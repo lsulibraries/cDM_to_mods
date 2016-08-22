@@ -12,7 +12,7 @@ from lxml import etree as ET
 
 
 def convert_to_mods(alias):
-    cdm_data_dir = os.path.realpath(os.path.join('..', 'revising_cdm_xporter', 'Cached_Cdm_files', alias))
+    cdm_data_dir = os.path.realpath(os.path.join('..', 'Cached_Cdm_files', alias))
     nicks_to_names_dict = make_nicks_to_names(cdm_data_dir)
     mappings_dict = parse_mappings_file(alias)
 
