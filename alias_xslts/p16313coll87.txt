@@ -1,0 +1,7 @@
+blankNamePart
+subjectSplit
+typeOfResource
+dateIssuedSplit
+blankNodes
+locationMerge
+OrderedTemplates

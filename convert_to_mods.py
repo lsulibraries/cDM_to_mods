@@ -9,6 +9,7 @@ import csv
 import json
 
 from lxml import etree as ET
+# add mods validation step
 
 
 def convert_to_mods(alias):
@@ -65,15 +66,23 @@ def convert_to_mods(alias):
                 f.write(ET.tostring(mods, pretty_print=True).decode('utf-8'))
     print('finished compounds')
 
-    flatten_simple_dir(os.path.join('output','{}_simples'.format(alias)))
-    run_saxon_simple(os.path.join('output', '{}_simples'.format(alias)))
 
+    alias_xslts = read_alias_xslt_file(alias)
 
-    flatten_cpd_dir(os.path.join('output', '{}_compounds'.format(alias)))
-    run_saxon_cpd(os.path.join('output', '{}_compounds'.format(alias)))
-    reinflate_cpd_dir(os.path.join('output', '{}_compounds'.format(alias)))
+    simples_output_dir = os.path.join('output','{}_simples'.format(alias))
+    flatten_simple_dir(simples_output_dir)
+    run_saxon_simple(simples_output_dir, alias_xslts)
+
+    cpd_output_dir = os.path.join('output', '{}_compounds'.format(alias))
+    flatten_cpd_dir(cpd_output_dir)
+    run_saxon_cpd(cpd_output_dir, alias_xslts)
+    reinflate_cpd_dir(cpd_output_dir)
 
     print('\n\nYour output files are in:\noutput/{}_simple/final_format/\nand\noutput/{}_compounds/final_format/'.format(alias, alias))
+
+def read_alias_xslt_file(alias):
+    with open(os.path.join('alias_xlts', '{}.txt'.format(alias), 'r')) as f:
+        return f.readlines()
 
 def flatten_simple_dir(simple_dir):
     source_dir = os.path.join(simple_dir, 'original_format')
@@ -83,9 +92,9 @@ def flatten_simple_dir(simple_dir):
         if '.xml' in file:
             copyfile(os.path.join(source_dir, file), os.path.join(flattened_dir, file))
 
-def run_saxon_simple(simple_dir):
+def run_saxon_simple(simple_dir, alias_xslts):
     input_dir = os.path.join(simple_dir, 'presaxon_flattened')
-    for xslt in ['blankNodes', 'titleNonSort', 'blankNamePart', 'subjectSplit', 'dateIssuedSplit', 'locationMerge', 'OrderedTemplates']:
+    for xslt in alias_xslts:
         print('doing Simple saxon {}'.format(xslt))
         output_dir = os.path.join(simple_dir, xslt)
         os.makedirs(output_dir, exist_ok=True)
@@ -113,9 +122,9 @@ def flatten_cpd_dir(cpd_dir):
                 copyfile(os.path.join(root, file), os.path.join(flattened_dir, '{}.xml'.format(root.split('/')[-1])))
 
 
-def run_saxon_cpd(cpd_dir):
+def run_saxon_cpd(cpd_dir, alias_xslts):
     input_dir = os.path.join(cpd_dir, 'presaxon_flattened')
-    for xslt in ['blankNodes', 'titleNonSort', 'blankNamePart', 'subjectSplit', 'dateIssuedSplit', 'locationMerge', 'OrderedTemplates']:
+    for xslt in alias_xslts:
         print('doing Compound saxon {}'.format(xslt))
         output_dir = os.path.join(cpd_dir, xslt)
         os.makedirs(output_dir, exist_ok=True)
