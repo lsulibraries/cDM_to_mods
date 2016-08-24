@@ -7,6 +7,7 @@ import subprocess
 import datetime
 import csv
 import json
+from copy import deepcopy
 
 from lxml import etree as ET
 # add mods validation step
@@ -80,9 +81,11 @@ def convert_to_mods(alias):
 
     print('\n\nYour output files are in:\noutput/{}_simple/final_format/\nand\noutput/{}_compounds/final_format/'.format(alias, alias))
 
+
 def read_alias_xslt_file(alias):
-    with open(os.path.join('alias_xlts', '{}.txt'.format(alias), 'r')) as f:
-        return f.readlines()
+    with open(os.path.join('alias_xslts', '{}.txt'.format(alias)), 'r') as f:
+        return [i for i in f.read().split('\n')]
+
 
 def flatten_simple_dir(simple_dir):
     source_dir = os.path.join(simple_dir, 'original_format')
@@ -92,9 +95,12 @@ def flatten_simple_dir(simple_dir):
         if '.xml' in file:
             copyfile(os.path.join(source_dir, file), os.path.join(flattened_dir, file))
 
+
 def run_saxon_simple(simple_dir, alias_xslts):
     input_dir = os.path.join(simple_dir, 'presaxon_flattened')
     for xslt in alias_xslts:
+        if xslt == 'subjectSplit':
+            continue
         print('doing Simple saxon {}'.format(xslt))
         output_dir = os.path.join(simple_dir, xslt)
         os.makedirs(output_dir, exist_ok=True)
@@ -102,14 +108,17 @@ def run_saxon_simple(simple_dir, alias_xslts):
         subprocess.call(['java',
                          '-jar',
                          'saxon9he.jar',
-                         '-s:{}'.format(os.path.realpath(input_dir)),
-                         '-xsl:{}'.format(os.path.realpath(path_to_xslt)),
-                         '-o:{}'.format(os.path.realpath(output_dir))])
+                         '-s:{}'.format(input_dir),
+                         '-xsl:{}'.format(path_to_xslt),
+                         '-o:{}'.format(output_dir)])
         input_dir = output_dir
     else:
         os.makedirs(os.path.join(simple_dir, 'post-saxon'), exist_ok=True)
         for file in os.listdir(os.path.join(simple_dir, xslt)):
             copyfile(os.path.join(simple_dir, xslt, file), os.path.join(simple_dir, 'post-saxon', file))
+        os.makedirs(os.path.join(simple_dir, 'final_output'), exist_ok=True)
+        for file in os.listdir(os.path.join(simple_dir, xslt)):
+            copyfile(os.path.join(simple_dir, 'post-saxon', file), os.path.join(simple_dir, 'final_output', file))
 
 
 def flatten_cpd_dir(cpd_dir):
@@ -125,6 +134,8 @@ def flatten_cpd_dir(cpd_dir):
 def run_saxon_cpd(cpd_dir, alias_xslts):
     input_dir = os.path.join(cpd_dir, 'presaxon_flattened')
     for xslt in alias_xslts:
+        if xslt == 'subjectSplit':
+            continue
         print('doing Compound saxon {}'.format(xslt))
         output_dir = os.path.join(cpd_dir, xslt)
         os.makedirs(output_dir, exist_ok=True)
@@ -132,9 +143,9 @@ def run_saxon_cpd(cpd_dir, alias_xslts):
         subprocess.call(['java',
                          '-jar',
                          'saxon9he.jar',
-                         '-s:{}'.format(os.path.realpath(input_dir)),
-                         '-xsl:{}'.format(os.path.realpath(path_to_xslt)),
-                         '-o:{}'.format(os.path.realpath(output_dir))])
+                         '-s:{}'.format(input_dir),
+                         '-xsl:{}'.format(path_to_xslt),
+                         '-o:{}'.format(output_dir)])
         input_dir = output_dir
     else:
         os.makedirs(os.path.join(cpd_dir, 'post-saxon'), exist_ok=True)
@@ -232,13 +243,13 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
                 make_contentDM_elem(new_element[0], pointer, pointer_json, alias)
             root_element.append(new_element)
 
-    subject_split(root_element)
-
     id_elem = ET.Element("identifier", attrib={'type': 'uri', 'invalid': 'yes', 'displayLabel': "Migrated From"})
     id_elem.text = 'http://cdm16313.contentdm.oclc.org/cdm/singleitem/collection/{}/id/{}'.format(alias, pointer)
     root_element.append(id_elem)
-    root_element = merge_same_fields(root_element)
-    root_element = delete_empty_fields(root_element)
+
+    merge_same_fields(root_element)
+    subject_split(root_element)
+    delete_empty_fields(root_element)
     return root_element
 
 
@@ -257,8 +268,29 @@ def make_contentDM_elem(cdm_elem, pointer, pointer_json, alias):
     cdm_elem.append(dmGetItemInfo_elem)
 
 
-def subject_split(my_etree):
-    pass
+def subject_split(etree):
+    for subj_elem in etree.findall('.//subject'):
+        for child in subj_elem.getchildren():
+            for split in list(child.text.split(';')):
+                new_elem = deepcopy(subj_elem)
+                for i in new_elem:
+                    new_elem.remove(i)
+                new_child_elem = deepcopy(child)
+                new_child_elem.text = split.strip()
+                new_elem.append(new_child_elem)
+                subj_elem.getparent().append(new_elem)
+        etree.remove(subj_elem)
+    for subj_elem in etree.findall('.//subject'):
+        new_elem = deepcopy(subj_elem)
+        for i in new_elem:
+            new_elem.remove(i)
+        for child in subj_elem.getchildren():
+            for split in list(child.text.split('--')):
+                new_child_elem = deepcopy(child)
+                new_child_elem.text = split.strip()
+                new_elem.append(new_child_elem)
+                subj_elem.getparent().append(new_elem)
+        etree.remove(subj_elem)
 
 
 def merge_same_fields(orig_etree):
