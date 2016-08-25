@@ -5,6 +5,7 @@ import sys
 from shutil import copyfile
 import subprocess
 import datetime
+import re
 import csv
 import json
 from copy import deepcopy
@@ -134,6 +135,7 @@ def flatten_cpd_dir(cpd_dir):
 def run_saxon_cpd(cpd_dir, alias_xslts):
     input_dir = os.path.join(cpd_dir, 'presaxon_flattened')
     for xslt in alias_xslts:
+        # this needs to be discussed, as this subjectSplit xsl breaks Mike's xsl subjectSplit
         if xslt == 'subjectSplit':
             continue
         print('doing Compound saxon {}'.format(xslt))
@@ -249,6 +251,7 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
 
     merge_same_fields(root_element)
     subject_split(root_element)
+    normalize_date(root_element)
     delete_empty_fields(root_element)
     return root_element
 
@@ -291,6 +294,24 @@ def subject_split(etree):
                 new_elem.append(new_child_elem)
                 subj_elem.getparent().append(new_elem)
         etree.remove(subj_elem)
+
+
+year_month_day = re.compile(r'(\d{4})[/.-](\d{2})[/.-](\d{2})')     # 2013-12-25
+year_last = re.compile(r'(\d{2})[/.-](\d{2})[/.-](\d{4})')          # 12-25-2013
+
+
+def normalize_date(root_elem):
+    date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate')
+                  for i in root_elem.findall('.//{}'.format(tag))]
+    for i in date_elems:
+        yearmonthday = year_month_day.search(i.text)
+        yearlast = year_last.search(i.text)
+        if yearmonthday:
+            i.text = yearmonthday.group()
+        elif yearlast:
+            i.text = '{}-{}-{}'.format(yearlast.group(3),
+                                       yearlast.group(1),
+                                       yearlast.group(2))
 
 
 def merge_same_fields(orig_etree):
