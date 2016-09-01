@@ -6,6 +6,9 @@ from shutil import copyfile
 from lxml import etree as ET
 
 
+source_dir = '/media/garrett_armstrong/U/Cached_Cdm_files'
+
+
 class IsCountsCorrect():
     def __init__(self, alias):
         list_of_etrees = IsCountsCorrect.make_etrees_of_Elems_In(alias)
@@ -30,7 +33,7 @@ class IsCountsCorrect():
 
     @staticmethod
     def make_etrees_of_Elems_In(alias):
-        input_dir = os.path.abspath('Cached_Cdm_files/{}'.format(alias))
+        input_dir = os.path.abspath(os.path.join(source_dir, alias))
         elems_files = ["{}/{}".format(input_dir, i) for i in os.listdir(input_dir) if ('Elems_in_Collection' in i) and ('.xml' in i)]
         return [ET.parse(i) for i in elems_files]
 
@@ -61,24 +64,24 @@ class IsCountsCorrect():
 
     @staticmethod
     def count_child_pointers(alias, cpd_pointer):
-        structure_file = os.path.abspath('Cached_Cdm_files/{}/Cpd/{}_cpd.xml'.format(alias, cpd_pointer))
+        structure_file = os.path.abspath(os.path.join(source_dir, alias, 'Cpd/{}_cpd.xml'.format(cpd_pointer)))
         structure_etree = ET.parse(structure_file)
         child_pointers = [i.text for i in structure_etree.findall('./page/pageptr')]
         return len(child_pointers)
 
     @staticmethod
     def count_observed_simples(alias):
-        for root, dirs, files in os.walk(os.path.abspath('output'.format(alias))):
-            if root.split('/')[-1] == '{}_simple'.format(alias):
-                output_dir = '{}/original_structure/'.format(root)
+        for root, dirs, files in os.walk(os.path.abspath('output')):
+            if root.split('/')[-1] == '{}_simples'.format(alias):
+                output_dir = '{}/final_format/'.format(root)
                 for root, dirs, files in os.walk(output_dir):
                     return len([i for i in files if ".xml" in i])
 
     @staticmethod
     def count_observed_compounds(alias):
-         for root, dirs, files in os.walk(os.path.abspath('output'.format(alias))):
-            if root.split('/')[-1] == '{}_compound'.format(alias):
-                output_dir = '{}/original_structure/'.format(root)
+         for root, dirs, files in os.walk(os.path.abspath('output')):
+            if root.split('/')[-1] == '{}_compounds'.format(alias):
+                output_dir = '{}/final_format/'.format(root)
                 compounds_count = 0
                 for root, dirs, files in os.walk(output_dir):
                     compounds_count += len([i for i in files if i == "MODS.xml"])
@@ -95,8 +98,8 @@ class PullInBinaries():
                       'python3 pull_in_binaries.py p16313coll13'
 
        result is:
-        for each mods item in the output/alias_simpleorcompound/original_structure/ directory,
-        the matching binary will be pulled from mik/Cached_Cdm_files/alias/
+        for each mods item in the output/alias_[simpleorcompound]/final_format directory,
+        the matching binary will be pulled from Cached_Cdm_files/alias/
 
        a tiny error message will print on the shell screen if no matching file is found
     '''
@@ -124,7 +127,7 @@ class PullInBinaries():
     @staticmethod
     def makedict_sourcefiles(alias):
         sourcefiles_paths = dict()
-        input_dir = 'Cached_Cdm_files/{}'.format(alias)
+        input_dir = os.path.join(source_dir, alias)
         for root, dirs, files in os.walk(input_dir):
             for file in files:
                 if file.split('.')[-1] in ('jp2', 'mp4', 'mp3', 'pdf'):
@@ -135,8 +138,9 @@ class PullInBinaries():
     @staticmethod
     def makelist_simpleoutfolderxmls(alias):
         xml_filelist = []
-        subfolder = "output/{}_simple/original_structure".format(alias)
+        subfolder = os.path.abspath(os.path.join('output', '{}_simples'.format(alias), 'final_format'))
         for root, dirs, files in os.walk(subfolder):
+            print(root)
             for file in files:
                 if '.xml' in file:
                     pointer = file.split('.')[0]
@@ -146,7 +150,7 @@ class PullInBinaries():
     @staticmethod
     def makelist_compoundoutfolderxmls(alias):
         xml_filelist = []
-        subfolder = "output/{}_compound/original_structure".format(alias)
+        subfolder = os.path.abspath(os.path.join('output', '{}_compounds'.format(alias), 'final_format'))
         for root, dirs, files in os.walk(subfolder):
             for file in files:
                 if file == 'MODS.xml':
@@ -159,20 +163,20 @@ class PullInBinaries():
         acceptable_binary_types = ('mp3', 'mp4', 'jp2', 'pdf')
         if kind == 'simple':
             for filetype in acceptable_binary_types:
-                if os.path.isfile('{}/{}.{}'.format(root, pointer, filetype)):
+                if os.path.isfile(os.path.join(root, '{}.{}'.format(pointer, filetype))):
                     return True
         if kind == 'compound':
             for filetype in acceptable_binary_types:
-                if os.path.isfile('{}/{}/OBJ.{}'.format(root, pointer, filetype)):
+                if os.path.isfile(os.path.join(root, pointer, 'OBJ.{}'.format(filetype))):
                     return True
         return False
 
     @staticmethod
     def copy_binary(kind, sourcepath, sourcefile, outroot, pointer):
         if kind == 'simple':
-            copyfile("{}/{}".format(sourcepath, sourcefile), "{}/{}".format(outroot, sourcefile))
+            copyfile(os.path.join(sourcepath, sourcefile), os.path.join(outroot, sourcefile))
         elif kind == 'compound':
-            copyfile("{}/{}".format(sourcepath, sourcefile), "{}/OBJ.{}".format(outroot, sourcefile.split('.')[-1]))
+            copyfile(os.path.join(sourcepath, sourcefile), os.path.join(outroot, "OBJ.{}".format(sourcefile.split('.')[-1])))
 
 
 class MakeStructureFile():
