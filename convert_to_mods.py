@@ -15,7 +15,7 @@ from lxml import etree as ET
 
 
 def convert_to_mods(alias):
-    cdm_data_dir = os.path.realpath(os.path.join('..', 'Cached_Cdm_files', alias))
+    cdm_data_dir = os.path.realpath(os.path.join('/media/garrett_armstrong/U/Cached_Cdm_files', alias))
     nicks_to_names_dict = make_nicks_to_names(cdm_data_dir)
     mappings_dict = parse_mappings_file(alias)
 
@@ -117,9 +117,9 @@ def run_saxon_simple(simple_dir, alias_xslts):
         os.makedirs(os.path.join(simple_dir, 'post-saxon'), exist_ok=True)
         for file in os.listdir(os.path.join(simple_dir, xslt)):
             copyfile(os.path.join(simple_dir, xslt, file), os.path.join(simple_dir, 'post-saxon', file))
-        os.makedirs(os.path.join(simple_dir, 'final_output'), exist_ok=True)
+        os.makedirs(os.path.join(simple_dir, 'final_format'), exist_ok=True)
         for file in os.listdir(os.path.join(simple_dir, xslt)):
-            copyfile(os.path.join(simple_dir, 'post-saxon', file), os.path.join(simple_dir, 'final_output', file))
+            copyfile(os.path.join(simple_dir, 'post-saxon', file), os.path.join(simple_dir, 'final_format', file))
 
 
 def flatten_cpd_dir(cpd_dir):
