@@ -6,7 +6,7 @@ from shutil import copyfile
 from lxml import etree as ET
 
 
-source_dir = '/media/garrett_armstrong/U/Cached_Cdm_files'
+source_dir = '/media/francis/U/Cached_Cdm_files'
 
 
 class IsCountsCorrect():
@@ -129,6 +129,7 @@ class PullInBinaries():
         sourcefiles_paths = dict()
         input_dir = os.path.join(source_dir, alias)
         for root, dirs, files in os.walk(input_dir):
+            print(root)
             for file in files:
                 if file.split('.')[-1] in ('jp2', 'mp4', 'mp3', 'pdf'):
                     alias = file.split('.')[0]
