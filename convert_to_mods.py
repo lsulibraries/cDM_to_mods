@@ -9,6 +9,7 @@ import re
 import csv
 import json
 from copy import deepcopy
+import logging
 
 from lxml import etree as ET
 
@@ -19,6 +20,7 @@ MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
 
 def convert_to_mods(alias):
+    logging.info('starting {}'.format(alias))
     cdm_data_dir = os.path.realpath(os.path.join(SOURCE_DIR, alias))
     nicks_to_names_dict = make_nicks_to_names(cdm_data_dir)
     mappings_dict = parse_mappings_file(alias)
@@ -40,7 +42,7 @@ def convert_to_mods(alias):
         os.makedirs(output_path, exist_ok=True)
         with open('{}/{}.xml'.format(output_path, pointer), 'w') as f:
             f.write(ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True).decode('utf-8'))
-    print('finished simples')
+    logging.info('finished simples {}'.format(alias))
 
     parents_children = dict()
     for cpd_parent in cpd_parent_pointers:
@@ -73,7 +75,7 @@ def convert_to_mods(alias):
             os.makedirs(output_path, exist_ok=True)
             with open('{}/MODS.xml'.format(output_path, pointer), 'w') as f:
                 f.write(ET.tostring(mods, pretty_print=True).decode('utf-8'))
-    print('finished compounds')
+    logging.info('finished compounds {}'.format(alias))
 
     alias_xslts = read_alias_xslt_file(alias)
 
@@ -90,6 +92,7 @@ def convert_to_mods(alias):
     validate_mods(flat_final_dir)
     reinflate_cpd_dir(cpd_output_dir)
 
+    logging.info('completed {}'.format(alias))
     print('\n\nYour output files are in:\noutput/{}_simple/final_format/\nand\noutput/{}_compounds/final_format/'.format(alias, alias))
 
 
@@ -100,9 +103,10 @@ def validate_mods(directory):
         pointer = file.split('.')[0]
         if not MODS_SCHEMA.validate(file_etree):
             all_passed = False
-            print("{} post-xsl did not validate!!!!".format(pointer))
+            logging.info("{} {} post-xsl did not validate!!!!".format(alias, pointer))
     if all_passed:
-        print("All files post-xsl Validated")
+        logging.info("All files post-xsl Validated")
+        print('')
 
 def read_alias_xslt_file(alias):
     with open(os.path.join('alias_xslts', '{}.txt'.format(alias)), 'r') as f:
@@ -123,7 +127,7 @@ def run_saxon_simple(simple_dir, alias_xslts):
     for xslt in alias_xslts:
         if xslt == 'subjectSplit':
             continue
-        print('doing Simple saxon {}'.format(xslt))
+        logging.info('doing Simple saxon {}'.format(xslt))
         output_dir = os.path.join(simple_dir, xslt)
         os.makedirs(output_dir, exist_ok=True)
         path_to_xslt = os.path.join('xsl', '{}.xsl'.format(xslt))
@@ -159,7 +163,7 @@ def run_saxon_cpd(cpd_dir, alias_xslts):
         # this needs to be discussed, as this subjectSplit xsl breaks Mike's xsl subjectSplit
         if xslt == 'subjectSplit':
             continue
-        print('doing Compound saxon {}'.format(xslt))
+        logging.info('doing Compound saxon {}'.format(xslt))
         output_dir = os.path.join(cpd_dir, xslt)
         os.makedirs(output_dir, exist_ok=True)
         path_to_xslt = os.path.join('xsl', '{}.xsl'.format(xslt))
@@ -367,7 +371,13 @@ def delete_empty_fields(orig_etree):
             orig_etree.remove(elem)
     return orig_etree
 
+def setup_logging(alias):
+    logging.
 
 if __name__ == '__main__':
     alias = sys.argv[1]
+    logging.basicConfig(filename='convert_to_mods_log.txt',
+                        level=logging.INFO,
+                        format='%(asctime)s %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p')
     convert_to_mods(alias)
