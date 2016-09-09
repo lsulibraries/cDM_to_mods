@@ -11,15 +11,17 @@ import json
 from copy import deepcopy
 
 from lxml import etree as ET
-# add mods validation step
+
+
+SOURCE_DIR = '/media/francis/U/Cached_Cdm_files'
+MODS_DEF = ET.parse('schema/mods-3-6.xsd')
+MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
 
 def convert_to_mods(alias):
-    cdm_data_dir = os.path.realpath(os.path.join('/media/francis/U/Cached_Cdm_files', alias))
+    cdm_data_dir = os.path.realpath(os.path.join(SOURCE_DIR, alias))
     nicks_to_names_dict = make_nicks_to_names(cdm_data_dir)
     mappings_dict = parse_mappings_file(alias)
-    mods_schema_tree = ET.parse('schema/mods-3-6.xsd')
-    mods_schema = ET.XMLSchema(mods_schema_tree)
 
     cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(cdm_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
@@ -33,8 +35,7 @@ def convert_to_mods(alias):
         nicks_texts = parse_cdm_pointer_json(pointer_json)
         propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
         mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
-        if not mods_schema.validate(mods.getroottree()):
-            print("{} did not validate!!!!".format(pointer))
+        reorder_sequence(mods)
         output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
         os.makedirs(output_path, exist_ok=True)
         with open('{}/{}.xml'.format(output_path, pointer), 'w') as f:
@@ -53,8 +54,7 @@ def convert_to_mods(alias):
         nicks_texts = parse_cdm_pointer_json(pointer_json)
         propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
         mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
-        if not mods_schema.validate(mods):
-            print("{} did not validate!!!!".format(pointer))
+        reorder_sequence(mods)
         output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', pointer)
         os.makedirs(output_path, exist_ok=True)
         with open('{}/MODS.xml'.format(output_path, pointer), 'w') as f:
@@ -68,28 +68,41 @@ def convert_to_mods(alias):
             nicks_texts = parse_cdm_pointer_json(pointer_json)
             propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
             mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
-            if not mods_schema.validate(mods):
-                print("{} did not validate!!!!".format(pointer))
+            reorder_sequence(mods)
             output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', parent, pointer)
             os.makedirs(output_path, exist_ok=True)
             with open('{}/MODS.xml'.format(output_path, pointer), 'w') as f:
                 f.write(ET.tostring(mods, pretty_print=True).decode('utf-8'))
     print('finished compounds')
 
-
     alias_xslts = read_alias_xslt_file(alias)
 
-    simples_output_dir = os.path.join('output','{}_simples'.format(alias))
+    simples_output_dir = os.path.join('output', '{}_simples'.format(alias))
     flatten_simple_dir(simples_output_dir)
     run_saxon_simple(simples_output_dir, alias_xslts)
+    flat_final_dir = os.path.join(simples_output_dir, 'final_format')
+    validate_mods(flat_final_dir)
 
     cpd_output_dir = os.path.join('output', '{}_compounds'.format(alias))
     flatten_cpd_dir(cpd_output_dir)
     run_saxon_cpd(cpd_output_dir, alias_xslts)
+    flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
+    validate_mods(flat_final_dir)
     reinflate_cpd_dir(cpd_output_dir)
 
     print('\n\nYour output files are in:\noutput/{}_simple/final_format/\nand\noutput/{}_compounds/final_format/'.format(alias, alias))
 
+
+def validate_mods(directory):
+    all_passed = True
+    for file in os.listdir(directory):
+        file_etree = ET.parse(os.path.join(directory, file))
+        pointer = file.split('.')[0]
+        if not MODS_SCHEMA.validate(file_etree):
+            all_passed = False
+            print("{} post-xsl did not validate!!!!".format(pointer))
+    if all_passed:
+        print("All files post-xsl Validated")
 
 def read_alias_xslt_file(alias):
     with open(os.path.join('alias_xslts', '{}.txt'.format(alias)), 'r') as f:
@@ -261,7 +274,23 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
     subject_split(root_element)
     normalize_date(root_element)
     delete_empty_fields(root_element)
+    reorder_sequence(root_element)
     return root_element
+
+
+def reorder_sequence(root_element):
+    location_elem = root_element.find('./location')
+    order_dict = {"physicalLocation": 0,
+                  "shelfLocator": 1,
+                  "url": 2,
+                  "holdingSimple": 3,
+                  "holdingExternal": 4, }
+    child_elems = location_elem.getchildren()
+    detached_list = sorted(child_elems, key=lambda x: order_dict[x.tag])
+    for child in location_elem:
+        location_elem.remove(child)
+    for i in detached_list:
+        location_elem.append(i)
 
 
 def make_contentDM_elem(cdm_elem, pointer, pointer_json, alias):
