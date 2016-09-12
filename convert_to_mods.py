@@ -394,16 +394,14 @@ if __name__ == '__main__':
     # convert_to_mods(alias)
     # logging.info('finished')
 
-    for alias in (''):
+    for alias in ('' ):
         logging.info('{} starting'.format(alias))
         convert_to_mods(alias)
         logging.info('{} finished'.format(alias))
 
-    for pseudopdf in ('p16313coll5', 'p16313coll87', 'p16313coll91', 'p120701coll27', ):
+    for pseudopdf in ('p16313coll5', 'p16313coll87', 'p16313coll91', 'p120701coll27', 'p15140coll52', ):
         pass
     for finished_one_pass in ('RTC', 'LOH', 'OMSA', 'ACC', 'JAZ', 'p120701coll28', 'p120701coll9', 'p16313coll98', 'p16313coll93', 'CMPRT', 'p15140coll27', 'p16313coll23', 'p120701coll15', 'UNO_JBF', 'UNO_ANI', 'LSM_MPC', 'LSM_KOH', 'p16313coll3', 'p15140coll4', 'p120701coll29', 'p120701coll7', 'p120701coll8', 'p15140coll19', 'p15140coll23', 'p15140coll30', 'p15140coll60',):
         pass
     for failed_to_validate in ('p15140coll7', ):
-        pass
-    for mappings_weirdness in ('p15140coll52', ):
         pass
