@@ -14,7 +14,7 @@ import logging
 from lxml import etree as ET
 
 
-SOURCE_DIR = '/media/francis/U/Cached_Cdm_files'
+SOURCE_DIR = '/home/garrett_armstrong/Desktop/Cached_Cdm_files_onlymetadata'
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
@@ -79,10 +79,13 @@ def convert_to_mods(alias):
     alias_xslts = read_alias_xslt_file(alias)
 
     simples_output_dir = os.path.join('output', '{}_simples'.format(alias))
-    flatten_simple_dir(simples_output_dir)
-    run_saxon_simple(simples_output_dir, alias_xslts)
-    flat_final_dir = os.path.join(simples_output_dir, 'final_format')
-    validate_mods(flat_final_dir)
+    if '{}_simples'.format(alias) in os.listdir('output') and 'original_format' in os.listdir(simples_output_dir):
+        flatten_simple_dir(simples_output_dir)
+        run_saxon_simple(simples_output_dir, alias_xslts)
+        flat_final_dir = os.path.join(simples_output_dir, 'final_format')
+        validate_mods(flat_final_dir)
+    else:
+        logging.info('no simple objects in this collection')
 
     cpd_output_dir = os.path.join('output', '{}_compounds'.format(alias))
     flatten_cpd_dir(cpd_output_dir)
@@ -371,21 +374,36 @@ def delete_empty_fields(orig_etree):
     return orig_etree
 
 
-def setup_logging(alias):
+def setup_logging():
     logging.basicConfig(filename='convert_to_mods_log.txt',
                         level=logging.INFO,
-                        format='{}: %(asctime)s: %(message)s'.format(alias),
+                        format='%(asctime)s: %(levelname)-8s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
     console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    formatter = logging.Formatter('{}: %(name)-12s: %(levelname)-8s %(message)s'.format(alias))
+    console.setLevel(logging.WARNING)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
 
 if __name__ == '__main__':
-    alias = sys.argv[1]
-    setup_logging(alias)
-    logging.info('starting')
-    convert_to_mods(alias)
-    logging.info('finished')
+    # alias = sys.argv[1]
+    setup_logging()
+    # setup_logging(alias)
+    # logging.info('starting')
+    # convert_to_mods(alias)
+    # logging.info('finished')
+
+    for alias in (''):
+        logging.info('{} starting'.format(alias))
+        convert_to_mods(alias)
+        logging.info('{} finished'.format(alias))
+
+    for pseudopdf in ('p16313coll5', 'p16313coll87', 'p16313coll91', 'p120701coll27', ):
+        pass
+    for finished_one_pass in ('RTC', 'LOH', 'OMSA', 'ACC', 'JAZ', 'p120701coll28', 'p120701coll9', 'p16313coll98', 'p16313coll93', 'CMPRT', 'p15140coll27', 'p16313coll23', 'p120701coll15', 'UNO_JBF', 'UNO_ANI', 'LSM_MPC', 'LSM_KOH', 'p16313coll3', 'p15140coll4', 'p120701coll29', 'p120701coll7', 'p120701coll8', 'p15140coll19', 'p15140coll23', 'p15140coll30', 'p15140coll60',):
+        pass
+    for failed_to_validate in ('p15140coll7', ):
+        pass
+    for mappings_weirdness in ('p15140coll52', ):
+        pass
