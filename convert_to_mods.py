@@ -20,7 +20,6 @@ MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
 
 def convert_to_mods(alias):
-    logging.info('starting {}'.format(alias))
     cdm_data_dir = os.path.realpath(os.path.join(SOURCE_DIR, alias))
     nicks_to_names_dict = make_nicks_to_names(cdm_data_dir)
     mappings_dict = parse_mappings_file(alias)
@@ -42,7 +41,7 @@ def convert_to_mods(alias):
         os.makedirs(output_path, exist_ok=True)
         with open('{}/{}.xml'.format(output_path, pointer), 'w') as f:
             f.write(ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True).decode('utf-8'))
-    logging.info('finished simples {}'.format(alias))
+    logging.info('finished simples')
 
     parents_children = dict()
     for cpd_parent in cpd_parent_pointers:
@@ -75,7 +74,7 @@ def convert_to_mods(alias):
             os.makedirs(output_path, exist_ok=True)
             with open('{}/MODS.xml'.format(output_path, pointer), 'w') as f:
                 f.write(ET.tostring(mods, pretty_print=True).decode('utf-8'))
-    logging.info('finished compounds {}'.format(alias))
+    logging.info('finished compounds')
 
     alias_xslts = read_alias_xslt_file(alias)
 
@@ -92,7 +91,7 @@ def convert_to_mods(alias):
     validate_mods(flat_final_dir)
     reinflate_cpd_dir(cpd_output_dir)
 
-    logging.info('completed {}'.format(alias))
+    logging.info('completed')
     logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
 
 
@@ -375,17 +374,18 @@ def delete_empty_fields(orig_etree):
 def setup_logging(alias):
     logging.basicConfig(filename='convert_to_mods_log.txt',
                         level=logging.INFO,
-                        format='%(asctime)s %(message)s',
+                        format='{}: %(asctime)s: %(message)s'.format(alias),
                         datefmt='%m/%d/%Y %I:%M:%S %p')
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    formatter = logging.Formatter('{}: %(name)-12s: %(levelname)-8s %(message)s'.format(alias))
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
-
 
 
 if __name__ == '__main__':
     alias = sys.argv[1]
     setup_logging(alias)
+    logging.info('starting')
     convert_to_mods(alias)
+    logging.info('finished')
