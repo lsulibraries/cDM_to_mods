@@ -2,6 +2,7 @@
 
 import os
 import sys
+import logging
 from shutil import copyfile
 from lxml import etree as ET
 
@@ -20,16 +21,16 @@ class IsCountsCorrect():
             compounds += IsCountsCorrect.count_child_pointers(alias, parent)
             compounds += 1  # we cound parent as 1 item here.
 
-        print('Count Simples xmls:', simples)
-        print('Count Compounds xmls', compounds)
+        logging.info('Count Simples xmls: {}'.format(simples))
+        logging.info('Count Compounds xmls: {}'.format(compounds))
         if simples == IsCountsCorrect.count_observed_simples(alias):
-            print('simples match')
+            logging.info('simples match')
         else:
-            print("BIG DEAL:  Simples Don't Match")
+            logging.warning("BIG DEAL:  Simples Don't Match")
         if compounds == IsCountsCorrect.count_observed_compounds(alias):
-            print('compounds match')
+            logging.info('compounds match')
         else:
-            print("BIG DEAL:  Compounds Don't Match")
+            logging.warning("BIG DEAL:  Compounds Don't Match")
 
     @staticmethod
     def make_etrees_of_Elems_In(alias):
@@ -43,7 +44,7 @@ class IsCountsCorrect():
         if len(set_total_at_root_level) == 1:
             return set_total_at_root_level.pop()
         else:
-            print('BIG DEAL:  either Elems_in_Collection has mismatched number of total counts, or an Elems_in is unreadable')
+            logging.warning('BIG DEAL:  either Elems_in_Collection has mismatched number of total counts, or an Elems_in is unreadable')
             return False
 
     @staticmethod
@@ -114,9 +115,7 @@ class PullInBinaries():
                     if ("_compound" in outroot) and (outroot.split('/')[-2] == "original_structure"):
                         continue  # root of cpd is expected to have no binary
                     else:
-                        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                        print("{}.xml may not have a matching binary".format(pointer))
-                        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                        logging.warning("{}.xml may not have a matching binary (normal for most cpd parents)".format(pointer))
                 if PullInBinaries.is_binary_in_output_dir(kind, outroot, pointer):
                     continue
                 if pointer not in sourcefiles_paths:
@@ -129,7 +128,6 @@ class PullInBinaries():
         sourcefiles_paths = dict()
         input_dir = os.path.join(source_dir, alias)
         for root, dirs, files in os.walk(input_dir):
-            print(root)
             for file in files:
                 if file.split('.')[-1] in ('jp2', 'mp4', 'mp3', 'pdf'):
                     alias = file.split('.')[0]
@@ -141,7 +139,6 @@ class PullInBinaries():
         xml_filelist = []
         subfolder = os.path.abspath(os.path.join('output', '{}_simples'.format(alias), 'final_format'))
         for root, dirs, files in os.walk(subfolder):
-            print(root)
             for file in files:
                 if '.xml' in file:
                     pointer = file.split('.')[0]
@@ -185,19 +182,33 @@ class MakeStructureFile():
         for root, dirs, files in os.walk('output'):
             if 'structure.cpd' in files:
                 parent = root.split("/")[-1]
-                xml_header = '<?xml version="1.0" encoding="utf-8"?>'
+                # xml_header = '<?xml version="1.0" encoding="utf-8"?>'
                 new_etree = ET.Element("islandora_compound_object", title=parent)
-
                 old_etree = ET.parse("{}/structure.cpd".format(root))
                 for i in old_etree.findall('.//pageptr'):
-                    # print('child is: ', i.text)
                     new_etree.append(ET.Element('child', content=i.text))
 
                 with open('{}/structure.xml'.format(root), 'wb') as f:
                     f.write(ET.tostring(new_etree, encoding="utf-8", xml_declaration=True, pretty_print=True))
 
+
+def setup_logging(alias):
+    logging.basicConfig(filename='post_conversion_cleanup_log.txt',
+                        level=logging.INFO,
+                        format='{}: %(asctime)s: %(message)s'.format(alias),
+                        datefmt='%m/%d/%Y %I:%M:%S %p')
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('{}: %(name)-12s: %(levelname)-8s %(message)s'.format(alias))
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
+
 if __name__ == '__main__':
     alias = sys.argv[1]
+    setup_logging(alias)
+    logging.info('starting')
     PullInBinaries(alias)
     MakeStructureFile(alias)
     IsCountsCorrect(alias)
+    logging.info('finished')
