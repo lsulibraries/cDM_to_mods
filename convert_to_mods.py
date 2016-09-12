@@ -93,7 +93,7 @@ def convert_to_mods(alias):
     reinflate_cpd_dir(cpd_output_dir)
 
     logging.info('completed {}'.format(alias))
-    print('\n\nYour output files are in:\noutput/{}_simple/final_format/\nand\noutput/{}_compounds/final_format/'.format(alias, alias))
+    logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
 
 
 def validate_mods(directory):
@@ -103,10 +103,10 @@ def validate_mods(directory):
         pointer = file.split('.')[0]
         if not MODS_SCHEMA.validate(file_etree):
             all_passed = False
-            logging.info("{} {} post-xsl did not validate!!!!".format(alias, pointer))
+            logging.warning("{} {} post-xsl did not validate!!!!".format(alias, pointer))
     if all_passed:
-        logging.info("All files post-xsl Validated")
-        print('')
+        logging.info("This group of files post-xsl Validated")
+
 
 def read_alias_xslt_file(alias):
     with open(os.path.join('alias_xslts', '{}.txt'.format(alias)), 'r') as f:
@@ -371,13 +371,21 @@ def delete_empty_fields(orig_etree):
             orig_etree.remove(elem)
     return orig_etree
 
-def setup_logging(alias):
-    logging.
 
-if __name__ == '__main__':
-    alias = sys.argv[1]
+def setup_logging(alias):
     logging.basicConfig(filename='convert_to_mods_log.txt',
                         level=logging.INFO,
                         format='%(asctime)s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
+
+
+if __name__ == '__main__':
+    alias = sys.argv[1]
+    setup_logging(alias)
     convert_to_mods(alias)
