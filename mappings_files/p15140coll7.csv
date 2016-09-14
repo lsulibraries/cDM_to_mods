@@ -1,6 +1,6 @@
 Title,"<titleInfo><title>%value%</title></titleInfo>"
 Author,"<name displayLabel='Author'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>aut</roleTerm><roleTerm type='text' authority='marcrelator'>Author</roleTerm></role></name>"
-Department,"<name displayLabel='Department'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>dgg</roleTerm></role><roleTerm type='text' authority='marcrelator'>Degree granting institution</roleTerm></name>"
+Department,"<name displayLabel='Department'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>dgg</roleTerm><roleTerm type='text' authority='marcrelator'>Degree granting institution</roleTerm></role></name>"
 Thesis Advisor,"<name displayLabel='Thesis Advisor'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>dgs</roleTerm><roleTerm type='text' authority='marcrelator'>Degree supervisor</roleTerm></role></name>"
 Advisory Committee,"<name displayLabel='Advisory Committee'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>ths</roleTerm><roleTerm type='text' authority='marcrelator'>Thesis advisor</roleTerm></role></name>"
 Date Degree Awarded,"<originInfo><dateIssued keyDate='yes'>%value%</dateIssued></originInfo>"
