@@ -1,6 +1,7 @@
 blankNamePart
 subjectSplit
 typeOfResource
+internetMediaType
 dateIssuedSplit
 blankNodes
 locationMerge
