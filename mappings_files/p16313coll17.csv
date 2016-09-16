@@ -34,7 +34,7 @@ Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></reco
 Date modified,"<recordInfo><recordChangeDate>%value%</recordChangeDate></recordInfo>"
 Location (hidden),"<extension><locationHidden>%value%</locationHidden></extension>"
 Room (hidden),"<extension><roomHidden>%value%</roomHidden></extension>"
-Provenance (hidden),"<extension><provenanceHidden>%value%</provenanceHidden></extension"
+Provenance (hidden),"<extension><provenanceHidden>%value%</provenanceHidden></extension>"
 Surveyed By,"<extension><surveyedBy>%value%</surveyedBy></extension>"
 RecordType,"<extension><recordType>%value%</recordType></extension>"
 Status,"<extension><status>%value%</status></extension>"
