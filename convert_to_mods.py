@@ -14,7 +14,7 @@ import logging
 from lxml import etree as ET
 
 
-SOURCE_DIR = '/home/francis/Desktop/Cached_Cdm_files_onlymetadata'
+SOURCE_DIR = '../Cached_Cdm_files/'
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
@@ -389,14 +389,7 @@ def setup_logging():
     logging.getLogger('').addHandler(console)
 
 
-if __name__ == '__main__':
-    # alias = sys.argv[1]
-    setup_logging()
-    # setup_logging(alias)
-    # logging.info('starting')
-    # convert_to_mods(alias)
-    # logging.info('finished')
-
+def do_a_bunch_of_collections():
     mappings_done = [i.split('.')[0] for i
                      in os.listdir('./mappings_files')]
 
@@ -420,11 +413,12 @@ if __name__ == '__main__':
                  'HPL', 'p16313coll91', 'LOYOLA_ETD', 'CCA', 'p16313coll74',
                  'p16313coll62', 'RTP', 'p16313coll17', 'p120701coll17',
                  ]
-
     we_dont_migrate = ['MPF', 'LOU', ]
 
     for alias in mappings_done:
         if alias in we_dont_migrate:
+            continue
+        if alias in completed:
             continue
         print(alias)
         logging.info('{} starting'.format(alias))
@@ -432,6 +426,16 @@ if __name__ == '__main__':
         logging.info('{} finished'.format(alias))
         new_completed.append(alias)
 
+    print("""completed\n{}""".format("',\n'".join(new_completed)))
+    print("""broken\n{}""".format("',\n'".join(new_broken)))
 
-print("""completed\n{}""".format("',\n'".join(new_completed)))
-print("""broken\n{}""".format("',\n'".join(new_broken)))
+
+if __name__ == '__main__':
+    alias = sys.argv[1]
+    setup_logging()
+    logging.info('starting')
+
+    convert_to_mods(alias)  # single collection or
+    # do_a_bunch_of_collections() # many collections
+
+    logging.info('finished')
