@@ -16,7 +16,9 @@ for converting the output of cdm_xporter/scrape_cdm.py into mods format (especia
 
 convert_to_mods.py:
   - applies the cDM_to_mods/mappings_file/{alias}.csv to the Cached_Cdm_files data to create a rough mods file.
-  - performs xsl transformations named in the cDM_to_mods/alias_xlsts/{alias}.txt file to refine the mods.  
+  - performs xsl transformations named in the cDM_to_mods/alias_xlsts/{alias}.txt file to refine the mods.
+  - validates each mods record against a local copy of the mods schema.
+  - complains loudly if anything fails.
 
 The xsl scripts are found in the cDM_to_mods/xsl/ folder.
 The final output can be found in cDM_to_mods/output/{alias}_simple/final_format and cDM_to_mods/output/{alias}_compound/final_format.  Seperating simples from compounds facilitates easier uploading into Islandora.  
