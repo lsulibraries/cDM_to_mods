@@ -23,6 +23,7 @@ The final output can be found in cDM_to_mods/output/{alias}_simple/final_format 
 
 post_conversion_cleanup.py:
   - verifies that each object in the collection was converted into a mod file.  
-  - pulls the binaries from the source_directory into the proper position within the output files.  
-  - creates a structure file that is necessary for Islandora Compound Batch Upload.  
-  - checks all the mods for access restrictions, and reports those in cDM_to_mods/{alias}_restrictions.txt  
+  - pulls the binaries from the source_directory into the proper position within the output files.
+  - complains if there is not a {.jp2, .mp3, .mp4, .pdf} for each mods.
+  - creates a structure file, which is necessary for Islandora Compound Batch Upload.  
+  - checks all the mods for access restrictions, and reports those to cDM_to_mods/{alias}_restrictions.txt  
