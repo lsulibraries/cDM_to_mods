@@ -1,16 +1,18 @@
-# cDM_to_mods
+# How to:
 
-for converting the output of cdm_xporter into mods format (especially for ingest into Islandora)
+for converting the output of cdm_xporter/scrape_cdm.py into mods format (especially for ingest into Islandora)
 
   1) Turn on your python3 virtualenv.  It needs lxml.  Ananconda for Mac & Windows works well.
   
-  2) convert_to_mods.py expects to find the source material from cdm_xporter/scrape_cdm.py, Cached_Cdm_files, in a sibling folder beside the cDM_to_mods folder.
+  2) convert_to_mods.py expects to find /Cached_Cdm_files/ (the output of scrape_cdm.py) in a sibling folder beside the cDM_to_mods folder.
   
-  3) In the command line, navigate to the cDM_to_mods directory.
+  3) In the command line, navigate into the cDM_to_mods directory.
   
   4) `python convert_to_mods.py {alias}`
   
   5) `python post_converstion_cleanup.py {alias}`
+
+## Scripts
 
 convert_to_mods.py:
   - applies the cDM_to_mods/mappings_file/{alias}.csv to the Cached_Cdm_files data to create a rough mods file.
