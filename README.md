@@ -13,4 +13,8 @@ for converting the output of cdm_xporter into mods format (especially for inject
 
 convert_to_mods.py applies the cDM_to_mods/mappings_file/{alias}.csv to the DublinCore source data, to create a rough mods file.  It the performs xsl transformations named in the cDM_to_mods/alias_xlsts/{alias}.txt file.  The xsl are found in the cDM_to_mods/xsl/ folder.  The final output can be found in cDM_to_mods/output/{alias}_simple/final_format and cDM_to_mods/output/{alias}_compound/final_format.  Seperating simples from compounds facilitates easier uploading into Islandora.  
 
-post_conversion_cleanup.py verifies that all of the objects in the collection were converted into mods files.  It then pulls the binaries from the source_directory into the proper position within the output files.  It then creates a structure file that is necessary for Islandora Batch Upload.  Finally, it checks all the mods for Access Restrictions, and reports those.  Access Restrictions are saved in cDM_to_mods/{}_restrictions.txt  Other information is logged to screen & a seperate log file.
+post_conversion_cleanup.py:
+  - verifies that each object in the collection was converted into a mod file.  
+  - pulls the binaries from the source_directory into the proper position within the output files.  
+  - creates a structure file that is necessary for Islandora Compound Batch Upload.  
+  - checks all the mods for access restrictions, and reports those in cDM_to_mods/{}_restrictions.txt  
