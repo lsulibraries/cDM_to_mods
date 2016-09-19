@@ -1,15 +1,11 @@
 # cDM_to_mods
+
 for converting the output of cdm_xporter into mods format (especially for inject into Islandora)
-
-1)  Turn on your python3 virtualenv.  It needs lxml.  Ananconda works well.
-
-2) convert_to_mods.py expects to find the source material from cdm_xporter/scrape_cdm.py, Cached_Cdm_files, in a sibling folder beside the cDM_to_mods folder.
-
-3)  In the command line, navigate to the cDM_to_mods directory.
-
-4)  `python3 convert_to_mods.py {alias}`
-
-5)  `python post_converstion_cleanup.py {alias}`
+  - Turn on your python3 virtualenv.  It needs lxml.  Ananconda works well.
+  - convert_to_mods.py expects to find the source material from cdm_xporter/scrape_cdm.py, Cached_Cdm_files, in a sibling folder beside the cDM_to_mods folder.
+  - In the command line, navigate to the cDM_to_mods directory.
+  - `python convert_to_mods.py {alias}`
+  - `python post_converstion_cleanup.py {alias}`
 
 convert_to_mods.py:
   - applies the cDM_to_mods/mappings_file/{alias}.csv to the Cached_Cdm_files data to create a rough mods file.
