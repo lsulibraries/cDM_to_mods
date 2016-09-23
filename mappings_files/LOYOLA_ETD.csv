@@ -26,7 +26,6 @@ Object File Name,"<identifier type='local' displayLabel='Object File Name'>%valu
 Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 Date modified,"<recordInfo><recordChangeDate>%value%</recordChangeDate></recordInfo>"
 Cataloger,"<extension><cataloger>%value%</cataloger></extension>"
-Viewer Information,"<note type='system details' displayLabel='Viewer Information'>%value%</note>"
 Image Resolution (Archival),"<extension><imageResolution>%value%</imageResolution></extension>"
 Image Bit-Depth (Archival),"<extension><imageBitDepth>%value%</imageBitDepth></extension>"
 Color Mode (Archival),"<extension><colorMode>%value%</colorMode></extension>"
