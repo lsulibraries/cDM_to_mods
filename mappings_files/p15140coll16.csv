@@ -25,7 +25,6 @@ Rights,"<accessCondition type='restriction on access' displayLabel='Rights'>%val
 Object File Name,"<identifier type='local' displayLabel='Object File Name'>%value%</identifier>"
 Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 Date modified,"<recordInfo><recordChangeDate>%value%</recordChangeDate></recordInfo>"
-Viewer Information,"<note type='system details'>%value%</note>"
 Cataloger,"<extension><cataloger>%value%</cataloger></extension>"
 Image Resolution (Archival),"<extension><imageResolution>%value%</imageResolution></extension>"
 Image Bit-Depth (Archival),"<extension><imageBitDepth>%value%</imageBitDepth></extension>"

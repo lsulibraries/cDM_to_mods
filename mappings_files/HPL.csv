@@ -20,4 +20,3 @@ Catalog Date,"<recordInfo><recordCreationDate>%value%</recordCreationDate></reco
 Date modified,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 Cataloger,"<extension><cataloger>%value%</cataloger></extension>"
 null1,"<extension><CONTENTdmData></CONTENTdmData></extension>"
-Viewer Information,"<note type='system details'>%value%</note>"

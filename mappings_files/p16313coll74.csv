@@ -25,6 +25,5 @@ Object File Name,"<identifier type='local' displayLabel='Object File Name'>%valu
 Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 Date modified,"<recordInfo><recordChangeDate>%value%</recordChangeDate></recordInfo>"
 Cataloged By,"<extension><cataloger>%value%</cataloger></extension>"
-Viewer Information,"<note type='system details' displayLabel='Viewer Information'>%value%</note>"
 File Size,"<extension><fileSize>%value%</fileSize></extension>"
 null5,"<extension><CONTENTdmData></CONTENTdmData></extension>"

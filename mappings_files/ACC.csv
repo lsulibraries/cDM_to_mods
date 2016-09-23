@@ -22,7 +22,6 @@ Accession Number,"<identifier type='local' displayLabel='Accession Number'>%valu
 Object_File_Name,"<identifier type='local' displayLabel='Object File Name'>%value%</identifier>"
 Cataloged Date,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 Date modified,"<recordInfo><recordChangeDate>%value%</recordChangeDate></recordInfo>"
-Viewer Information,"<note type='system details' displayLabel='Viewer Information'>%value%</note>"
 Cataloger,"<extension><cataloger>%value%</cataloger></extension>"
 Audio Sample Rate,"<extension><audioSampleRate>%value%</audioSampleRate></extension>"
 Audio Bit Depth,"<extension><audioBitDepth>%value%</audioBitDepth></extension>"

@@ -26,7 +26,6 @@ Contact Information,"<accessCondition type='use and reproduction' displayLabel='
 Object File Name,"<identifier type='local' displayLabel='Object File Name'>%value%</identifier>"
 Cataloged Date,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 Date modified,"<recordInfo><recordChangeDate>%value%</recordChangeDate></recordInfo>"
-Viewer Information,"<note type='system details' displayLabel='Viewer Information'>%value%</note>"
 Cataloger,"<extension><cataloger>%value%</cataloger></extension>"
 Image Resolution (Archival),"<extension><imageResolution>%value%</imageResolution></extension>"
 Image Bit-Depth (Archival),"<extension><imageBitDepth>%value%</imageBitDepth></extension>"
