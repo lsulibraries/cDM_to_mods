@@ -8,7 +8,7 @@ import json
 from lxml import etree as ET
 
 
-source_dir = '../Cached_Cdm_files/'
+source_dir = '/media/francis/U/Cached_Cdm_files/'
 
 # usage is:
 #    path/to/the/directory/cDM_to_mods/python3 post_conversion_cleanup.py $alias_name
@@ -36,6 +36,7 @@ class IsCountsCorrect():
             logging.info('compounds metadata counts match')
         else:
             logging.warning("BIG DEAL:  Compounds Don't Match")
+        logging.info('IsCountsCorrect done')
 
     @staticmethod
     def make_etrees_of_Elems_In(alias):
@@ -86,7 +87,7 @@ class IsCountsCorrect():
 
     @staticmethod
     def count_observed_compounds(alias):
-         for root, dirs, files in os.walk(os.path.abspath('output')):
+        for root, dirs, files in os.walk(os.path.abspath('output')):
             if root.split('/')[-1] == '{}_compounds'.format(alias):
                 output_dir = '{}/final_format/'.format(root)
                 compounds_count = 0
@@ -113,6 +114,7 @@ class PullInBinaries():
                     continue
                 sourcepath, sourcefile = sourcefiles_paths[pointer]
                 PullInBinaries.copy_binary(kind, sourcepath, sourcefile, outroot, pointer)
+        logging.info('PullInBinaries done')
 
     @staticmethod
     def makedict_sourcefiles(alias):
@@ -180,6 +182,7 @@ class MakeStructureFile():
 
                 with open('{}/structure.xml'.format(root), 'wb') as f:
                     f.write(ET.tostring(new_etree, encoding="utf-8", xml_declaration=True, pretty_print=True))
+        logging.info('MakeStructureFile done')
 
 
 def report_restricted_files(alias):
@@ -190,7 +193,7 @@ def report_restricted_files(alias):
                          for file in files
                          if '.xml' in file]
     all_metadatas.extend(simples_metadatas)
-    compounds_metadatas = ["{}/{}".format(root, file) 
+    compounds_metadatas = ["{}/{}".format(root, file)
                            for root, dirs, files in os.walk('output/{}_compounds/final_format'.format(alias))
                            for file in files
                            if '.xml' in file]
@@ -210,6 +213,9 @@ def report_restricted_files(alias):
             for k, v in restrictions_dict.items():
                 output_text += '{}: {}\n'.format(k.replace('.xml', ''), v)
             f.write(output_text)
+        logging.info('report_restricted_files done\nList of restricted items in file at output/{alias}_restricted_item.txt')
+    else:
+        logging.info('report_restricted_files done\nNo restricted items.')
 
 
 def setup_logging(alias):
