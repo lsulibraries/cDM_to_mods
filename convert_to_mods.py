@@ -13,8 +13,8 @@ import logging
 
 from lxml import etree as ET
 
-
-SOURCE_DIR = '../Cached_Cdm_files/'
+SOURCE_DIR = '/home/francis/Desktop/Cached_Cdm_files_onlymetadata/'
+# SOURCE_DIR = '../Cached_Cdm_files/'
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
@@ -83,7 +83,7 @@ def convert_to_mods(alias):
         flatten_simple_dir(simples_output_dir)
         run_saxon_simple(simples_output_dir, alias_xslts)
         flat_final_dir = os.path.join(simples_output_dir, 'final_format')
-        validate_mods(flat_final_dir)
+        validate_mods(alias, flat_final_dir)
     else:
         logging.info('no simple objects in this collection')
 
@@ -91,14 +91,14 @@ def convert_to_mods(alias):
     flatten_cpd_dir(cpd_output_dir)
     run_saxon_cpd(cpd_output_dir, alias_xslts)
     flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
-    validate_mods(flat_final_dir)
+    validate_mods(alias, flat_final_dir)
     reinflate_cpd_dir(cpd_output_dir)
 
     logging.info('completed')
     logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
 
 
-def validate_mods(directory):
+def validate_mods(alias, directory):
     all_passed = True
     xml_files = [file for file in os.listdir(directory) if ".xml" in file]
     for file in xml_files:
@@ -418,8 +418,8 @@ def do_a_bunch_of_collections():
     for alias in mappings_done:
         if alias in we_dont_migrate:
             continue
-        if alias in completed:
-            continue
+        # if alias in completed:
+        #     continue
         print(alias)
         logging.info('{} starting'.format(alias))
         convert_to_mods(alias)
@@ -431,11 +431,13 @@ def do_a_bunch_of_collections():
 
 
 if __name__ == '__main__':
-    alias = sys.argv[1]
     setup_logging()
-    logging.info('starting')
-
-    convert_to_mods(alias)  # single collection or
-    # do_a_bunch_of_collections() # many collections
-
-    logging.info('finished')
+    if len(sys.argv) > 1:
+        alias = sys.argv[1]
+        logging.info('starting {}'.format(alias))
+        convert_to_mods(alias)  # single collection or
+        logging.info('finished {}'.format(alias))
+    else:
+        doublecheck = input('Are you sure you want to convert all mapped collections? (y/N)')
+        if doublecheck.lower() == 'y':
+            do_a_bunch_of_collections()  # many collections
