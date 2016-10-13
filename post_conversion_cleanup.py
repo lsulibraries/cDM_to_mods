@@ -213,29 +213,46 @@ def report_restricted_files(alias):
             for k, v in restrictions_dict.items():
                 output_text += '{}: {}\n'.format(k.replace('.xml', ''), v)
             f.write(output_text)
-        logging.info('report_restricted_files done\nList of restricted items in file at output/{alias}_restricted_item.txt')
+        logging.info('report_restricted_files done')
+        logging.info('List of restricted items in file at output/{}_restricted_item.txt'.format(alias))
     else:
-        logging.info('report_restricted_files done\nNo restricted items.')
+        logging.info('report_restricted_files done.')
+        logging.info('No restricted items.')
 
 
-def setup_logging(alias):
+def setup_logging():
     logging.basicConfig(filename='post_conversion_cleanup_log.txt',
                         level=logging.INFO,
-                        format='{}: %(asctime)s: %(message)s'.format(alias),
+                        format='%(asctime)s: %(levelname)-8s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
     console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    formatter = logging.Formatter('{}: %(name)-12s: %(levelname)-8s %(message)s'.format(alias))
+    console.setLevel(logging.WARNING)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
 
+def name_outputted_collections():
+    return set(root.split('/')[-1].replace('_compounds', '').replace('_simples', '') for root, dirs, files in os.walk('output') if 'final_format' in dirs)
+
+
 if __name__ == '__main__':
-    alias = sys.argv[1]
-    setup_logging(alias)
-    logging.info('starting')
-    PullInBinaries(alias)
-    MakeStructureFile(alias)
-    IsCountsCorrect(alias)
-    report_restricted_files(alias)
-    logging.info('finished')
+    if len(sys.argv) > 1:
+        alias = sys.argv[1]
+        setup_logging(alias)
+        logging.info('starting {}'.format(alias))
+        PullInBinaries(alias)
+        MakeStructureFile(alias)
+        IsCountsCorrect(alias)
+        report_restricted_files(alias)
+        llogging.info('finished {}'.format(alias))
+    else:
+        for alias in name_outputted_collections():
+            print(alias)
+            setup_logging()
+            logging.info('starting {}'.format(alias))
+            PullInBinaries(alias)
+            MakeStructureFile(alias)
+            IsCountsCorrect(alias)
+            report_restricted_files(alias)
+            logging.info('finished {}'.format(alias))
