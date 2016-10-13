@@ -27,6 +27,8 @@ def convert_to_mods(alias):
     cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(cdm_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
 
+    remove_previous_mods(alias)
+
     for pointer in simple_pointers:
         target_file = '{}.json'.format(pointer)
         path_to_pointer = [os.path.join(root, target_file)
@@ -96,6 +98,15 @@ def convert_to_mods(alias):
 
     logging.info('completed')
     logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
+
+
+def remove_previous_mods(alias):
+    xml_files = ['{}/{}'.format(root, file)
+                 for root, dirs, files in os.walk('output')
+                 for file in files
+                 if alias in root and ".xml" in file]
+    for file in xml_files:
+        os.remove(file)
 
 
 def validate_mods(alias, directory):
@@ -285,6 +296,14 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
     return root_element
 
 
+def write_etree(element, pointer):
+    print(element)
+    os.makedirs('/home/francis/Desktop/orig_etree', exist_ok=True)
+    text = ET.tostring(element, encoding="utf-8", method="xml")
+    with open('/home/francis/Desktop/orig_etree/{}.xml'.format(pointer), 'w') as f:
+        f.write(text.decode('utf-8'))
+
+
 def reorder_sequence(root_element):
     if root_element.find('./location') is None:  # lxml wants this syntax
         return
@@ -343,11 +362,11 @@ def subject_split(etree):
 
 
 year_month_day = re.compile(r'(\d{4})[/.-](\d{2})[/.-](\d{2})')     # 2013-12-25
-year_last = re.compile(r'(\d{2})[/.-](\d{2})[/.-](\d{4})')          # 12-25-2013
+year_last = re.compile(r'(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})')          # 12-25-2013
 
 
 def normalize_date(root_elem):
-    date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate')
+    date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued')
                   for i in root_elem.findall('.//{}'.format(tag))]
     for i in date_elems:
         yearmonthday = year_month_day.search(i.text)
