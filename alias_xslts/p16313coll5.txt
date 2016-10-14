@@ -6,3 +6,5 @@ subjectSplit
 dateIssuedSplit
 locationMerge
 OrderedTemplates
+typeOfResource
+internetMediaType
