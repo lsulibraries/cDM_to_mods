@@ -8,6 +8,7 @@ for converting the output of cdm_xporter/scrape_cdm.py into mods format (especia
         `vagrant up`
         `vagrant ssh`
         `cd /vagrant`
+        `. bootstrap.sh`
         `python3 convert_to_mods.py {alias name}
         
         
