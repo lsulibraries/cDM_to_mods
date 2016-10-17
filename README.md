@@ -4,10 +4,17 @@ for converting the output of cdm_xporter/scrape_cdm.py into mods format (especia
  
   1) Windows:  
         In terminal, navigate to cDM_to_mods directory.
+        
         Move the "Cached_Cdm_files_onlymetadata" folder inside of "cDM_to_mods".
+        
         `vagrant up`
+        
         `vagrant ssh`
+        
         `cd /vagrant`
+        
+        `. bootstrap.sh`
+        
         `python3 convert_to_mods.py {alias name}
         
         
