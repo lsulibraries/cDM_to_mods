@@ -1,9 +1,18 @@
 # How to:
 
 for converting the output of cdm_xporter/scrape_cdm.py into mods format (especially for ingest into Islandora)
-
-  1) Turn on your python3 virtualenv.  It needs lxml.  Ananconda for Mac & Windows works well.
-  
+ 
+  1) Windows:  
+        In terminal, navigate to cDM_to_mods directory.
+        Move the "Cached_Cdm_files_onlymetadata" folder inside of "cDM_to_mods".
+        `vagrant up`
+        `vagrant ssh`
+        `cd /vagrant`
+        `python3 convert_to_mods.py {alias name}
+        
+        
+  1) Linux/Mac:  Turn on your python3 virtualenv.  It needs lxml.
+ 
   2) convert_to_mods.py expects to find /Cached_Cdm_files/ (the output of scrape_cdm.py) in a sibling folder beside the cDM_to_mods folder.
   
   3) In the command line, navigate into the cDM_to_mods directory.
