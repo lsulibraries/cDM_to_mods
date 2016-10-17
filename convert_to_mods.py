@@ -13,7 +13,7 @@ import logging
 
 from lxml import etree as ET
 
-SOURCE_DIR = '../Cached_Cdm_files_onlymetadata/'
+SOURCE_DIR = 'Cached_Cdm_files_onlymetadata/'
 # SOURCE_DIR = '../Cached_Cdm_files/'
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
