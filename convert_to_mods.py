@@ -13,8 +13,8 @@ import logging
 
 from lxml import etree as ET
 
-
-SOURCE_DIR = '/media/francis/U/Cached_Cdm_files'
+SOURCE_DIR = '../Cached_Cdm_files_onlymetadata/'
+# SOURCE_DIR = '../Cached_Cdm_files/'
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
@@ -26,6 +26,8 @@ def convert_to_mods(alias):
 
     cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(cdm_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
+
+    remove_previous_mods(alias)
 
     for pointer in simple_pointers:
         target_file = '{}.json'.format(pointer)
@@ -79,25 +81,38 @@ def convert_to_mods(alias):
     alias_xslts = read_alias_xslt_file(alias)
 
     simples_output_dir = os.path.join('output', '{}_simples'.format(alias))
-    flatten_simple_dir(simples_output_dir)
-    run_saxon_simple(simples_output_dir, alias_xslts)
-    flat_final_dir = os.path.join(simples_output_dir, 'final_format')
-    validate_mods(flat_final_dir)
+    if '{}_simples'.format(alias) in os.listdir('output') and 'original_format' in os.listdir(simples_output_dir):
+        flatten_simple_dir(simples_output_dir)
+        run_saxon_simple(simples_output_dir, alias_xslts)
+        flat_final_dir = os.path.join(simples_output_dir, 'final_format')
+        validate_mods(alias, flat_final_dir)
+    else:
+        logging.info('no simple objects in this collection')
 
     cpd_output_dir = os.path.join('output', '{}_compounds'.format(alias))
     flatten_cpd_dir(cpd_output_dir)
     run_saxon_cpd(cpd_output_dir, alias_xslts)
     flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
-    validate_mods(flat_final_dir)
+    validate_mods(alias, flat_final_dir)
     reinflate_cpd_dir(cpd_output_dir)
 
     logging.info('completed')
     logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
 
 
-def validate_mods(directory):
+def remove_previous_mods(alias):
+    xml_files = ['{}/{}'.format(root, file)
+                 for root, dirs, files in os.walk('output')
+                 for file in files
+                 if alias in root and ".xml" in file]
+    for file in xml_files:
+        os.remove(file)
+
+
+def validate_mods(alias, directory):
     all_passed = True
-    for file in os.listdir(directory):
+    xml_files = [file for file in os.listdir(directory) if ".xml" in file]
+    for file in xml_files:
         file_etree = ET.parse(os.path.join(directory, file))
         pointer = file.split('.')[0]
         if not MODS_SCHEMA.validate(file_etree):
@@ -281,7 +296,17 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
     return root_element
 
 
+def write_etree(element, pointer):
+    print(element)
+    os.makedirs('/home/francis/Desktop/orig_etree', exist_ok=True)
+    text = ET.tostring(element, encoding="utf-8", method="xml")
+    with open('/home/francis/Desktop/orig_etree/{}.xml'.format(pointer), 'w') as f:
+        f.write(text.decode('utf-8'))
+
+
 def reorder_sequence(root_element):
+    if root_element.find('./location') is None:  # lxml wants this syntax
+        return
     location_elem = root_element.find('./location')
     order_dict = {"physicalLocation": 0,
                   "shelfLocator": 1,
@@ -337,11 +362,11 @@ def subject_split(etree):
 
 
 year_month_day = re.compile(r'(\d{4})[/.-](\d{2})[/.-](\d{2})')     # 2013-12-25
-year_last = re.compile(r'(\d{2})[/.-](\d{2})[/.-](\d{4})')          # 12-25-2013
+year_last = re.compile(r'(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})')          # 12-25-2013
 
 
 def normalize_date(root_elem):
-    date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate')
+    date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued')
                   for i in root_elem.findall('.//{}'.format(tag))]
     for i in date_elems:
         yearmonthday = year_month_day.search(i.text)
@@ -371,21 +396,67 @@ def delete_empty_fields(orig_etree):
     return orig_etree
 
 
-def setup_logging(alias):
+def setup_logging():
     logging.basicConfig(filename='convert_to_mods_log.txt',
                         level=logging.INFO,
-                        format='{}: %(asctime)s: %(message)s'.format(alias),
+                        format='%(asctime)s: %(levelname)-8s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
     console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    formatter = logging.Formatter('{}: %(name)-12s: %(levelname)-8s %(message)s'.format(alias))
+    console.setLevel(logging.WARNING)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
 
+def do_a_bunch_of_collections():
+    mappings_done = [i.split('.')[0] for i
+                     in os.listdir('./mappings_files')]
+
+    new_broken, new_completed = [], []
+
+    completed = ['UNO_JBF', 'LOH', 'p16313coll95', 'LPS', 'LSM_FQA',
+                 'LSM_KOH', 'p16313coll20', 'p15140coll1', 'LSM_MPC',
+                 'JAZ', 'MPA', 'p16313coll3', 'p15140coll61', 'LCT',
+                 'OSC', 'p16313coll98', 'p15140coll16', 'p120701coll27',
+                 'SIP', 'p120701coll9', 'STC', 'p15140coll4', 'p16313coll24',
+                 'LHP', 'p15140coll28', 'p16313coll87', 'RMC', 'p15140coll52',
+                 'p15140coll30', 'HWJ', 'UNO_ANI', 'FJC', 'ACC', 'LSUHSCS_GWM',
+                 'p120701coll10', 'LSM_CCC', 'p16313coll48', 'FBM', 'RTC',
+                 'HIC', 'LHC', 'CLF', 'OMSA', 'p15140coll7', 'NCC', 'p16313coll5',
+                 'LSM_NCC', 'VBC', 'p16313coll28', 'GFM', 'p120701coll28',
+                 'p16313coll23', 'p15140coll23', 'BRS', 'p16313coll93',
+                 'p120701coll8', 'p16313coll25', 'CMPRT', 'LSM_NAC', 'p15140coll60',
+                 'p120701coll15', 'p120701coll29', 'LSU_HPL', 'LSU_JJA', 'LPH',
+                 'RSP', 'JNT', 'p15140coll27', 'LSA', 'p120701coll7', 'LMNP01',
+                 'p16313coll21', 'PSL', 'p15140coll19', 'p120701coll18', 'NWM',
+                 'HPL', 'p16313coll91', 'LOYOLA_ETD', 'CCA', 'p16313coll74',
+                 'p16313coll62', 'RTP', 'p16313coll17', 'p120701coll17',
+                 ]
+    we_dont_migrate = ['MPF', 'LOU', ]
+
+    for alias in mappings_done:
+        if alias in we_dont_migrate:
+            continue
+        # if alias in completed:
+        #     continue
+        print(alias)
+        logging.info('{} starting'.format(alias))
+        convert_to_mods(alias)
+        logging.info('{} finished'.format(alias))
+        new_completed.append(alias)
+
+    print("""completed\n{}""".format("',\n'".join(new_completed)))
+    print("""broken\n{}""".format("',\n'".join(new_broken)))
+
+
 if __name__ == '__main__':
-    alias = sys.argv[1]
-    setup_logging(alias)
-    logging.info('starting')
-    convert_to_mods(alias)
-    logging.info('finished')
+    setup_logging()
+    if len(sys.argv) > 1:
+        alias = sys.argv[1]
+        logging.info('starting {}'.format(alias))
+        convert_to_mods(alias)  # single collection or
+        logging.info('finished {}'.format(alias))
+    else:
+        doublecheck = input('Are you sure you want to convert all mapped collections? (y/N)')
+        if doublecheck.lower() == 'y':
+            do_a_bunch_of_collections()  # many collections

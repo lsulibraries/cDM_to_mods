@@ -1,6 +1,6 @@
 Volume,"<titleInfo><title>%value%</title></titleInfo>"
 Title,"<titleInfo><partName>%value%</partName></titleInfo>"
-Page Number(s),"<part displayLabel='Page Number(s)'><extent unit='pages'><list>%value%</list></extent></part>
+Page Number(s),"<part displayLabel='Page Number(s)'><extent unit='pages'><list>%value%</list></extent></part>"
 Meeting,"<name type='conference' displayLabel='Meeting'><namePart>%value%</namePart></name>"
 Creator,"<name displayLabel='Creator'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>cre</roleTerm><roleTerm type='text' authority='marcrelator'>Creator</roleTerm></role></name>"
 Board Members Present,"<note type='statement of responsibility' displayLabel='Board Members Present'>%value%</note>"

@@ -273,55 +273,55 @@
                 </xsl:analyze-string>
             </xsl:when>
             <xsl:when test="matches(., 'early 20th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1901</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1901</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1939</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., 'late 20th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1960</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1960</dateIssued>
                 <dateIssued point="end" qualifier="approximate">2000</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., 'mid-20th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1930</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1930</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1969</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., '20th century', 'i') and matches(., '19th')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1801</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1801</dateIssued>
                 <dateIssued point="end" qualifier="approximate">2000</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., '20th century', 'i') and not (matches(., '19th'))">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1901</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1901</dateIssued>
                 <dateIssued point="end" qualifier="approximate">2000</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., 'mid-19th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1830</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1830</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1869</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., 'late 19th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1860</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1860</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1900</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., '19th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1801</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1801</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1900</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., '18th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1701</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1701</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1800</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., '17th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1601</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1601</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1700</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., '16th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1501</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1501</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1600</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., '15th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1401</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1401</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1500</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., '14th century', 'i')">
-                <dateIssued point="start" keydate="yes" qualifier="approximate">1301</dateIssued>
+                <dateIssued point="start" keyDate="yes" qualifier="approximate">1301</dateIssued>
                 <dateIssued point="end" qualifier="approximate">1400</dateIssued>
             </xsl:when>
             <xsl:when test="matches(., 'no date', 'i')">
