@@ -7,12 +7,13 @@ from shutil import copyfile
 import json
 from lxml import etree as ET
 
-
-source_dir = '/media/francis/U/Cached_Cdm_files/'
+source_dir = "U:/Cached_Cdm_files/" # Windows source
+# source_dir = '/media/francis/U/Cached_Cdm_files/' # garrett's laptop
+# source_dir = add yours here.
 
 # usage is:
 #    path/to/the/directory/cDM_to_mods/python3 post_conversion_cleanup.py $alias_name
-#    i.e.  C:\User\Thomas\cDm_to_mods\python3 post_conversion_cleanup.py p16313coll16
+#    i.e.  python3 post_conversion_cleanup.py p16313coll16
 
 
 class IsCountsCorrect():
