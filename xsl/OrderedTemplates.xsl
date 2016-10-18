@@ -18,7 +18,6 @@
     <xsl:template match="mods" exclude-result-prefixes="#all">
         <xsl:copy>
             <xsl:apply-templates select="titleInfo" />
-            <xsl:apply-templates select="titleInfo[@type='alternative']"/>
             <xsl:apply-templates select="part" />
             <xsl:apply-templates select="name" />
             <xsl:apply-templates select="note[@type='statement of responsibility']"/>
