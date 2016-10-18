@@ -220,6 +220,24 @@ def report_restricted_files(alias):
         logging.info('No restricted items.')
 
 
+def report_filetype(alias):
+    filetypes = set()
+    all_binaries = []
+    simples_binaries = ["{}/{}".format(root, file)
+                        for root, dirs, files in os.walk('output/{}_simples/final_format'.format(alias))
+                        for file in files
+                        if '.xml' not in file]
+    all_binaries.extend(simples_binaries)
+    compounds_binaries = ["{}/{}".format(root, file)
+                          for root, dirs, files in os.walk('output/{}_compounds/final_format'.format(alias))
+                          for file in files
+                          if '.xml' not in file]
+    all_binaries.extend(compounds_binaries)
+    for binary_filename in all_binaries:
+        filetypes.add(binary_filename.split('.')[-1])
+    logging.info('Collection contains filetypes: {}'.format(*filetypes))
+
+
 def setup_logging():
     logging.basicConfig(filename='post_conversion_cleanup_log.txt',
                         level=logging.INFO,
@@ -239,13 +257,14 @@ def name_outputted_collections():
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         alias = sys.argv[1]
-        setup_logging(alias)
+        setup_logging()
         logging.info('starting {}'.format(alias))
         PullInBinaries(alias)
         MakeStructureFile(alias)
         IsCountsCorrect(alias)
         report_restricted_files(alias)
-        llogging.info('finished {}'.format(alias))
+        report_filetype(alias)
+        logging.info('finished {}'.format(alias))
     else:
         for alias in name_outputted_collections():
             print(alias)
@@ -255,4 +274,5 @@ if __name__ == '__main__':
             MakeStructureFile(alias)
             IsCountsCorrect(alias)
             report_restricted_files(alias)
+            report_filetype(alias)
             logging.info('finished {}'.format(alias))
