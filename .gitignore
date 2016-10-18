@@ -2,3 +2,6 @@ output/*
 *.pyc
 convert_to_mods_log.txt
 post_conversion_cleanup_log.txt
+.vagrant/
+Cached_Cdm_files_onlymetadata/
+ubuntu-xenial-16.04-clouding-console.log
