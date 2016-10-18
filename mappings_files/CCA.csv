@@ -6,7 +6,7 @@ Coverage,"<subject authority='lcsh' displayLabel='Geographic Subject'><geographi
 Description,"<abstract displayLabel='Description'>%value%</abstract>"
 Notes,"<note type='content'>%value%</note>"
 Type,"<typeOfResource>still image</typeOfResource>"
-null5,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
+null4,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
 Language,"<language><languageTerm type='code'>%value%</languageTerm></language>"
 Source,"<note type='ownership' displayLabel='Repository'>Louisiana State Museum ( http://lsm.crt.state.la.us/ )</note>"
 null6,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>New Orleans Chamber of Commerce Photographs</title></titleInfo></relatedItem>"
