@@ -239,7 +239,7 @@ def name_outputted_collections():
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         alias = sys.argv[1]
-        setup_logging(alias)
+        setup_logging()
         logging.info('starting {}'.format(alias))
         PullInBinaries(alias)
         MakeStructureFile(alias)
