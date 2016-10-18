@@ -7,7 +7,7 @@ from shutil import copyfile
 import json
 from lxml import etree as ET
 
-source_dir = "U:/Cached_Cdm_files/" # Windows source
+source_dir = "U:\\Cached_Cdm_files/" # Windows source
 # source_dir = '/media/francis/U/Cached_Cdm_files/' # garrett's laptop
 # source_dir = add yours here.
 
