@@ -13,7 +13,7 @@ import logging
 
 from lxml import etree as ET
 
-SOURCE_DIR = 'Cached_Cdm_files_onlymetadata/'
+SOURCE_DIR = '../../Cached_Cdm_files_onlymetadata'
 # SOURCE_DIR = '../Cached_Cdm_files/'
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
@@ -35,7 +35,7 @@ def convert_to_mods(alias):
                            for root, dirs, files in cdm_data_filestructure
                            if target_file in files][0]
         pointer_json = get_cdm_pointer_json(path_to_pointer)
-        nicks_texts = parse_cdm_pointer_json(pointer_json)
+        nicks_texts = parse_cdm_pointer_json(pointer, pointer_json)
         propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
         mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
         reorder_sequence(mods)
@@ -54,7 +54,7 @@ def convert_to_mods(alias):
     for pointer, _ in parents_children.items():
         path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', '{}.json'.format(pointer))
         pointer_json = get_cdm_pointer_json(path_to_pointer)
-        nicks_texts = parse_cdm_pointer_json(pointer_json)
+        nicks_texts = parse_cdm_pointer_json(pointer, pointer_json)
         propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
         mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
         reorder_sequence(mods)
@@ -68,7 +68,7 @@ def convert_to_mods(alias):
         for pointer in children_pointers:
             path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', parent, '{}.json'.format(pointer))
             pointer_json = get_cdm_pointer_json(path_to_pointer)
-            nicks_texts = parse_cdm_pointer_json(pointer_json)
+            nicks_texts = parse_cdm_pointer_json(pointer, pointer_json)
             propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
             mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
             reorder_sequence(mods)
@@ -247,8 +247,12 @@ def get_cdm_pointer_json(filepath):
         return f.read()
 
 
-def parse_cdm_pointer_json(pointer_json):
-    parsed_alias_json = json.loads(pointer_json)
+def parse_cdm_pointer_json(pointer, pointer_json):
+    try:
+        parsed_alias_json = json.loads(pointer_json)
+    except json.decoder.JSONDecodeError:
+        logging.warning('{}.json is improperly formed json.  Conversion halted!'.format(pointer))
+        quit()
     return {nick: text for nick, text in parsed_alias_json.items()}
 
 
@@ -294,14 +298,6 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
     delete_empty_fields(root_element)
     reorder_sequence(root_element)
     return root_element
-
-
-def write_etree(element, pointer):
-    print(element)
-    os.makedirs('/home/francis/Desktop/orig_etree', exist_ok=True)
-    text = ET.tostring(element, encoding="utf-8", method="xml")
-    with open('/home/francis/Desktop/orig_etree/{}.xml'.format(pointer), 'w') as f:
-        f.write(text.decode('utf-8'))
 
 
 def reorder_sequence(root_element):
@@ -411,52 +407,25 @@ def setup_logging():
 def do_a_bunch_of_collections():
     mappings_done = [i.split('.')[0] for i
                      in os.listdir('./mappings_files')]
-
-    new_broken, new_completed = [], []
-
-    completed = ['UNO_JBF', 'LOH', 'p16313coll95', 'LPS', 'LSM_FQA',
-                 'LSM_KOH', 'p16313coll20', 'p15140coll1', 'LSM_MPC',
-                 'JAZ', 'MPA', 'p16313coll3', 'p15140coll61', 'LCT',
-                 'OSC', 'p16313coll98', 'p15140coll16', 'p120701coll27',
-                 'SIP', 'p120701coll9', 'STC', 'p15140coll4', 'p16313coll24',
-                 'LHP', 'p15140coll28', 'p16313coll87', 'RMC', 'p15140coll52',
-                 'p15140coll30', 'HWJ', 'UNO_ANI', 'FJC', 'ACC', 'LSUHSCS_GWM',
-                 'p120701coll10', 'LSM_CCC', 'p16313coll48', 'FBM', 'RTC',
-                 'HIC', 'LHC', 'CLF', 'OMSA', 'p15140coll7', 'NCC', 'p16313coll5',
-                 'LSM_NCC', 'VBC', 'p16313coll28', 'GFM', 'p120701coll28',
-                 'p16313coll23', 'p15140coll23', 'BRS', 'p16313coll93',
-                 'p120701coll8', 'p16313coll25', 'CMPRT', 'LSM_NAC', 'p15140coll60',
-                 'p120701coll15', 'p120701coll29', 'LSU_HPL', 'LSU_JJA', 'LPH',
-                 'RSP', 'JNT', 'p15140coll27', 'LSA', 'p120701coll7', 'LMNP01',
-                 'p16313coll21', 'PSL', 'p15140coll19', 'p120701coll18', 'NWM',
-                 'HPL', 'p16313coll91', 'LOYOLA_ETD', 'CCA', 'p16313coll74',
-                 'p16313coll62', 'RTP', 'p16313coll17', 'p120701coll17',
-                 ]
     we_dont_migrate = ['MPF', 'LOU', ]
 
     for alias in mappings_done:
         if alias in we_dont_migrate:
             continue
-        # if alias in completed:
-        #     continue
         print(alias)
         logging.info('{} starting'.format(alias))
         convert_to_mods(alias)
         logging.info('{} finished'.format(alias))
-        new_completed.append(alias)
-
-    print("""completed\n{}""".format("',\n'".join(new_completed)))
-    print("""broken\n{}""".format("',\n'".join(new_broken)))
 
 
 if __name__ == '__main__':
     setup_logging()
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1:      # single collection or
         alias = sys.argv[1]
         logging.info('starting {}'.format(alias))
-        convert_to_mods(alias)  # single collection or
+        convert_to_mods(alias)
         logging.info('finished {}'.format(alias))
-    else:
+    else:                       # many collections
         doublecheck = input('Are you sure you want to convert all mapped collections? (y/N)')
         if doublecheck.lower() == 'y':
-            do_a_bunch_of_collections()  # many collections
+            do_a_bunch_of_collections()
