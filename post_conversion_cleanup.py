@@ -7,7 +7,8 @@ from shutil import copyfile
 import json
 from lxml import etree as ET
 
-source_dir = "U:\\Cached_Cdm_files" # Windows source
+
+source_dir = "U:\\Cached_Cdm_files"  # Windows source
 # source_dir = '/media/francis/U/Cached_Cdm_files/' # garrett's laptop
 # source_dir = add yours here.
 
@@ -236,7 +237,7 @@ def report_filetype(alias):
     all_binaries.extend(compounds_binaries)
     for binary_filename in all_binaries:
         filetypes.add(binary_filename.split('.')[-1])
-    logging.info('Collection contains filetypes: {}'.format(*filetypes))
+    logging.info('Collection contains filetypes: {}'.format(filetypes))
 
 
 def setup_logging():
