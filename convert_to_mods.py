@@ -13,8 +13,11 @@ import logging
 
 from lxml import etree as ET
 
-SOURCE_DIR = '../../Cached_Cdm_files_onlymetadata'
+SOURCE_DIR = input('Type the path to your Cache of Cdm directory: ')
+# SOURCE_DIR = '../Cached_Cdm_files_onlymetadata'
 # SOURCE_DIR = '../Cached_Cdm_files/'
+
+
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
@@ -145,6 +148,7 @@ def run_saxon_simple(simple_dir, alias_xslts):
         output_dir = os.path.join(simple_dir, xslt)
         os.makedirs(output_dir, exist_ok=True)
         path_to_xslt = os.path.join('xsl', '{}.xsl'.format(xslt))
+        print(input_dir, path_to_xslt, output_dir)
         subprocess.call(['java',
                          '-jar',
                          'saxon9he.jar',
