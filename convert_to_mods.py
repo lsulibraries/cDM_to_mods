@@ -13,7 +13,7 @@ import logging
 
 from lxml import etree as ET
 
-SOURCE_DIR = input('Type the path to your Cache of Cdm directory: ')
+# SOURCE_DIR = input('Type the path to your Cache of Cdm directory: ')
 # SOURCE_DIR = '../Cached_Cdm_files_onlymetadata'
 # SOURCE_DIR = '../Cached_Cdm_files/'
 
@@ -44,8 +44,11 @@ def convert_to_mods(alias):
         reorder_sequence(mods)
         output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
         os.makedirs(output_path, exist_ok=True)
-        with open('{}/{}.xml'.format(output_path, pointer), 'w') as f:
-            f.write(ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True).decode('utf-8'))
+        mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8",  pretty_print=True)
+        mods_string = mods_bytes.decode('utf-8')
+        print(type(mods_string))
+        with open('{}/{}.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
+            f.write(mods_string)
     logging.info('finished simples')
 
     parents_children = dict()
@@ -108,6 +111,7 @@ def remove_previous_mods(alias):
                  for root, dirs, files in os.walk('output')
                  for file in files
                  if alias in root and ".xml" in file]
+    print(xml_files)
     for file in xml_files:
         os.remove(file)
 
@@ -148,7 +152,7 @@ def run_saxon_simple(simple_dir, alias_xslts):
         output_dir = os.path.join(simple_dir, xslt)
         os.makedirs(output_dir, exist_ok=True)
         path_to_xslt = os.path.join('xsl', '{}.xsl'.format(xslt))
-        print(input_dir, path_to_xslt, output_dir)
+        print('\njava -jar saxon9he.jar -s:{} -xsl:{} -o:{}\n'.format(input_dir, path_to_xslt, output_dir))
         subprocess.call(['java',
                          '-jar',
                          'saxon9he.jar',
@@ -217,13 +221,13 @@ def reinflate_cpd_dir(cpd_dir):
 
 def make_nicks_to_names(cdm_data_dir):
     rosetta_filepath = os.path.join(cdm_data_dir, 'Collection_Fields.json')
-    with open(rosetta_filepath, 'r') as f:
+    with open(rosetta_filepath, 'r', encoding='utf-8') as f:
         parsed_rosetta_file = json.loads(f.read())
     return {field['nick']: field['name'] for field in parsed_rosetta_file}
 
 
 def parse_mappings_file(alias):
-    with open('mappings_files/{}.csv'.format(alias), 'r') as f:
+    with open('mappings_files/{}.csv'.format(alias), 'r', encoding='utf-8') as f:
         csv_reader = csv.reader(f, delimiter=',')
         return {i: j for i, j in csv_reader}
 
@@ -247,7 +251,7 @@ def parse_root_cdm_pointers(cdm_data_filestructure):
 
 
 def get_cdm_pointer_json(filepath):
-    with open(filepath, 'r') as f:
+    with open(filepath, 'r', encoding='utf-8') as f:
         return f.read()
 
 
@@ -424,12 +428,15 @@ def do_a_bunch_of_collections():
 
 if __name__ == '__main__':
     setup_logging()
-    if len(sys.argv) > 1:      # single collection or
+    try:
         alias = sys.argv[1]
-        logging.info('starting {}'.format(alias))
-        convert_to_mods(alias)
-        logging.info('finished {}'.format(alias))
-    else:                       # many collections
-        doublecheck = input('Are you sure you want to convert all mapped collections? (y/N)')
-        if doublecheck.lower() == 'y':
-            do_a_bunch_of_collections()
+        SOURCE_DIR = sys.argv[2]
+    except IndexError:
+        logging.warning('')
+        logging.warning('Change to: "python convert_to_mods.py $aliasname $sourcefolder"')
+        logging.warning('')
+        quit()
+    logging.info('starting {}'.format(alias))
+    convert_to_mods(alias)
+    logging.info('finished {}'.format(alias))
+
