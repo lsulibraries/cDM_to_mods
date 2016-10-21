@@ -13,10 +13,6 @@ import logging
 
 from lxml import etree as ET
 
-# SOURCE_DIR = input('Type the path to your Cache of Cdm directory: ')
-# SOURCE_DIR = '../Cached_Cdm_files_onlymetadata'
-# SOURCE_DIR = '../Cached_Cdm_files/'
-
 
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
@@ -46,7 +42,6 @@ def convert_to_mods(alias):
         os.makedirs(output_path, exist_ok=True)
         mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8",  pretty_print=True)
         mods_string = mods_bytes.decode('utf-8')
-        print(type(mods_string))
         with open('{}/{}.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
             f.write(mods_string)
     logging.info('finished simples')
@@ -66,7 +61,7 @@ def convert_to_mods(alias):
         reorder_sequence(mods)
         output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', pointer)
         os.makedirs(output_path, exist_ok=True)
-        with open('{}/MODS.xml'.format(output_path, pointer), 'w') as f:
+        with open('{}/MODS.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
             f.write(ET.tostring(mods, pretty_print=True).decode('utf-8'))
         copyfile(os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(pointer)), os.path.join(output_path, 'structure.cpd'))
 
@@ -80,7 +75,7 @@ def convert_to_mods(alias):
             reorder_sequence(mods)
             output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', parent, pointer)
             os.makedirs(output_path, exist_ok=True)
-            with open('{}/MODS.xml'.format(output_path, pointer), 'w') as f:
+            with open('{}/MODS.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
                 f.write(ET.tostring(mods, pretty_print=True).decode('utf-8'))
     logging.info('finished compounds')
 
@@ -111,7 +106,6 @@ def remove_previous_mods(alias):
                  for root, dirs, files in os.walk('output')
                  for file in files
                  if alias in root and ".xml" in file]
-    print(xml_files)
     for file in xml_files:
         os.remove(file)
 
@@ -152,7 +146,7 @@ def run_saxon_simple(simple_dir, alias_xslts):
         output_dir = os.path.join(simple_dir, xslt)
         os.makedirs(output_dir, exist_ok=True)
         path_to_xslt = os.path.join('xsl', '{}.xsl'.format(xslt))
-        print('\njava -jar saxon9he.jar -s:{} -xsl:{} -o:{}\n'.format(input_dir, path_to_xslt, output_dir))
+        # print('\njava -jar saxon9he.jar -s:{} -xsl:{} -o:{}\n'.format(input_dir, path_to_xslt, output_dir))
         subprocess.call(['java',
                          '-jar',
                          'saxon9he.jar',
@@ -176,7 +170,9 @@ def flatten_cpd_dir(cpd_dir):
     for root, dirs, files in os.walk(source_dir):
         for file in files:
             if ".xml" in file:
-                copyfile(os.path.join(root, file), os.path.join(flattened_dir, '{}.xml'.format(root.split('/')[-1])))
+                source_folder_name = os.path.split(root)[-1]
+                dest_filepath = os.path.join(flattened_dir, '{}.xml'.format(source_folder_name))
+                copyfile(os.path.join(root, file), dest_filepath)
 
 
 def run_saxon_cpd(cpd_dir, alias_xslts):
