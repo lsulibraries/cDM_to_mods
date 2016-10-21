@@ -8,13 +8,13 @@ import json
 from lxml import etree as ET
 
 
+# source_dir = add yours here.
 source_dir = "U:\\Cached_Cdm_files"  # Windows source
 # source_dir = '/media/francis/U/Cached_Cdm_files/' # garrett's laptop
-# source_dir = add yours here.
+
 
 # usage is:
-#    path/to/the/directory/cDM_to_mods/python3 post_conversion_cleanup.py $alias_name
-#    i.e.  python3 post_conversion_cleanup.py p16313coll16
+#    python3 post_conversion_cleanup.py $alias_name
 
 
 class IsCountsCorrect():
