@@ -8,15 +8,6 @@ import json
 from lxml import etree as ET
 
 
-# source_dir = add yours here.
-source_dir = "U:\\Cached_Cdm_files"  # Windows source
-# source_dir = '/media/francis/U/Cached_Cdm_files/' # garrett's laptop
-
-
-# usage is:
-#    python3 post_conversion_cleanup.py $alias_name
-
-
 class IsCountsCorrect():
     def __init__(self, alias):
         list_of_etrees = IsCountsCorrect.make_etrees_of_Elems_In(alias)
@@ -82,7 +73,7 @@ class IsCountsCorrect():
     @staticmethod
     def count_observed_simples(alias):
         for root, dirs, files in os.walk(os.path.abspath('output')):
-            if root.split('/')[-1] == '{}_simples'.format(alias):
+            if os.path.split(root)[-1] == '{}_simples'.format(alias):
                 output_dir = '{}/final_format/'.format(root)
                 for root, dirs, files in os.walk(output_dir):
                     return len([i for i in files if ".xml" in i])
@@ -90,7 +81,7 @@ class IsCountsCorrect():
     @staticmethod
     def count_observed_compounds(alias):
         for root, dirs, files in os.walk(os.path.abspath('output')):
-            if root.split('/')[-1] == '{}_compounds'.format(alias):
+            if os.path.split(root)[-1] == '{}_compounds'.format(alias):
                 output_dir = '{}/final_format/'.format(root)
                 compounds_count = 0
                 for root, dirs, files in os.walk(output_dir):
@@ -106,7 +97,7 @@ class PullInBinaries():
         for filelist in (simplexmls_list, compoundxmls_list):
             for kind, outroot, pointer in filelist:
                 if pointer not in sourcefiles_paths:
-                    if kind == "compound" and outroot.split('/')[-2] == "final_format":
+                    if kind == "compound" and os.path.split(outroot)[-2] == "final_format":
                         continue  # root of cpd is expected to have no binary
                     else:
                         logging.warning("{} pointer {} has no matching binary".format(kind, pointer))
@@ -147,7 +138,7 @@ class PullInBinaries():
         for root, dirs, files in os.walk(subfolder):
             for file in files:
                 if file == 'MODS.xml':
-                    pointer = root.split('/')[-1]
+                    pointer = os.path.split(root)[-1]
                     xml_filelist.append(('compound', root, pointer))
         return xml_filelist
 
@@ -176,7 +167,7 @@ class MakeStructureFile():
     def __init__(self, alias):
         for root, dirs, files in os.walk('output'):
             if 'structure.cpd' in files:
-                parent = root.split("/")[-1]
+                parent = os.path.split(root)[-1]
                 new_etree = ET.Element("islandora_compound_object", title=parent)
                 old_etree = ET.parse("{}/structure.cpd".format(root))
                 for i in old_etree.findall('.//pageptr'):
@@ -201,7 +192,7 @@ def report_restricted_files(alias):
                            if '.xml' in file]
     all_metadatas.extend(compounds_metadatas)
     for mods in all_metadatas:
-        pointer = mods.split('/')[-1]
+        pointer = os.path.split(mods)[-1]
         mods_etree = ET.parse(mods).getroot()
         for child in mods_etree.iterfind('.//{http://www.loc.gov/mods/v3}dmGetItemInfo'):
             original_metadata = json.loads(child.text)
@@ -214,7 +205,7 @@ def report_restricted_files(alias):
         with open('output/{}_restrictions.txt'.format(alias), 'w') as f:
             for k, v in restrictions_dict.items():
                 output_text += '{}: {}\n'.format(k.replace('.xml', ''), v)
-            f.write(output_text)
+            f.write(output_text, encoding='utf-8')
         logging.info('report_restricted_files done')
         logging.info('List of restricted items in file at output/{}_restricted_item.txt'.format(alias))
     else:
@@ -252,29 +243,20 @@ def setup_logging():
     logging.getLogger('').addHandler(console)
 
 
-def name_outputted_collections():
-    return set(root.split('/')[-1].replace('_compounds', '').replace('_simples', '') for root, dirs, files in os.walk('output') if 'final_format' in dirs)
-
-
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
+    setup_logging()
+    try:
         alias = sys.argv[1]
-        setup_logging()
-        logging.info('starting {}'.format(alias))
-        PullInBinaries(alias)
-        MakeStructureFile(alias)
-        IsCountsCorrect(alias)
-        report_restricted_files(alias)
-        report_filetype(alias)
-        logging.info('finished {}'.format(alias))
-    else:
-        for alias in name_outputted_collections():
-            print(alias)
-            setup_logging()
-            logging.info('starting {}'.format(alias))
-            PullInBinaries(alias)
-            MakeStructureFile(alias)
-            IsCountsCorrect(alias)
-            report_restricted_files(alias)
-            report_filetype(alias)
-            logging.info('finished {}'.format(alias))
+        source_dir = sys.argv[2]
+    except IndexError:
+        logging.warning('')
+        logging.warning('Change to: "python post_conversion_cleanup.py $aliasname $sourcefolder"')
+        logging.warning('')
+        quit()
+    logging.info('starting {}'.format(alias))
+    PullInBinaries(alias)
+    MakeStructureFile(alias)
+    IsCountsCorrect(alias)
+    report_restricted_files(alias)
+    report_filetype(alias)
+    logging.info('finished {}'.format(alias))
