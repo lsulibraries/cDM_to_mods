@@ -34,7 +34,7 @@ def convert_to_mods(alias):
                            for root, dirs, files in cdm_data_filestructure
                            if target_file in files][0]
         pointer_json = get_cdm_pointer_json(path_to_pointer)
-        nicks_texts = parse_cdm_pointer_json(pointer, pointer_json)
+        nicks_texts = parse_json(pointer, pointer_json)
         propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
         mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
         reorder_sequence(mods)
@@ -55,7 +55,7 @@ def convert_to_mods(alias):
     for pointer, _ in parents_children.items():
         path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', '{}.json'.format(pointer))
         pointer_json = get_cdm_pointer_json(path_to_pointer)
-        nicks_texts = parse_cdm_pointer_json(pointer, pointer_json)
+        nicks_texts = parse_json(pointer, pointer_json)
         propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
         mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
         reorder_sequence(mods)
@@ -69,7 +69,7 @@ def convert_to_mods(alias):
         for pointer in children_pointers:
             path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', parent, '{}.json'.format(pointer))
             pointer_json = get_cdm_pointer_json(path_to_pointer)
-            nicks_texts = parse_cdm_pointer_json(pointer, pointer_json)
+            nicks_texts = parse_json(pointer, pointer_json)
             propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
             mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
             reorder_sequence(mods)
@@ -84,7 +84,7 @@ def convert_to_mods(alias):
     simples_output_dir = os.path.join('output', '{}_simples'.format(alias))
     if '{}_simples'.format(alias) in os.listdir('output') and 'original_format' in os.listdir(simples_output_dir):
         flatten_simple_dir(simples_output_dir)
-        run_saxon_simple(simples_output_dir, alias_xslts)
+        run_saxon(simples_output_dir, alias_xslts, 'simple')
         flat_final_dir = os.path.join(simples_output_dir, 'final_format')
         validate_mods(alias, flat_final_dir)
     else:
@@ -92,7 +92,7 @@ def convert_to_mods(alias):
 
     cpd_output_dir = os.path.join('output', '{}_compounds'.format(alias))
     flatten_cpd_dir(cpd_output_dir)
-    run_saxon_cpd(cpd_output_dir, alias_xslts)
+    run_saxon(cpd_output_dir, alias_xslts, 'compound')
     flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
     validate_mods(alias, flat_final_dir)
     reinflate_cpd_dir(cpd_output_dir)
@@ -137,30 +137,30 @@ def flatten_simple_dir(simple_dir):
             copyfile(os.path.join(source_dir, file), os.path.join(flattened_dir, file))
 
 
-def run_saxon_simple(simple_dir, alias_xslts):
-    input_dir = os.path.join(simple_dir, 'presaxon_flattened')
+def run_saxon(output_dir, alias_xslts, cpd_or_simple):
+    starting_dir = os.path.join(output_dir, 'presaxon_flattened')
     for xslt in alias_xslts:
         if xslt == 'subjectSplit':
             continue
-        logging.info('doing Simple saxon {}'.format(xslt))
-        output_dir = os.path.join(simple_dir, xslt)
-        os.makedirs(output_dir, exist_ok=True)
+        logging.info('doing {} saxon {}'.format(cpd_or_simple.title(), xslt))
+        new_dir = os.path.join(output_dir, xslt)
+        os.makedirs(new_dir, exist_ok=True)
         path_to_xslt = os.path.join('xsl', '{}.xsl'.format(xslt))
-        # print('\njava -jar saxon9he.jar -s:{} -xsl:{} -o:{}\n'.format(input_dir, path_to_xslt, output_dir))
         subprocess.call(['java',
                          '-jar',
                          'saxon9he.jar',
-                         '-s:{}'.format(input_dir),
+                         '-s:{}'.format(starting_dir),
                          '-xsl:{}'.format(path_to_xslt),
-                         '-o:{}'.format(output_dir)])
-        input_dir = output_dir
+                         '-o:{}'.format(new_dir)])
+        starting_dir = new_dir
     else:
-        os.makedirs(os.path.join(simple_dir, 'post-saxon'), exist_ok=True)
-        for file in os.listdir(os.path.join(simple_dir, xslt)):
-            copyfile(os.path.join(simple_dir, xslt, file), os.path.join(simple_dir, 'post-saxon', file))
-        os.makedirs(os.path.join(simple_dir, 'final_format'), exist_ok=True)
-        for file in os.listdir(os.path.join(simple_dir, xslt)):
-            copyfile(os.path.join(simple_dir, 'post-saxon', file), os.path.join(simple_dir, 'final_format', file))
+        os.makedirs(os.path.join(output_dir, 'post-saxon'), exist_ok=True)
+        for file in os.listdir(os.path.join(output_dir, xslt)):
+            copyfile(os.path.join(output_dir, xslt, file), os.path.join(output_dir, 'post-saxon', file))
+        if cpd_or_simple == 'simple':
+            os.makedirs(os.path.join(output_dir, 'final_format'), exist_ok=True)
+            for file in os.listdir(os.path.join(output_dir, xslt)):
+                copyfile(os.path.join(output_dir, 'post-saxon', file), os.path.join(output_dir, 'final_format', file))
 
 
 def flatten_cpd_dir(cpd_dir):
@@ -175,31 +175,9 @@ def flatten_cpd_dir(cpd_dir):
                 copyfile(os.path.join(root, file), dest_filepath)
 
 
-def run_saxon_cpd(cpd_dir, alias_xslts):
-    input_dir = os.path.join(cpd_dir, 'presaxon_flattened')
-    for xslt in alias_xslts:
-        # this needs to be discussed, as this subjectSplit xsl breaks Mike's xsl subjectSplit
-        if xslt == 'subjectSplit':
-            continue
-        logging.info('doing Compound saxon {}'.format(xslt))
-        output_dir = os.path.join(cpd_dir, xslt)
-        os.makedirs(output_dir, exist_ok=True)
-        path_to_xslt = os.path.join('xsl', '{}.xsl'.format(xslt))
-        subprocess.call(['java',
-                         '-jar',
-                         'saxon9he.jar',
-                         '-s:{}'.format(input_dir),
-                         '-xsl:{}'.format(path_to_xslt),
-                         '-o:{}'.format(output_dir)])
-        input_dir = output_dir
-    else:
-        os.makedirs(os.path.join(cpd_dir, 'post-saxon'), exist_ok=True)
-        for file in os.listdir(os.path.join(cpd_dir, xslt)):
-            copyfile(os.path.join(cpd_dir, xslt, file), os.path.join(cpd_dir, 'post-saxon', file))
-
-
 def reinflate_cpd_dir(cpd_dir):
-    original_format = [(root, dirs, files) for root, dirs, files in os.walk(os.path.join(cpd_dir, 'original_format'))]
+    original_format_path = os.path.join(cpd_dir, 'original_format')
+    original_format = [(root, dirs, files) for root, dirs, files in os.walk(original_format_path)]
     for file in os.listdir(os.path.join(cpd_dir, 'post-saxon')):
         for root, dirs, files in original_format:
             if file.split('.')[0] == os.path.split(root)[-1]:
@@ -216,10 +194,19 @@ def reinflate_cpd_dir(cpd_dir):
 
 
 def make_nicks_to_names(cdm_data_dir):
-    rosetta_filepath = os.path.join(cdm_data_dir, 'Collection_Fields.json')
-    with open(rosetta_filepath, 'r', encoding='utf-8') as f:
-        parsed_rosetta_file = json.loads(f.read())
-    return {field['nick']: field['name'] for field in parsed_rosetta_file}
+    filepath = os.path.join(cdm_data_dir, 'Collection_Fields.json')
+    json_text = get_cdm_pointer_json(filepath)
+    nicks_names = parse_collection_fields('Collection_Fields', json_text)
+    return nicks_names
+
+
+def parse_collection_fields(filename, json_text):
+    try:
+        parsed_json = json.loads(json_text)
+    except json.decoder.JSONDecodeError:
+        logging.warning('{}.json is improperly formed json.  Conversion halted!'.format(filename))
+        quit()
+    return {field['nick']: field['name'] for field in parsed_json}
 
 
 def parse_mappings_file(alias):
@@ -234,16 +221,16 @@ def parse_root_cdm_pointers(cdm_data_filestructure):
                  for file in files
                  if ("Elems_in_Collection" in file and ".json" in file)]
     simple_pointers, cpd_parent_pointers = [], []
-    for file in Elems_ins:
-        with open(file, 'r') as f:
-            parsed_json_elems_file = json.loads(f.read())
-        for i in parsed_json_elems_file['records']:
+    for filename in Elems_ins:
+        json_text = get_cdm_pointer_json(filename)
+        nicks_text = parse_json(filename, json_text)
+        for i in nicks_text['records']:
             pointer = str(i['pointer'] or i['dmrecord'])
             if i['filetype'] == 'cpd':
                 cpd_parent_pointers.append(pointer)
             else:
                 simple_pointers.append(pointer)
-    return (simple_pointers, cpd_parent_pointers)
+    return simple_pointers, cpd_parent_pointers
 
 
 def get_cdm_pointer_json(filepath):
@@ -251,11 +238,11 @@ def get_cdm_pointer_json(filepath):
         return f.read()
 
 
-def parse_cdm_pointer_json(pointer, pointer_json):
+def parse_json(filename, json_text):
     try:
-        parsed_alias_json = json.loads(pointer_json)
+        parsed_alias_json = json.loads(json_text)
     except json.decoder.JSONDecodeError:
-        logging.warning('{}.json is improperly formed json.  Conversion halted!'.format(pointer))
+        logging.warning('{}.json is improperly formed json.  Conversion halted!'.format(filename))
         quit()
     return {nick: text for nick, text in parsed_alias_json.items()}
 
@@ -298,7 +285,7 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
 
     merge_same_fields(root_element)
     subject_split(root_element)
-    normalize_date(root_element)
+    normalize_date(root_element, pointer)
     delete_empty_fields(root_element)
     reorder_sequence(root_element)
     return root_element
@@ -365,18 +352,21 @@ year_month_day = re.compile(r'(\d{4})[/.-](\d{2})[/.-](\d{2})')     # 2013-12-25
 year_last = re.compile(r'(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})')          # 12-25-2013
 
 
-def normalize_date(root_elem):
+def normalize_date(root_elem, pointer):
     date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued')
                   for i in root_elem.findall('.//{}'.format(tag))]
     for i in date_elems:
         yearmonthday = year_month_day.search(i.text)
         yearlast = year_last.search(i.text)
+
         if yearmonthday:
             i.text = yearmonthday.group()
         elif yearlast:
             i.text = '{}-{}-{}'.format(yearlast.group(3),
                                        yearlast.group(1),
                                        yearlast.group(2))
+        elif i.text:
+            logging.warning('{}.json has date "{}"'.format(pointer, i.text))
 
 
 def merge_same_fields(orig_etree):
@@ -406,20 +396,6 @@ def setup_logging():
     formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
-
-
-def do_a_bunch_of_collections():
-    mappings_done = [i.split('.')[0] for i
-                     in os.listdir('./mappings_files')]
-    we_dont_migrate = ['MPF', 'LOU', ]
-
-    for alias in mappings_done:
-        if alias in we_dont_migrate:
-            continue
-        print(alias)
-        logging.info('{} starting'.format(alias))
-        convert_to_mods(alias)
-        logging.info('{} finished'.format(alias))
 
 
 if __name__ == '__main__':
