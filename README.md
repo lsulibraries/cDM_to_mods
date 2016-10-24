@@ -1,38 +1,26 @@
 # How to:
 
 for converting the output of cdm_xporter/scrape_cdm.py into mods format (especially for ingest into Islandora)
+  
+  1a) Windows:  Check if Anaconda is your default python, by typing in a command prompt: `python`.  It should read `python3 Anaconda ...`.  Then type `exit()` to exit python.
+        
+  1b) Linux/Mac:  Turn on your python3 virtualenv.  It needs lxml.
  
-  1) Windows:  
-        In terminal, navigate to cDM_to_mods directory.
-        
-        Move the "Cached_Cdm_files_onlymetadata" folder inside of "cDM_to_mods".
-        
-        `vagrant up`
-        
-        `vagrant ssh`
-        
-        `cd /vagrant`
-        
-        `. bootstrap.sh`
-        
-        `python3 convert_to_mods.py {alias name}
-        
-        
-  1) Linux/Mac:  Turn on your python3 virtualenv.  It needs lxml.
- 
-  2) convert_to_mods.py expects to find /Cached_Cdm_files/ (the output of scrape_cdm.py) in a sibling folder beside the cDM_to_mods folder.
+  2) Have a copy of the Cached_Cdm_files (the output of cdm_xporter/scrape_cdm.py) on your computer.
   
   3) In the command line, navigate into the cDM_to_mods directory.
   
-  4) `python convert_to_mods.py {alias}`
+  4) `python convert_to_mods.py {alias} {path/to/Cached_Cdm_files}`
   
-  5) `python post_converstion_cleanup.py {alias}`
+  5) `python post_converstion_cleanup.py {alias} {path/to/U_drive/Cached_Cdm_files}`
+
 
 ## Scripts
 
 convert_to_mods.py:
   - applies the cDM_to_mods/mappings_file/{alias}.csv to the Cached_Cdm_files data to create a rough mods file.
   - performs xsl transformations named in the cDM_to_mods/alias_xlsts/{alias}.txt file to refine the mods.
+  - attempts to convert dates into the standard format
   - validates each mods record against a local copy of the mods schema.
   - complains loudly if anything fails.
 
