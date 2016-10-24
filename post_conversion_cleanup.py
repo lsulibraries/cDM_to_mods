@@ -257,24 +257,12 @@ def name_outputted_collections():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
+    setup_logging()
+    try:
         alias = sys.argv[1]
-        setup_logging()
-        logging.info('starting {}'.format(alias))
-        PullInBinaries(alias)
-        MakeStructureFile(alias)
-        IsCountsCorrect(alias)
-        report_restricted_files(alias)
-        report_filetype(alias)
-        logging.info('finished {}'.format(alias))
-    else:
-        for alias in name_outputted_collections():
-            print(alias)
-            setup_logging()
-            logging.info('starting {}'.format(alias))
-            PullInBinaries(alias)
-            MakeStructureFile(alias)
-            IsCountsCorrect(alias)
-            report_restricted_files(alias)
-            report_filetype(alias)
-            logging.info('finished {}'.format(alias))
+        SOURCE_DIR = sys.argv[2]
+    except IndexError:
+        logging.warning('')
+        logging.warning('Change to: "python post_conversion_cleanup.py $aliasname $path/to/U-Drive/Cached_Cdm_files"')
+        logging.warning('')
+        quit()
