@@ -13,10 +13,6 @@ import logging
 
 from lxml import etree as ET
 
-# SOURCE_DIR = input('Type the path to your Cache of Cdm directory: ')
-# SOURCE_DIR = '../Cached_Cdm_files_onlymetadata'
-# SOURCE_DIR = '../Cached_Cdm_files/'
-
 
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
@@ -44,7 +40,7 @@ def convert_to_mods(alias):
         reorder_sequence(mods)
         output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
         os.makedirs(output_path, exist_ok=True)
-        mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8",  pretty_print=True)
+        mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
         mods_string = mods_bytes.decode('utf-8')
         print(type(mods_string))
         with open('{}/{}.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
@@ -433,10 +429,9 @@ if __name__ == '__main__':
         SOURCE_DIR = sys.argv[2]
     except IndexError:
         logging.warning('')
-        logging.warning('Change to: "python convert_to_mods.py $aliasname $sourcefolder"')
+        logging.warning('Change to: "python convert_to_mods.py $aliasname $path/to/Cached_Cdm_files"')
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
     convert_to_mods(alias)
     logging.info('finished {}'.format(alias))
-
