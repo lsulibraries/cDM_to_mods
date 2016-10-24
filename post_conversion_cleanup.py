@@ -250,7 +250,7 @@ if __name__ == '__main__':
         source_dir = sys.argv[2]
     except IndexError:
         logging.warning('')
-        logging.warning('Change to: "python post_conversion_cleanup.py $aliasname $sourcefolder"')
+        logging.warning('Change to: "python post_conversion_cleanup.py $aliasname $path/to/U-Drive/Cached_Cdm_files"')
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
