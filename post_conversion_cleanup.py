@@ -253,7 +253,7 @@ if __name__ == '__main__':
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
-    # PullInBinaries(alias)
+    PullInBinaries(alias)
     MakeStructureFile(alias)
     IsCountsCorrect(alias, SOURCE_DIR)
     report_restricted_files(alias)
