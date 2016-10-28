@@ -10,10 +10,11 @@ for converting the output of cdm_xporter/scrape_cdm.py into mods format (especia
   
   3) In the command line, navigate into the cDM_to_mods directory.
   
-  4) `python convert_to_mods.py {alias} {path/to/Cached_Cdm_files}`
+  4) `python convert_to_mods.py {alias} {path/to/Cached_Cdm_files}
+        -this /Cached_Cdm_files only needs metadata.
   
   5) `python post_converstion_cleanup.py {alias} {path/to/U_drive/Cached_Cdm_files}`
-
+        -this /Cached_Cdm_files needs metadata+binaries
 
 ## Scripts
 
@@ -22,6 +23,7 @@ convert_to_mods.py:
   - performs xsl transformations named in the cDM_to_mods/alias_xlsts/{alias}.txt file to refine the mods.
   - attempts to convert dates into the standard format
   - validates each mods record against a local copy of the mods schema.
+  - compares the count of xmls to the reported number of items in TotalRecs.xml
   - complains loudly if anything fails.
 
 The xsl scripts are found in the cDM_to_mods/xsl/ folder.
