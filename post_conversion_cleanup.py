@@ -9,14 +9,15 @@ from lxml import etree as ET
 
 
 class IsCountsCorrect():
-    def __init__(self, alias):
-        list_of_etrees = IsCountsCorrect.make_etrees_of_Elems_In(alias)
+    def __init__(self, alias, SOURCE_DIR):
+        self.SOURCE_DIR = SOURCE_DIR
+        list_of_etrees = self.make_etrees_of_Elems_In(alias)
         root_count = IsCountsCorrect.get_root_count_from_etrees(list_of_etrees)
         root_compounds = IsCountsCorrect.name_root_compounds(list_of_etrees)
         simples = root_count - len(root_compounds)
         compounds = 0
         for parent in root_compounds:
-            compounds += IsCountsCorrect.count_child_pointers(alias, parent)
+            compounds += self.count_child_pointers(alias, parent)
             compounds += 1  # we count compound root objects as 1 item here.
 
         logging.info('Count Simples xmls: {}'.format(simples))
@@ -31,9 +32,8 @@ class IsCountsCorrect():
             logging.warning("BIG DEAL:  Compounds Don't Match")
         logging.info('IsCountsCorrect done')
 
-    @staticmethod
-    def make_etrees_of_Elems_In(alias):
-        input_dir = os.path.abspath(os.path.join(source_dir, alias))
+    def make_etrees_of_Elems_In(self, alias):
+        input_dir = os.path.abspath(os.path.join(self.SOURCE_DIR, alias))
         elems_files = ["{}/{}".format(input_dir, i) for i in os.listdir(input_dir)
                        if 'Elems_in_Collection' in i and '.xml' in i]
         return [ET.parse(i) for i in elems_files]
@@ -63,9 +63,8 @@ class IsCountsCorrect():
                         compound_pointers.append(dmrecords.pop())
         return compound_pointers
 
-    @staticmethod
-    def count_child_pointers(alias, cpd_pointer):
-        structure_file = os.path.abspath(os.path.join(source_dir, alias, 'Cpd/{}_cpd.xml'.format(cpd_pointer)))
+    def count_child_pointers(self, alias, cpd_pointer):
+        structure_file = os.path.abspath(os.path.join(self.SOURCE_DIR, alias, 'Cpd/{}_cpd.xml'.format(cpd_pointer)))
         structure_etree = ET.parse(structure_file)
         child_pointers = [i.text for i in structure_etree.findall('./page/pageptr')]
         return len(child_pointers)
@@ -112,7 +111,7 @@ class PullInBinaries():
     @staticmethod
     def makedict_sourcefiles(alias):
         sourcefiles_paths = dict()
-        input_dir = os.path.join(source_dir, alias)
+        input_dir = os.path.join(SOURCE_DIR, alias)
         for root, dirs, files in os.walk(input_dir):
             for file in files:
                 if file.split('.')[-1] in ('jp2', 'mp4', 'mp3', 'pdf'):
@@ -247,7 +246,7 @@ if __name__ == '__main__':
     setup_logging()
     try:
         alias = sys.argv[1]
-        source_dir = sys.argv[2]
+        SOURCE_DIR = sys.argv[2]
     except IndexError:
         logging.warning('')
         logging.warning('Change to: "python post_conversion_cleanup.py $aliasname $path/to/U-Drive/Cached_Cdm_files"')
@@ -256,7 +255,7 @@ if __name__ == '__main__':
     logging.info('starting {}'.format(alias))
     PullInBinaries(alias)
     MakeStructureFile(alias)
-    IsCountsCorrect(alias)
+    IsCountsCorrect(alias, SOURCE_DIR)
     report_restricted_files(alias)
     report_filetype(alias)
     logging.info('finished {}'.format(alias))
