@@ -22,6 +22,10 @@ class IsCountsCorrect():
 
         logging.info('Count Simples xmls: {}'.format(simples))
         logging.info('Count Compounds xmls: {}'.format(compounds))
+        print('root count', root_count)
+        print('root compounds', root_compounds)
+        print('simples', simples)
+        print('IsCountsCorrect.count_observed_simples', IsCountsCorrect.count_observed_simples(alias))
         if simples == IsCountsCorrect.count_observed_simples(alias):
             logging.info('simples metadata counts match')
         else:
@@ -41,6 +45,7 @@ class IsCountsCorrect():
     @staticmethod
     def get_root_count_from_etrees(list_of_etrees):
         set_total_at_root_level = {int(elems_etree.find('./pager/total').text) for elems_etree in list_of_etrees}
+        print(set_total_at_root_level)
         if len(set_total_at_root_level) == 1:
             return set_total_at_root_level.pop()
         else:
@@ -71,21 +76,17 @@ class IsCountsCorrect():
 
     @staticmethod
     def count_observed_simples(alias):
-        for root, dirs, files in os.walk(os.path.abspath('output')):
-            if os.path.split(root)[-1] == '{}_simples'.format(alias):
-                output_dir = '{}/final_format/'.format(root)
-                for root, dirs, files in os.walk(output_dir):
-                    return len([i for i in files if ".xml" in i])
+        output_dir = os.path.join('output', '{}_simples'.format(alias), 'final_format')
+        simple_files = [i for i in os.listdir(output_dir) if ".xml" in i]
+        return len(simple_files)
 
     @staticmethod
     def count_observed_compounds(alias):
-        for root, dirs, files in os.walk(os.path.abspath('output')):
-            if os.path.split(root)[-1] == '{}_compounds'.format(alias):
-                output_dir = '{}/final_format/'.format(root)
-                compounds_count = 0
-                for root, dirs, files in os.walk(output_dir):
-                    compounds_count += len([i for i in files if i == "MODS.xml"])
-                return compounds_count
+        output_dir = os.path.join('output', '{}_compounds'.format(alias), 'final_format')
+        compounds_files = []
+        for root, dirs, files in os.walk(output_dir):
+            compounds_files.extend([i for i in files if i == "MODS.xml"])
+        return len(compounds_files)
 
 
 class PullInBinaries():
@@ -253,7 +254,7 @@ if __name__ == '__main__':
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
-    PullInBinaries(alias)
+    # PullInBinaries(alias)
     MakeStructureFile(alias)
     IsCountsCorrect(alias, SOURCE_DIR)
     report_restricted_files(alias)
