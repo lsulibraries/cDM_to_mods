@@ -66,7 +66,7 @@ class IsCountsCorrect():
     def count_child_pointers(self, alias, cpd_pointer):
         structure_file = os.path.abspath(os.path.join(self.SOURCE_DIR, alias, 'Cpd/{}_cpd.xml'.format(cpd_pointer)))
         structure_etree = ET.parse(structure_file)
-        child_pointers = [i.text for i in structure_etree.findall('./page/pageptr')]
+        child_pointers = [i for i in structure_etree.findall('//pageptr') if i.text]
         return len(child_pointers)
 
     @staticmethod
@@ -96,7 +96,7 @@ class PullInBinaries():
         for filelist in (simplexmls_list, compoundxmls_list):
             for kind, outroot, pointer in filelist:
                 if pointer not in sourcefiles_paths:
-                    if kind == "compound" and os.path.split(outroot)[-2] == "final_format":
+                    if kind == "compound" and os.path.split(os.path.split(outroot)[0])[1] == "final_format":
                         continue  # root of cpd is expected to have no binary
                     else:
                         logging.warning("{} pointer {} has no matching binary".format(kind, pointer))
@@ -253,7 +253,7 @@ if __name__ == '__main__':
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
-    PullInBinaries(alias)
+    # PullInBinaries(alias)
     MakeStructureFile(alias)
     IsCountsCorrect(alias, SOURCE_DIR)
     report_restricted_files(alias)
