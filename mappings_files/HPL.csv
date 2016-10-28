@@ -16,7 +16,7 @@ Relation,"<relatedItem type='host'><location><url displayLabel='Relation'>http:/
 Rights,"<accessCondition type='restriction on access' displayLabel='Rights'>%value%</accessCondition>"
 Contact Information,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>%value%</accessCondition>"
 Object_File_Name,"<identifier type='local' displayLabel='Object File Name'>%value%</identifier>"
-Catalog Date,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
+Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 Date modified,"<recordInfo><recordChangeDate>%value%</recordChangeDate></recordInfo>"
 Cataloger,"<extension><cataloger>%value%</cataloger></extension>"
 null1,"<extension><CONTENTdmData></CONTENTdmData></extension>"
