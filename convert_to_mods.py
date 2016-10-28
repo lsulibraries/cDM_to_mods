@@ -100,6 +100,7 @@ def polish_mods(alias):
         run_saxon(simples_output_dir, alias_xslts, 'simple')
         flat_final_dir = os.path.join(simples_output_dir, 'final_format')
         validate_mods(alias, flat_final_dir)
+        check_date_format(alias, flat_final_dir)
     else:
         logging.info('no simple objects in this collection')
 
@@ -110,6 +111,7 @@ def polish_mods(alias):
         run_saxon(cpd_output_dir, alias_xslts, 'compound')
         flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
         validate_mods(alias, flat_final_dir)
+        check_date_format(alias, flat_final_dir)
         reinflate_cpd_dir(cpd_output_dir)
     else:
         logging.info('no compound objects in this collection')
@@ -362,16 +364,21 @@ def subject_split(etree):
         etree.remove(subj_elem)
 
 
-year_month_day = re.compile(r'(\d{4})[/.-](\d{2})[/.-](\d{2})')     # 2013-12-25
-year_last = re.compile(r'(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})')          # 12-25-2013
+year_month_day = re.compile(r'^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$')     # 2013-12-25
+year_last = re.compile(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')      # 12-25-2013
+year_only = re.compile(r'^(\d{4})$')                                  # 1234
+year_month = re.compile(r'^(\d{4})[/.-](\d{1,2})$')
 
 
 def normalize_date(root_elem, pointer):
     date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued')
                   for i in root_elem.findall('.//{}'.format(tag))]
     for i in date_elems:
+        i.text = i.text.strip()
         yearmonthday = year_month_day.search(i.text)
         yearlast = year_last.search(i.text)
+        yearonly = year_only.search(i.text)
+        yearmonth = year_month.search(i.text)
 
         if yearmonthday:
             i.text = yearmonthday.group()
@@ -379,8 +386,29 @@ def normalize_date(root_elem, pointer):
             i.text = '{}-{}-{}'.format(yearlast.group(3),
                                        yearlast.group(1),
                                        yearlast.group(2))
-        elif i.text:
-            logging.warning('{}.json has date "{}"'.format(pointer, i.text))
+        elif yearonly:
+            i.text = yearonly.group()
+        elif yearmonth:
+            i.text = '{}-{}'.format(yearmonth.group(1),
+                                    yearmonth.group(2))
+
+
+def check_date_format(alias, flat_final_dir):
+    item_xml_files = [os.path.join(root, file) for root, dirs, files in os.walk(flat_final_dir)
+                      for file in files if '.xml' in file]
+    for file in item_xml_files:
+        with open(file, 'r', encoding='utf-8') as f:
+            file_text = bytes(bytearray(f.read(), encoding='utf-8'))
+            file_etree = ET.fromstring(file_text)
+        date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued')
+                      for i in file_etree.findall('.//{}'.format(tag))]
+        for i in date_elems:
+            i.text = i.text.strip().replace('[', '').replace(']', '')
+            yearmonthday = year_month_day.search(i.text)
+            yearonly = year_only.search(i.text)
+            yearmonth = year_month.search(i.text)
+            if not (yearmonthday or yearonly or yearmonth):
+                logging.warning('{}.json has date "{}"'.format(file, i.text))
 
 
 def merge_same_fields(orig_etree):
