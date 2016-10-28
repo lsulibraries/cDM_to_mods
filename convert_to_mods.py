@@ -13,6 +13,7 @@ import logging
 
 from lxml import etree as ET
 
+from post_conversion_cleanup import IsCountsCorrect
 
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
@@ -26,59 +27,71 @@ def convert_to_mods(alias):
     cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(cdm_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
 
+    parents_children = dict()
+    for cpd_parent in cpd_parent_pointers:
+        cpd_parent_filepath = os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(cpd_parent))
+        cpd_parent_etree = ET.parse(cpd_parent_filepath)
+        children_pointers = [i.text for i in cpd_parent_etree.findall('.//pageptr')]
+        parents_children[cpd_parent] = children_pointers
+
     remove_previous_mods(alias)
 
     for pointer in simple_pointers:
+        output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
         target_file = '{}.json'.format(pointer)
         path_to_pointer = [os.path.join(root, target_file)
                            for root, dirs, files in cdm_data_filestructure
                            if target_file in files][0]
+        os.makedirs(output_path, exist_ok=True)
         pointer_json = get_cdm_pointer_json(path_to_pointer)
         nicks_texts = parse_json(pointer, pointer_json)
         propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
         mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
         reorder_sequence(mods)
-        output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
-        os.makedirs(output_path, exist_ok=True)
         mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
         mods_string = mods_bytes.decode('utf-8')
         with open('{}/{}.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
             f.write(mods_string)
-    logging.info('finished simples')
-
-    parents_children = dict()
-    for cpd_parent in cpd_parent_pointers:
-        cpd_parent_etree = ET.parse(os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(cpd_parent)))
-        children_pointers = [i.text for i in cpd_parent_etree.findall('.//pageptr')]
-        parents_children[cpd_parent] = children_pointers
+    logging.info('finished preliminary mods: simples')
 
     for pointer, _ in parents_children.items():
+        output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', pointer)
         path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', '{}.json'.format(pointer))
+        os.makedirs(output_path, exist_ok=True)
         pointer_json = get_cdm_pointer_json(path_to_pointer)
         nicks_texts = parse_json(pointer, pointer_json)
         propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
         mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
         reorder_sequence(mods)
-        output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', pointer)
-        os.makedirs(output_path, exist_ok=True)
+        mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
+        mods_string = mods_bytes.decode('utf-8')
         with open('{}/MODS.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
-            f.write(ET.tostring(mods, pretty_print=True).decode('utf-8'))
+            f.write(mods_string)
         copyfile(os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(pointer)), os.path.join(output_path, 'structure.cpd'))
 
     for parent, children_pointers in parents_children.items():
         for pointer in children_pointers:
+            output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', parent, pointer)
             path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', parent, '{}.json'.format(pointer))
+            os.makedirs(output_path, exist_ok=True)
             pointer_json = get_cdm_pointer_json(path_to_pointer)
             nicks_texts = parse_json(pointer, pointer_json)
             propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
             mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
             reorder_sequence(mods)
-            output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', parent, pointer)
-            os.makedirs(output_path, exist_ok=True)
+            mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
+            mods_string = mods_bytes.decode('utf-8')
             with open('{}/MODS.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
-                f.write(ET.tostring(mods, pretty_print=True).decode('utf-8'))
-    logging.info('finished compounds')
+                f.write(mods_string)
+    logging.info('finished preliminary mods: compounds')
 
+    polish_mods(alias)
+    IsCountsCorrect(alias, SOURCE_DIR)
+    logging.info('completed')
+    logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
+
+
+def polish_mods(alias):
     alias_xslts = read_alias_xslt_file(alias)
 
     simples_output_dir = os.path.join('output', '{}_simples'.format(alias))
@@ -90,15 +103,16 @@ def convert_to_mods(alias):
     else:
         logging.info('no simple objects in this collection')
 
-    cpd_output_dir = os.path.join('output', '{}_compounds'.format(alias))
-    flatten_cpd_dir(cpd_output_dir)
-    run_saxon(cpd_output_dir, alias_xslts, 'compound')
-    flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
-    validate_mods(alias, flat_final_dir)
-    reinflate_cpd_dir(cpd_output_dir)
-
-    logging.info('completed')
-    logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
+    compounds_output_dir = os.path.join('output', '{}_compounds'.format(alias))
+    if '{}_compounds'.format(alias) in os.listdir('output') and 'original_format' in os.listdir(compounds_output_dir):
+        cpd_output_dir = os.path.join('output', '{}_compounds'.format(alias))
+        flatten_cpd_dir(cpd_output_dir)
+        run_saxon(cpd_output_dir, alias_xslts, 'compound')
+        flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
+        validate_mods(alias, flat_final_dir)
+        reinflate_cpd_dir(cpd_output_dir)
+    else:
+        logging.info('no compound objects in this collection')
 
 
 def remove_previous_mods(alias):
