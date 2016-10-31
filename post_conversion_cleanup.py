@@ -22,18 +22,14 @@ class IsCountsCorrect():
 
         logging.info('Count Simples xmls: {}'.format(simples))
         logging.info('Count Compounds xmls: {}'.format(compounds))
-        print('root count', root_count)
-        print('root compounds', root_compounds)
-        print('simples', simples)
-        print('IsCountsCorrect.count_observed_simples', IsCountsCorrect.count_observed_simples(alias))
         if simples == IsCountsCorrect.count_observed_simples(alias):
             logging.info('simples metadata counts match')
         else:
-            logging.warning("BIG DEAL:  Simples Don't Match")
+            logging.warning("BIG DEAL:  Simples Don't Match.  Expected: {}.  Observed: {}".format(simples, IsCountsCorrect.count_observed_simples(alias)))
         if compounds == IsCountsCorrect.count_observed_compounds(alias):
             logging.info('compounds metadata counts match')
         else:
-            logging.warning("BIG DEAL:  Compounds Don't Match")
+            logging.warning("BIG DEAL:  Compounds Don't Match.  Expected: {}.  Observed: {}".format(compounds, IsCountsCorrect.count_observed_compounds(alias)))
         logging.info('IsCountsCorrect done')
 
     def make_etrees_of_Elems_In(self, alias):
@@ -45,7 +41,6 @@ class IsCountsCorrect():
     @staticmethod
     def get_root_count_from_etrees(list_of_etrees):
         set_total_at_root_level = {int(elems_etree.find('./pager/total').text) for elems_etree in list_of_etrees}
-        print(set_total_at_root_level)
         if len(set_total_at_root_level) == 1:
             return set_total_at_root_level.pop()
         else:
@@ -254,7 +249,7 @@ if __name__ == '__main__':
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
-    # PullInBinaries(alias)
+    PullInBinaries(alias)
     MakeStructureFile(alias)
     IsCountsCorrect(alias, SOURCE_DIR)
     report_restricted_files(alias)

@@ -364,10 +364,10 @@ def subject_split(etree):
         etree.remove(subj_elem)
 
 
-year_month_day = re.compile(r'^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$')     # 2013-12-25
-year_last = re.compile(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')      # 12-25-2013
+year_month_day = re.compile(r'^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$')     # 1234-56-78 or 1234-5-6
+year_last = re.compile(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')      # 12-34-5678 or 1-2-3456
 year_only = re.compile(r'^(\d{4})$')                                  # 1234
-year_month = re.compile(r'^(\d{4})[/.-](\d{1,2})$')
+year_month = re.compile(r'^(\d{4})[/.-](\d{1,2})$')                      # 1234-56 or 1234-5
 
 
 def normalize_date(root_elem, pointer):
