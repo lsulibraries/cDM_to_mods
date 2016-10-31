@@ -26,9 +26,9 @@ def convert_to_mods(alias):
 
     cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(cdm_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
-    print(len(cdm_data_filestructure[0][2]))
-    print(len(simple_pointers))
-    print(len(set(simple_pointers)))
+    # print(len(cdm_data_filestructure[0][2]))
+    # print(len(simple_pointers))
+    # print(len(set(simple_pointers)))
 
     parents_children = dict()
     for cpd_parent in cpd_parent_pointers:
@@ -39,7 +39,7 @@ def convert_to_mods(alias):
 
     remove_previous_mods(alias)
 
-    count = 0
+    # count = 0
     for pointer in simple_pointers:
         output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
         target_file = '{}.json'.format(pointer)
@@ -55,9 +55,9 @@ def convert_to_mods(alias):
         mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
         mods_string = mods_bytes.decode('utf-8')
         with open('{}/{}.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
-            count += 1
+            # count += 1
             f.write(mods_string)
-    print(count)
+    # print(count)
     logging.info('finished preliminary mods: simples')
 
     for pointer, _ in parents_children.items():
@@ -243,15 +243,22 @@ def parse_root_cdm_pointers(cdm_data_filestructure):
                  for file in files
                  if ("Elems_in_Collection" in file and ".json" in file)]
     simple_pointers, cpd_parent_pointers = [], []
+    # old_pointer = None
     for filename in Elems_ins:
         json_text = get_cdm_pointer_json(filename)
         nicks_text = parse_json(filename, json_text)
         for i in nicks_text['records']:
             pointer = str(i['pointer'] or i['dmrecord'])
+            # if pointer == old_pointer:
+            #     print('missed new pointer after {}'.format(pointer, filename))
             if i['filetype'] == 'cpd':
                 cpd_parent_pointers.append(pointer)
             else:
+                # print(pointer)
+                # if pointer in simple_pointers:
+                #     print('{} has a duplicate pointer {}'.format(filename, pointer))
                 simple_pointers.append(pointer)
+            # old_pointer = str(pointer)
     return simple_pointers, cpd_parent_pointers
 
 
@@ -375,9 +382,9 @@ year_last = re.compile(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')      # 12-34-56
 year_only = re.compile(r'^(\d{4})$')                                  # 1234
 year_month = re.compile(r'^(\d{4})[/.-](\d{1,2})$')                      # 1234-56 or 1234-5
 
-temp_year_month_day = re.compile(r'^(\d{4})[/.-](\d{1})[/.-](\d{1})$')     # 1234-5-6
-temp_year_last = re.compile(r'^(\d{1})[/.-](\d{1})[/.-](\d{4})$')      # 1-2-3456
-temp_year_month = re.compile(r'^(\d{4})[/.-](\d{1})$')                      # 1234-5
+correct_year_month_day = re.compile(r'^(\d{4})[/.-](\d{2})[/.-](\d{2})$')     # 1234-5-6
+correct_year_last = re.compile(r'^(\d{2})[/.-](\d{2})[/.-](\d{4})$')      # 1-2-3456
+correct_year_month = re.compile(r'^(\d{4})[/.-](\d{2})$')                      # 1234-5
 
 
 def normalize_date(root_elem, pointer):
@@ -390,26 +397,41 @@ def normalize_date(root_elem, pointer):
         yearonly = year_only.search(i.text)
         yearmonth = year_month.search(i.text)
 
-# this section is just for debugging the normalize_date xsl.
-        temp_yearmonthday = temp_year_month_day.search(i.text)
-        temp_yearlast = temp_year_last.search(i.text)
-        temp_yearmonth = temp_year_month.search(i.text)
+# # this section is just for debugging the normalize_date xsl.
+#         temp_yearmonthday = temp_year_month_day.search(i.text)
+#         temp_yearlast = temp_year_last.search(i.text)
+#         temp_yearmonth = temp_year_month.search(i.text)
 
-        if temp_yearmonthday or temp_yearlast or temp_yearmonth:
-            logging.warning('pointer {} has single digit month or day: {}'.format(pointer, i.text))
-# end of debugging section.
+#         if temp_yearmonthday or temp_yearlast or temp_yearmonth:
+#             logging.warning('pointer {} has single digit month or day: {}'.format(pointer, i.text))
+# # end of debugging section.
 
         if yearmonthday:
-            i.text = yearmonthday.group()
+            year = yearmonthday.group(1)
+            month = yearmonthday.group(2)
+            day = yearmonthday.group(3)
+            if len(month) == 1:
+                month = '0{}'.format(month)
+            if len(day) == 1:
+                day = '0{}'.format(day)
+            i.text = '{}-{}-{}'.format(year, month, day)
         elif yearlast:
-            i.text = '{}-{}-{}'.format(yearlast.group(3),
-                                       yearlast.group(1),
-                                       yearlast.group(2))
+            year = yearlast.group(3)
+            month = yearlast.group(1)
+            day = yearlast.group(2)
+            if len(month) == 1:
+                month = '0{}'.format(month)
+            if len(day) == 1:
+                day = '0{}'.format(day)
+            i.text = '{}-{}-{}'.format(year, month, day)
+        elif yearmonth:
+            year = yearmonth.group(1)
+            month = yearmonth.group(2)
+            if len(month) == 1:
+                month = '0{}'.format(month)
+            i.text = '{}-{}'.format(year, month)
         elif yearonly:
             i.text = yearonly.group()
-        elif yearmonth:
-            i.text = '{}-{}'.format(yearmonth.group(1),
-                                    yearmonth.group(2))
 
 
 def check_date_format(alias, flat_final_dir):
@@ -423,9 +445,9 @@ def check_date_format(alias, flat_final_dir):
                       for i in file_etree.findall('.//{}'.format(tag))]
         for i in date_elems:
             i.text = i.text.strip().replace('[', '').replace(']', '')
-            yearmonthday = year_month_day.search(i.text)
-            yearonly = year_only.search(i.text)
-            yearmonth = year_month.search(i.text)
+            yearmonthday = correct_year_month_day.search(i.text)
+            yearonly = correct_year_last.search(i.text)
+            yearmonth = correct_year_month.search(i.text)
             if not (yearmonthday or yearonly or yearmonth):
                 logging.warning('{}.json has date "{}"'.format(file, i.text))
 
