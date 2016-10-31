@@ -26,9 +26,9 @@ def convert_to_mods(alias):
 
     cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(cdm_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
-    # print(len(cdm_data_filestructure[0][2]))
-    # print(len(simple_pointers))
-    # print(len(set(simple_pointers)))
+    print(len(cdm_data_filestructure[0][2]))
+    print(len(simple_pointers))
+    print(len(set(simple_pointers)))
 
     parents_children = dict()
     for cpd_parent in cpd_parent_pointers:
@@ -243,22 +243,21 @@ def parse_root_cdm_pointers(cdm_data_filestructure):
                  for file in files
                  if ("Elems_in_Collection" in file and ".json" in file)]
     simple_pointers, cpd_parent_pointers = [], []
-    # old_pointer = None
+    duplicates = []
     for filename in Elems_ins:
         json_text = get_cdm_pointer_json(filename)
         nicks_text = parse_json(filename, json_text)
         for i in nicks_text['records']:
             pointer = str(i['pointer'] or i['dmrecord'])
-            # if pointer == old_pointer:
-            #     print('missed new pointer after {}'.format(pointer, filename))
+            if not pointer:
+                print(filename)
             if i['filetype'] == 'cpd':
                 cpd_parent_pointers.append(pointer)
             else:
-                # print(pointer)
-                # if pointer in simple_pointers:
-                #     print('{} has a duplicate pointer {}'.format(filename, pointer))
+                if pointer in simple_pointers:
+                    duplicates.append(pointer)
                 simple_pointers.append(pointer)
-            # old_pointer = str(pointer)
+    print(len(duplicates), 'duplicate pointers')
     return simple_pointers, cpd_parent_pointers
 
 
