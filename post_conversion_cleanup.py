@@ -11,56 +11,55 @@ from lxml import etree as ET
 class IsCountsCorrect():
     def __init__(self, alias, SOURCE_DIR):
         self.SOURCE_DIR = SOURCE_DIR
-        list_of_etrees = self.make_etrees_of_Elems_In(alias)
-        root_count = IsCountsCorrect.get_root_count_from_etrees(list_of_etrees)
-        root_compounds = IsCountsCorrect.name_root_compounds(list_of_etrees)
-        simples = root_count - len(root_compounds)
+
+        list_of_json_elems_files = self.make_list_of_elem_jsons(alias)
+        root_count_json = self.get_root_count(list_of_json_elems_files)
+        root_compounds_json = self.name_root_compounds_json(list_of_json_elems_files)
+
+        simples = root_count_json - len(root_compounds_json)
         compounds = 0
-        for parent in root_compounds:
+        for parent in root_compounds_json:
             compounds += self.count_child_pointers(alias, parent)
             compounds += 1  # we count compound root objects as 1 item here.
 
         logging.info('Count Simples xmls: {}'.format(simples))
         logging.info('Count Compounds xmls: {}'.format(compounds))
-        if simples == IsCountsCorrect.count_observed_simples(alias):
+        if simples == self.count_observed_simples(alias):
             logging.info('simples metadata counts match')
         else:
-            logging.warning("BIG DEAL:  Simples Don't Match.  Expected: {}.  Observed: {}".format(simples, IsCountsCorrect.count_observed_simples(alias)))
-        if compounds == IsCountsCorrect.count_observed_compounds(alias):
+            logging.warning("BIG DEAL:  Simples Don't Match.  Expected: {}.  Observed: {}".format(simples, self.count_observed_simples(alias)))
+        if compounds == self.count_observed_compounds(alias):
             logging.info('compounds metadata counts match')
         else:
-            logging.warning("BIG DEAL:  Compounds Don't Match.  Expected: {}.  Observed: {}".format(compounds, IsCountsCorrect.count_observed_compounds(alias)))
+            logging.warning("BIG DEAL:  Compounds Don't Match.  Expected: {}.  Observed: {}".format(compounds, self.count_observed_compounds(alias)))
         logging.info('IsCountsCorrect done')
 
-    def make_etrees_of_Elems_In(self, alias):
-        input_dir = os.path.abspath(os.path.join(self.SOURCE_DIR, alias))
-        elems_files = ["{}/{}".format(input_dir, i) for i in os.listdir(input_dir)
-                       if 'Elems_in_Collection' in i and '.xml' in i]
-        return [ET.parse(i) for i in elems_files]
+    def make_list_of_elem_jsons(self, alias):
+        input_dir = os.path.join(self.SOURCE_DIR, alias)
+        return [os.path.join(input_dir, file) for file in os.listdir(input_dir)
+                if 'Elems_in_Collection' in file and '.json' in file]
 
-    @staticmethod
-    def get_root_count_from_etrees(list_of_etrees):
-        set_total_at_root_level = {int(elems_etree.find('./pager/total').text) for elems_etree in list_of_etrees}
-        if len(set_total_at_root_level) == 1:
-            return set_total_at_root_level.pop()
+    def get_root_count(self, list_of_json_files):
+        named_total = set()
+        for file in list_of_json_files:
+            with open(file, 'r', encoding='utf-8') as f:
+                parsed_json = json.loads(f.read())
+            named_total.add(parsed_json['pager']['total'])
+        if len(named_total) == 1:
+            return named_total.pop()
         else:
             logging.warning('BIG DEAL:  either Elems_in_Collection has mismatched number of total counts, or an Elems_in is unreadable')
             return False
 
-    @staticmethod
-    def name_root_compounds(list_of_etrees):
+    def name_root_compounds_json(self, list_of_json_files):
         compound_pointers = []
-        for i in list_of_etrees:
-            for elem in i.findall('.//record/filetype'):
-                if elem.text == 'cpd':
-                    pointers = {p.text for p in elem.itersiblings(preceding=True) if p.tag == 'pointer'}.union(
-                               {p.text for p in elem.itersiblings() if p.tag == 'pointer'})
-                    dmrecords = {p.text for p in elem.itersiblings(preceding=True) if p.tag == 'dmrecord'}.union(
-                                {p.text for p in elem.itersiblings() if p.tag == 'dmrecord'})
-                    if pointers:
-                        compound_pointers.append(pointers.pop())
-                    elif dmrecords:
-                        compound_pointers.append(dmrecords.pop())
+        for file in list_of_json_files:
+            with open(file, 'r', encoding='utf-8') as f:
+                parsed_json = json.loads(f.read())
+            for item in parsed_json['records']:
+                if item["filetype"] == "cpd":
+                    pointer = item['pointer'] or item['dmrecord']
+                    compound_pointers.append(str(pointer))
         return compound_pointers
 
     def count_child_pointers(self, alias, cpd_pointer):
@@ -69,14 +68,12 @@ class IsCountsCorrect():
         child_pointers = [i for i in structure_etree.findall('//pageptr') if i.text]
         return len(child_pointers)
 
-    @staticmethod
-    def count_observed_simples(alias):
+    def count_observed_simples(self, alias):
         output_dir = os.path.join('output', '{}_simples'.format(alias), 'final_format')
         simple_files = [i for i in os.listdir(output_dir) if ".xml" in i]
         return len(simple_files)
 
-    @staticmethod
-    def count_observed_compounds(alias):
+    def count_observed_compounds(self, alias):
         output_dir = os.path.join('output', '{}_compounds'.format(alias), 'final_format')
         compounds_files = []
         for root, dirs, files in os.walk(output_dir):

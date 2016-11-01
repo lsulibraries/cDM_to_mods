@@ -1,5 +1,6 @@
 titleNonSort
 dateIssuedSplit
+dateIssuedLSUHSCS_GWM
 subjectSplit
 subjectTemporalSemicolon
 typeOfResource
