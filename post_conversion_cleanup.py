@@ -17,7 +17,6 @@ class IsCountsCorrect():
         root_compounds_json = self.name_root_compounds_json(list_of_json_elems_files)
 
         simples = root_count_json - len(root_compounds_json)
-        print(root_count_json, root_compounds_json, simples)
         compounds = 0
         for parent in root_compounds_json:
             compounds += self.count_child_pointers(alias, parent)
@@ -49,7 +48,6 @@ class IsCountsCorrect():
         if len(named_total) == 1:
             return named_total.pop()
         else:
-            print(named_total)
             logging.warning('BIG DEAL:  either Elems_in_Collection has mismatched number of total counts, or an Elems_in is unreadable')
             return False
 

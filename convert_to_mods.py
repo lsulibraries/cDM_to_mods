@@ -36,7 +36,6 @@ def convert_to_mods(alias):
 
     remove_previous_mods(alias)
 
-    # count = 0
     for pointer in simple_pointers:
         output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
         target_file = '{}.json'.format(pointer)
@@ -52,9 +51,7 @@ def convert_to_mods(alias):
         mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
         mods_string = mods_bytes.decode('utf-8')
         with open('{}/{}.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
-            # count += 1
             f.write(mods_string)
-    # print(count)
     logging.info('finished preliminary mods: simples')
 
     for pointer, _ in parents_children.items():
@@ -246,8 +243,6 @@ def parse_root_cdm_pointers(cdm_data_filestructure):
         nicks_text = parse_json(filename, json_text)
         for i in nicks_text['records']:
             pointer = str(i['pointer'] or i['dmrecord'])
-            if not pointer:
-                print(filename)
             if i['filetype'] == 'cpd':
                 cpd_parent_pointers.append(pointer)
             else:
@@ -391,15 +386,6 @@ def normalize_date(root_elem, pointer):
         yearlast = year_last.search(i.text)
         yearonly = year_only.search(i.text)
         yearmonth = year_month.search(i.text)
-
-# # this section is just for debugging the normalize_date xsl.
-#         temp_yearmonthday = temp_year_month_day.search(i.text)
-#         temp_yearlast = temp_year_last.search(i.text)
-#         temp_yearmonth = temp_year_month.search(i.text)
-
-#         if temp_yearmonthday or temp_yearlast or temp_yearmonth:
-#             logging.warning('pointer {} has single digit month or day: {}'.format(pointer, i.text))
-# # end of debugging section.
 
         if yearmonthday:
             year = yearmonthday.group(1)
