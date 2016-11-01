@@ -26,9 +26,6 @@ def convert_to_mods(alias):
 
     cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(cdm_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
-    print(len(cdm_data_filestructure[0][2]))
-    print(len(simple_pointers))
-    print(len(set(simple_pointers)))
 
     parents_children = dict()
     for cpd_parent in cpd_parent_pointers:
@@ -257,7 +254,6 @@ def parse_root_cdm_pointers(cdm_data_filestructure):
                 if pointer in simple_pointers:
                     duplicates.append(pointer)
                 simple_pointers.append(pointer)
-    print(len(duplicates), 'duplicate pointers')
     return simple_pointers, cpd_parent_pointers
 
 
