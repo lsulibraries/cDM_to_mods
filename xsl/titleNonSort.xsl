@@ -15,8 +15,8 @@
         </xsl:copy>
     </xsl:template>
     
-    <xsl:variable name="nonSortArticleRegEx" select="'^([&quot;''\[\(\.{3}]*)(An|A|The)?\s(.+)'"/>
-    <xsl:variable name="nonSortPuncRegEx" select="'^([&quot;''\[\(\.{3}]+)(.+)'"/>
+    <xsl:variable name="nonSortArticleRegEx" select="'^(&quot;|''|\[|\(|\.{3})(An|A|The)?\s(.+)'"/>
+    <xsl:variable name="nonSortPuncRegEx" select="'^(&quot;|''|\[|\(|\.{3})(.+)'"/>
     <xsl:variable name="nonSortAQuotRegEx" select="'^(A\s[&quot;])(.+)'"/>  <!-- A " -->
     
     <xsl:template match="titleInfo/title">
