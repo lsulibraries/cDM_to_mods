@@ -26,6 +26,7 @@
             <xsl:apply-templates select="subject" />
             <xsl:apply-templates select="abstract" />
             <xsl:apply-templates select="note[@type='content']"/>
+            <xsl:apply-templates select="note[@type='performers']"/>
             <xsl:apply-templates select="typeOfResource" />
             <xsl:apply-templates select="physicalDescription" />
             <xsl:apply-templates select="genre" />
