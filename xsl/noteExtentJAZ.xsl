@@ -17,6 +17,19 @@
     
     <xsl:variable name="resource" select="node()/typeOfResource/text()"/>
     
+    <xsl:template match="note[@type='content']">
+        <xsl:choose>
+            <xsl:when test="matches($resource, 'audio')">
+                <note type="performers">
+                    <xsl:value-of select="."/>
+                </note>
+            </xsl:when>
+            <xsl:otherwise>
+                <!-- remove the note -->
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
     <xsl:template match="physicalDescription">
         <xsl:choose>
             <xsl:when test="matches($resource, 'image')">
@@ -28,11 +41,15 @@
                 </physicalDescription>
             </xsl:when>
             <xsl:otherwise>
-                
+                <physicalDescription>
+                    <xsl:apply-templates />
+                </physicalDescription>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
     
-    <xsl:template match="note[@type='content']"/>
+
+    
+    
 
 </xsl:stylesheet>
