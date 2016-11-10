@@ -70,6 +70,8 @@ class IsCountsCorrect():
 
     def count_observed_simples(self, alias):
         output_dir = os.path.join('output', '{}_simples'.format(alias), 'final_format')
+        if not os.path.isdir(output_dir):
+            return 0
         simple_files = [i for i in os.listdir(output_dir) if ".xml" in i]
         return len(simple_files)
 
