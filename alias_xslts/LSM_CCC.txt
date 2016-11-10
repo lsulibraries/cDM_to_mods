@@ -1,6 +1,7 @@
 titleNonSort
 blankNamePart
 subjectSplit
+multiNamePart
 dateIssuedSplit
 dateIssuedLSM_CCC
 blankNodes
