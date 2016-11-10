@@ -2,8 +2,9 @@ titleNonSort
 blankNamePart
 multiNamePart
 subjectSplit
-noteExtentJAZ
 typeOfResource
+noteExtentJAZ
+internetMediaType
 dateIssuedSplit
 blankNodes
 locationMerge

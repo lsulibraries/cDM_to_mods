@@ -7,7 +7,7 @@
     version="2.0"
     xmlns="http://www.loc.gov/mods/v3" >
 
-    <!-- removes semicolonts from subject/Temporal (as in Loyola University New Orleans Athletics Collection-->
+    <!-- removes semicolons from subject/Temporal (as in Loyola University New Orleans Athletics Collection-->
     
     <xsl:template match="@* | node()">
         <xsl:copy>
