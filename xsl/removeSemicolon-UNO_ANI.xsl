@@ -16,7 +16,7 @@
     </xsl:template>
     
     <xsl:template match="dateIssued[substring(., string-length()) = ';']">
-        <dateIssued>
+        <dateIssued keydate="yes">
         <xsl:value-of select="substring(., 1, string-length(.) -1)"/> 
         </dateIssued>
     </xsl:template>
