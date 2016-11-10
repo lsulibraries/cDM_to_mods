@@ -1,8 +1,8 @@
 blankNamePart
 multiNamePart
 subjectSplit
-dateIssuedSplit
 removeSemicolon-UNO_ANI
+dateIssuedSplit
 blankNodes
 locationMerge
 OrderedTemplates
