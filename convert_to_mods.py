@@ -304,6 +304,7 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
 
     merge_same_fields(root_element)
     subject_split(root_element)
+    namePart_split(root_element)
     normalize_date(root_element, pointer)
     delete_empty_fields(root_element)
     reorder_sequence(root_element)
@@ -345,7 +346,11 @@ def make_contentDM_elem(cdm_elem, pointer, pointer_json, alias):
 def subject_split(etree):
     for subj_elem in etree.findall('.//subject'):
         for child in subj_elem.getchildren():
+            if not child.text:
+                continue
             for split in list(child.text.split(';')):
+                if not len(split):
+                    continue
                 new_elem = deepcopy(subj_elem)
                 for i in new_elem:
                     new_elem.remove(i)
@@ -359,12 +364,49 @@ def subject_split(etree):
         for i in new_elem:
             new_elem.remove(i)
         for child in subj_elem.getchildren():
+            if not child.text:
+                continue
             for split in list(child.text.split('--')):
+                if not len(split):
+                    continue
                 new_child_elem = deepcopy(child)
                 new_child_elem.text = split.strip()
                 new_elem.append(new_child_elem)
                 subj_elem.getparent().append(new_elem)
         etree.remove(subj_elem)
+
+
+def namePart_split(etree):
+    for namePart_elem in etree.findall('.//name'):
+        for child in namePart_elem.getchildren():
+            if not child.text:
+                continue
+            for split in list(child.text.split(';')):
+                if not len(split):
+                    continue
+                new_elem = deepcopy(namePart_elem)
+                for i in new_elem:
+                    new_elem.remove(i)
+                new_child_elem = deepcopy(child)
+                new_child_elem.text = split.strip()
+                new_elem.append(new_child_elem)
+                namePart_elem.getparent().append(new_elem)
+        etree.remove(namePart_elem)
+    for namePart_elem in etree.findall('.//name'):
+        new_elem = deepcopy(namePart_elem)
+        for i in new_elem:
+            new_elem.remove(i)
+        for child in namePart_elem.getchildren():
+            if not child.text:
+                continue
+            for split in list(child.text.split('--')):
+                if not len(split):
+                    continue
+                new_child_elem = deepcopy(child)
+                new_child_elem.text = split.strip()
+                new_elem.append(new_child_elem)
+                namePart_elem.getparent().append(new_elem)
+        etree.remove(namePart_elem)
 
 
 year_month_day = re.compile(r'^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$')     # 1234-56-78 or 1234-5-6
