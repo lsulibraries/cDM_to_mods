@@ -308,6 +308,7 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
     normalize_date(root_element, pointer)
     delete_empty_fields(root_element)
     reorder_sequence(root_element)
+
     return root_element
 
 
@@ -379,33 +380,19 @@ def subject_split(etree):
 def namePart_split(etree):
     for namePart_elem in etree.findall('.//name'):
         for child in namePart_elem.getchildren():
-            if not child.text:
-                continue
-            for split in list(child.text.split(';')):
-                if not len(split):
-                    continue
-                new_elem = deepcopy(namePart_elem)
-                for i in new_elem:
-                    new_elem.remove(i)
-                new_child_elem = deepcopy(child)
-                new_child_elem.text = split.strip()
-                new_elem.append(new_child_elem)
-                namePart_elem.getparent().append(new_elem)
-        etree.remove(namePart_elem)
-    for namePart_elem in etree.findall('.//name'):
-        new_elem = deepcopy(namePart_elem)
-        for i in new_elem:
-            new_elem.remove(i)
-        for child in namePart_elem.getchildren():
-            if not child.text:
-                continue
-            for split in list(child.text.split('--')):
-                if not len(split):
-                    continue
-                new_child_elem = deepcopy(child)
-                new_child_elem.text = split.strip()
-                new_elem.append(new_child_elem)
-                namePart_elem.getparent().append(new_elem)
+            if child.tag == 'namePart':
+                for split in list(child.text.split(';')):
+                    split = split.strip()
+                    if not len(split):
+                        continue
+                    new_elem = deepcopy(namePart_elem)
+                    for i in new_elem:
+                        if i.tag == 'namePart':
+                            new_elem.remove(i)
+                    new_child_elem = deepcopy(child)
+                    new_child_elem.text = split.strip()
+                    new_elem.insert(0, new_child_elem)
+                    namePart_elem.getparent().append(new_elem)
         etree.remove(namePart_elem)
 
 
@@ -502,6 +489,14 @@ def setup_logging():
     formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
+
+
+def write_etree(etree, name):
+    os.makedirs('debug_output_xmls', exist_ok=True)
+    with open('debug_output_xmls/{}.xml'.format(name), 'w') as f:
+        mods_bytes = ET.tostring(etree, xml_declaration=True, encoding="utf-8", pretty_print=True)
+        mods_string = mods_bytes.decode('utf-8')
+        f.write(mods_string)
 
 
 if __name__ == '__main__':
