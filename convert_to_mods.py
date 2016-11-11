@@ -156,8 +156,6 @@ def flatten_simple_dir(simple_dir):
 def run_saxon(output_dir, alias_xslts, cpd_or_simple):
     starting_dir = os.path.join(output_dir, 'presaxon_flattened')
     for xslt in alias_xslts:
-        if xslt == 'subjectSplit':
-            continue
         logging.info('doing {} saxon {}'.format(cpd_or_simple.title(), xslt))
         new_dir = os.path.join(output_dir, xslt)
         os.makedirs(new_dir, exist_ok=True)
@@ -303,8 +301,11 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
     root_element.append(id_elem)
 
     merge_same_fields(root_element)
-    subject_split(root_element)
-    namePart_split(root_element)
+    careful_tag_split(root_element, 'name', 'namePart')
+    careful_tag_split(root_element, 'subject', 'topic')
+    careful_tag_split(root_element, 'subject', 'geographic')
+    careful_tag_split(root_element, 'subject', 'temporal')
+    careful_tag_split(root_element, 'subject', 'hierarchicalGeographic')
     normalize_date(root_element, pointer)
     delete_empty_fields(root_element)
     reorder_sequence(root_element)
@@ -344,56 +345,28 @@ def make_contentDM_elem(cdm_elem, pointer, pointer_json, alias):
     cdm_elem.append(dmGetItemInfo_elem)
 
 
-def subject_split(etree):
-    for subj_elem in etree.findall('.//subject'):
-        for child in subj_elem.getchildren():
-            if not child.text:
-                continue
-            for split in list(child.text.split(';')):
-                if not len(split):
-                    continue
-                new_elem = deepcopy(subj_elem)
-                for i in new_elem:
-                    new_elem.remove(i)
-                new_child_elem = deepcopy(child)
-                new_child_elem.text = split.strip()
-                new_elem.append(new_child_elem)
-                subj_elem.getparent().append(new_elem)
-        etree.remove(subj_elem)
-    for subj_elem in etree.findall('.//subject'):
-        new_elem = deepcopy(subj_elem)
-        for i in new_elem:
-            new_elem.remove(i)
-        for child in subj_elem.getchildren():
-            if not child.text:
-                continue
-            for split in list(child.text.split('--')):
-                if not len(split):
-                    continue
-                new_child_elem = deepcopy(child)
-                new_child_elem.text = split.strip()
-                new_elem.append(new_child_elem)
-                subj_elem.getparent().append(new_elem)
-        etree.remove(subj_elem)
-
-
-def namePart_split(etree):
-    for namePart_elem in etree.findall('.//name'):
-        for child in namePart_elem.getchildren():
-            if child.tag == 'namePart':
-                for split in list(child.text.split(';')):
+def careful_tag_split(etree, parent_tag_name, child_tag_name):
+    # we split the child_tag text into pieces
+    # and create a duplicate parent_tag object for each split child_tag text
+    for name_elem in etree.findall('.//{}'.format(parent_tag_name)):
+        remove_orig_parent = False
+        for child in name_elem.getchildren():
+            if child.tag == child_tag_name:
+                remove_orig_parent = True
+                for split in child.text.split(';'):
                     split = split.strip()
                     if not len(split):
                         continue
-                    new_elem = deepcopy(namePart_elem)
-                    for i in new_elem:
-                        if i.tag == 'namePart':
-                            new_elem.remove(i)
                     new_child_elem = deepcopy(child)
                     new_child_elem.text = split.strip()
-                    new_elem.insert(0, new_child_elem)
-                    namePart_elem.getparent().append(new_elem)
-        etree.remove(namePart_elem)
+                    copied_name_elem = deepcopy(name_elem)
+                    for i in copied_name_elem:
+                        if i.tag == child_tag_name:
+                            copied_name_elem.remove(i)
+                    copied_name_elem.insert(0, new_child_elem)
+                    name_elem.getparent().append(copied_name_elem)
+        if remove_orig_parent:
+            etree.remove(name_elem)
 
 
 year_month_day = re.compile(r'^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$')     # 1234-56-78 or 1234-5-6
