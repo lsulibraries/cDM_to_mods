@@ -6,7 +6,7 @@ for converting the output of cdm_xporter/scrape_cdm.py into mods format (especia
         
   1b) Linux/Mac:  Turn on your python3 virtualenv.  It needs lxml.
  
-  2) Have a copy of the Cached_Cdm_files (the output of cdm_xporter/scrape_cdm.py) on your computer.
+  2) Have a copy of the Cached_Cdm_files (the output of cdm_xporter/scrape_cdm.py) on your computer.  This /Cached_Cdm_files only needs metadata.
   
   3) In the command line, navigate into the cDM_to_mods directory.
   
