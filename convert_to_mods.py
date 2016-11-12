@@ -38,51 +38,31 @@ def convert_to_mods(alias):
 
     for pointer in simple_pointers:
         output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
+        output_file = os.path.join(output_path, '{}.xml'.format(pointer))
         target_file = '{}.json'.format(pointer)
         path_to_pointer = [os.path.join(root, target_file)
                            for root, dirs, files in cdm_data_filestructure
                            if target_file in files][0]
-        os.makedirs(output_path, exist_ok=True)
-        pointer_json = get_cdm_pointer_json(path_to_pointer)
-        nicks_texts = parse_json(pointer, pointer_json)
-        propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
-        mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
-        reorder_sequence(mods)
-        mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
-        mods_string = mods_bytes.decode('utf-8')
-        with open('{}/{}.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
-            f.write(mods_string)
+        ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
+        make_a_single_mods(ingredients)
+
     logging.info('finished preliminary mods: simples')
 
     for pointer, _ in parents_children.items():
         output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', pointer)
+        output_file = os.path.join(output_path, 'MODS.xml')
         path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', '{}.json'.format(pointer))
-        os.makedirs(output_path, exist_ok=True)
-        pointer_json = get_cdm_pointer_json(path_to_pointer)
-        nicks_texts = parse_json(pointer, pointer_json)
-        propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
-        mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
-        reorder_sequence(mods)
-        mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
-        mods_string = mods_bytes.decode('utf-8')
-        with open('{}/MODS.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
-            f.write(mods_string)
+        ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
+        make_a_single_mods(ingredients)
         copyfile(os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(pointer)), os.path.join(output_path, 'structure.cpd'))
 
     for parent, children_pointers in parents_children.items():
         for pointer in children_pointers:
             output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', parent, pointer)
+            output_file = os.path.join(output_path, 'MODS.xml')
             path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', parent, '{}.json'.format(pointer))
-            os.makedirs(output_path, exist_ok=True)
-            pointer_json = get_cdm_pointer_json(path_to_pointer)
-            nicks_texts = parse_json(pointer, pointer_json)
-            propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
-            mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
-            reorder_sequence(mods)
-            mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
-            mods_string = mods_bytes.decode('utf-8')
-            with open('{}/MODS.xml'.format(output_path, pointer), 'w', encoding="utf-8") as f:
-                f.write(mods_string)
+            ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
+            make_a_single_mods(ingredients)
     logging.info('finished preliminary mods: compounds')
 
     polish_mods(alias)
@@ -146,6 +126,20 @@ def remove_previous_mods(alias):
                  if alias in root and ".xml" in file]
     for file in xml_files:
         os.remove(file)
+
+
+def make_a_single_mods(ingredients):
+    (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict) = ingredients
+    os.makedirs(output_path, exist_ok=True)
+    pointer_json = get_cdm_pointer_json(path_to_pointer)
+    nicks_texts = parse_json(pointer, pointer_json)
+    propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
+    mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
+    reorder_sequence(mods)
+    mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
+    mods_string = mods_bytes.decode('utf-8')
+    with open(output_file, 'w', encoding="utf-8") as f:
+        f.write(mods_string)
 
 
 def parse_json(filename, json_text):
@@ -399,9 +393,9 @@ year_last = re.compile(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')      # 12-34-56
 year_only = re.compile(r'^(\d{4})$')                                  # 1234
 year_month = re.compile(r'^(\d{4})[/.-](\d{1,2})$')                      # 1234-56 or 1234-5
 
-correct_year_month_day = re.compile(r'^(\d{4})[/.-](\d{2})[/.-](\d{2})$')     # 1234-5-6
-correct_year_last = re.compile(r'^(\d{2})[/.-](\d{2})[/.-](\d{4})$')      # 1-2-3456
-correct_year_month = re.compile(r'^(\d{4})[/.-](\d{2})$')                      # 1234-5
+correct_year_month_day = re.compile(r'^(\d{4})[/.-](\d{2})[/.-](\d{2})$')     # 1234-05-06
+correct_year_last = re.compile(r'^(\d{2})[/.-](\d{2})[/.-](\d{4})$')      # 01-02-3456
+correct_year_month = re.compile(r'^(\d{4})[/.-](\d{2})$')                      # 1234-05
 
 
 def check_date_format(alias, flat_final_dir):
