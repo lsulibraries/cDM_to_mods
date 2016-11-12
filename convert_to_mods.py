@@ -91,127 +91,16 @@ def convert_to_mods(alias):
     logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
 
 
-def polish_mods(alias):
-    alias_xslts = read_alias_xslt_file(alias)
-
-    simples_output_dir = os.path.join('output', '{}_simples'.format(alias))
-    if '{}_simples'.format(alias) in os.listdir('output') and 'original_format' in os.listdir(simples_output_dir):
-        flatten_simple_dir(simples_output_dir)
-        run_saxon(simples_output_dir, alias_xslts, 'simple')
-        flat_final_dir = os.path.join(simples_output_dir, 'final_format')
-        validate_mods(alias, flat_final_dir)
-        check_date_format(alias, flat_final_dir)
-    else:
-        logging.info('no simple objects in this collection')
-
-    compounds_output_dir = os.path.join('output', '{}_compounds'.format(alias))
-    if '{}_compounds'.format(alias) in os.listdir('output') and 'original_format' in os.listdir(compounds_output_dir):
-        cpd_output_dir = os.path.join('output', '{}_compounds'.format(alias))
-        flatten_cpd_dir(cpd_output_dir)
-        run_saxon(cpd_output_dir, alias_xslts, 'compound')
-        flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
-        validate_mods(alias, flat_final_dir)
-        check_date_format(alias, flat_final_dir)
-        reinflate_cpd_dir(cpd_output_dir)
-    else:
-        logging.info('no compound objects in this collection')
-
-
-def remove_previous_mods(alias):
-    xml_files = ['{}/{}'.format(root, file)
-                 for root, dirs, files in os.walk('output')
-                 for file in files
-                 if alias in root and ".xml" in file]
-    for file in xml_files:
-        os.remove(file)
-
-
-def validate_mods(alias, directory):
-    all_passed = True
-    xml_files = [file for file in os.listdir(directory) if ".xml" in file]
-    for file in xml_files:
-        file_etree = ET.parse(os.path.join(directory, file))
-        pointer = file.split('.')[0]
-        if not MODS_SCHEMA.validate(file_etree):
-            all_passed = False
-            logging.warning("{} {} post-xsl did not validate!!!!".format(alias, pointer))
-    if all_passed:
-        logging.info("This group of files post-xsl Validated")
-
-
-def read_alias_xslt_file(alias):
-    with open(os.path.join('alias_xslts', '{}.txt'.format(alias)), 'r') as f:
-        return [i for i in f.read().split('\n')]
-
-
-def flatten_simple_dir(simple_dir):
-    source_dir = os.path.join(simple_dir, 'original_format')
-    flattened_dir = os.path.join(simple_dir, 'presaxon_flattened')
-    os.makedirs(flattened_dir, exist_ok=True)
-    for file in os.listdir(source_dir):
-        if '.xml' in file:
-            copyfile(os.path.join(source_dir, file), os.path.join(flattened_dir, file))
-
-
-def run_saxon(output_dir, alias_xslts, cpd_or_simple):
-    starting_dir = os.path.join(output_dir, 'presaxon_flattened')
-    for xslt in alias_xslts:
-        logging.info('doing {} saxon {}'.format(cpd_or_simple.title(), xslt))
-        new_dir = os.path.join(output_dir, xslt)
-        os.makedirs(new_dir, exist_ok=True)
-        path_to_xslt = os.path.join('xsl', '{}.xsl'.format(xslt))
-        subprocess.call(['java',
-                         '-jar',
-                         'saxon9he.jar',
-                         '-s:{}'.format(starting_dir),
-                         '-xsl:{}'.format(path_to_xslt),
-                         '-o:{}'.format(new_dir)])
-        starting_dir = new_dir
-    else:
-        os.makedirs(os.path.join(output_dir, 'post-saxon'), exist_ok=True)
-        for file in os.listdir(os.path.join(output_dir, xslt)):
-            copyfile(os.path.join(output_dir, xslt, file), os.path.join(output_dir, 'post-saxon', file))
-        if cpd_or_simple == 'simple':
-            os.makedirs(os.path.join(output_dir, 'final_format'), exist_ok=True)
-            for file in os.listdir(os.path.join(output_dir, xslt)):
-                copyfile(os.path.join(output_dir, 'post-saxon', file), os.path.join(output_dir, 'final_format', file))
-
-
-def flatten_cpd_dir(cpd_dir):
-    source_dir = os.path.join(cpd_dir, 'original_format')
-    flattened_dir = os.path.join(cpd_dir, 'presaxon_flattened')
-    os.makedirs(flattened_dir, exist_ok=True)
-    for root, dirs, files in os.walk(source_dir):
-        for file in files:
-            if ".xml" in file:
-                source_folder_name = os.path.split(root)[-1]
-                dest_filepath = os.path.join(flattened_dir, '{}.xml'.format(source_folder_name))
-                copyfile(os.path.join(root, file), dest_filepath)
-
-
-def reinflate_cpd_dir(cpd_dir):
-    original_format_path = os.path.join(cpd_dir, 'original_format')
-    original_format = [(root, dirs, files) for root, dirs, files in os.walk(original_format_path)]
-    for file in os.listdir(os.path.join(cpd_dir, 'post-saxon')):
-        for root, dirs, files in original_format:
-            if file.split('.')[0] == os.path.split(root)[-1]:
-                source_file = os.path.join(cpd_dir, 'post-saxon', file)
-                dest_path = root.replace('original_format', 'final_format')
-                os.makedirs(dest_path, exist_ok=True)
-                dest_file = os.path.join(dest_path, 'MODS.xml')
-                copyfile(source_file, dest_file)
-    for root, dirs, files in original_format:
-        if 'structure.cpd' in files:
-            source_file = os.path.join(root, 'structure.cpd')
-            dest_file = os.path.join(root.replace('original_format', 'final_format'), 'structure.cpd')
-            copyfile(source_file, dest_file)
-
-
 def make_nicks_to_names(cdm_data_dir):
     filepath = os.path.join(cdm_data_dir, 'Collection_Fields.json')
     json_text = get_cdm_pointer_json(filepath)
     nicks_names = parse_collection_fields('Collection_Fields', json_text)
     return nicks_names
+
+
+def get_cdm_pointer_json(filepath):
+    with open(filepath, 'r', encoding='utf-8') as f:
+        return f.read()
 
 
 def parse_collection_fields(filename, json_text):
@@ -250,9 +139,13 @@ def parse_root_cdm_pointers(cdm_data_filestructure):
     return simple_pointers, cpd_parent_pointers
 
 
-def get_cdm_pointer_json(filepath):
-    with open(filepath, 'r', encoding='utf-8') as f:
-        return f.read()
+def remove_previous_mods(alias):
+    xml_files = ['{}/{}'.format(root, file)
+                 for root, dirs, files in os.walk('output')
+                 for file in files
+                 if alias in root and ".xml" in file]
+    for file in xml_files:
+        os.remove(file)
 
 
 def parse_json(filename, json_text):
@@ -313,23 +206,6 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
     return root_element
 
 
-def reorder_sequence(root_element):
-    if root_element.find('./location') is None:  # lxml wants this syntax
-        return
-    location_elem = root_element.find('./location')
-    order_dict = {"physicalLocation": 0,
-                  "shelfLocator": 1,
-                  "url": 2,
-                  "holdingSimple": 3,
-                  "holdingExternal": 4, }
-    child_elems = location_elem.getchildren()
-    detached_list = sorted(child_elems, key=lambda x: order_dict[x.tag])
-    for child in location_elem:
-        location_elem.remove(child)
-    for i in detached_list:
-        location_elem.append(i)
-
-
 def make_contentDM_elem(cdm_elem, pointer, pointer_json, alias):
     alias_elem = ET.Element('alias')
     alias_elem.text = alias
@@ -343,6 +219,15 @@ def make_contentDM_elem(cdm_elem, pointer, pointer_json, alias):
         'timestamp': '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), })
     dmGetItemInfo_elem.text = pointer_json
     cdm_elem.append(dmGetItemInfo_elem)
+
+
+def merge_same_fields(orig_etree):
+    for elem in orig_etree:
+        for following_elem in elem.itersiblings():
+            if elem.tag == following_elem.tag and elem.attrib == following_elem.attrib:
+                for child in following_elem.iterchildren():
+                    elem.insert(-1, child)
+    return orig_etree
 
 
 def careful_tag_split(etree, parent_tag_name, child_tag_name):
@@ -367,16 +252,6 @@ def careful_tag_split(etree, parent_tag_name, child_tag_name):
                     name_elem.getparent().append(copied_name_elem)
         if remove_orig_parent:
             etree.remove(name_elem)
-
-
-year_month_day = re.compile(r'^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$')     # 1234-56-78 or 1234-5-6
-year_last = re.compile(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')      # 12-34-5678 or 1-2-3456
-year_only = re.compile(r'^(\d{4})$')                                  # 1234
-year_month = re.compile(r'^(\d{4})[/.-](\d{1,2})$')                      # 1234-56 or 1234-5
-
-correct_year_month_day = re.compile(r'^(\d{4})[/.-](\d{2})[/.-](\d{2})$')     # 1234-5-6
-correct_year_last = re.compile(r'^(\d{2})[/.-](\d{2})[/.-](\d{4})$')      # 1-2-3456
-correct_year_month = re.compile(r'^(\d{4})[/.-](\d{2})$')                      # 1234-5
 
 
 def normalize_date(root_elem, pointer):
@@ -417,6 +292,118 @@ def normalize_date(root_elem, pointer):
             i.text = yearonly.group()
 
 
+def delete_empty_fields(orig_etree):
+    elems_list = [i for i in orig_etree]
+    for elem in elems_list:
+        if not elem.text and len(elem) == 0:
+            orig_etree.remove(elem)
+    return orig_etree
+
+
+def reorder_sequence(root_element):
+    if root_element.find('./location') is None:  # lxml wants this syntax
+        return
+    location_elem = root_element.find('./location')
+    order_dict = {"physicalLocation": 0,
+                  "shelfLocator": 1,
+                  "url": 2,
+                  "holdingSimple": 3,
+                  "holdingExternal": 4, }
+    child_elems = location_elem.getchildren()
+    detached_list = sorted(child_elems, key=lambda x: order_dict[x.tag])
+    for child in location_elem:
+        location_elem.remove(child)
+    for i in detached_list:
+        location_elem.append(i)
+
+
+def polish_mods(alias):
+    alias_xslts = read_alias_xslt_file(alias)
+
+    simples_output_dir = os.path.join('output', '{}_simples'.format(alias))
+    if '{}_simples'.format(alias) in os.listdir('output') and 'original_format' in os.listdir(simples_output_dir):
+        flatten_simple_dir(simples_output_dir)
+        run_saxon(simples_output_dir, alias_xslts, 'simple')
+        flat_final_dir = os.path.join(simples_output_dir, 'final_format')
+        validate_mods(alias, flat_final_dir)
+        check_date_format(alias, flat_final_dir)
+    else:
+        logging.info('no simple objects in this collection')
+
+    compounds_output_dir = os.path.join('output', '{}_compounds'.format(alias))
+    if '{}_compounds'.format(alias) in os.listdir('output') and 'original_format' in os.listdir(compounds_output_dir):
+        cpd_output_dir = os.path.join('output', '{}_compounds'.format(alias))
+        flatten_cpd_dir(cpd_output_dir)
+        run_saxon(cpd_output_dir, alias_xslts, 'compound')
+        flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
+        validate_mods(alias, flat_final_dir)
+        check_date_format(alias, flat_final_dir)
+        reinflate_cpd_dir(cpd_output_dir)
+    else:
+        logging.info('no compound objects in this collection')
+
+
+def read_alias_xslt_file(alias):
+    with open(os.path.join('alias_xslts', '{}.txt'.format(alias)), 'r') as f:
+        return [i for i in f.read().split('\n')]
+
+
+def flatten_simple_dir(simple_dir):
+    source_dir = os.path.join(simple_dir, 'original_format')
+    flattened_dir = os.path.join(simple_dir, 'presaxon_flattened')
+    os.makedirs(flattened_dir, exist_ok=True)
+    for file in os.listdir(source_dir):
+        if '.xml' in file:
+            copyfile(os.path.join(source_dir, file), os.path.join(flattened_dir, file))
+
+
+def run_saxon(output_dir, alias_xslts, cpd_or_simple):
+    starting_dir = os.path.join(output_dir, 'presaxon_flattened')
+    for xslt in alias_xslts:
+        logging.info('doing {} saxon {}'.format(cpd_or_simple.title(), xslt))
+        new_dir = os.path.join(output_dir, xslt)
+        os.makedirs(new_dir, exist_ok=True)
+        path_to_xslt = os.path.join('xsl', '{}.xsl'.format(xslt))
+        subprocess.call(['java',
+                         '-jar',
+                         'saxon9he.jar',
+                         '-s:{}'.format(starting_dir),
+                         '-xsl:{}'.format(path_to_xslt),
+                         '-o:{}'.format(new_dir)])
+        starting_dir = new_dir
+    else:
+        os.makedirs(os.path.join(output_dir, 'post-saxon'), exist_ok=True)
+        for file in os.listdir(os.path.join(output_dir, xslt)):
+            copyfile(os.path.join(output_dir, xslt, file), os.path.join(output_dir, 'post-saxon', file))
+        if cpd_or_simple == 'simple':
+            os.makedirs(os.path.join(output_dir, 'final_format'), exist_ok=True)
+            for file in os.listdir(os.path.join(output_dir, xslt)):
+                copyfile(os.path.join(output_dir, 'post-saxon', file), os.path.join(output_dir, 'final_format', file))
+
+
+def validate_mods(alias, directory):
+    all_passed = True
+    xml_files = [file for file in os.listdir(directory) if ".xml" in file]
+    for file in xml_files:
+        file_etree = ET.parse(os.path.join(directory, file))
+        pointer = file.split('.')[0]
+        if not MODS_SCHEMA.validate(file_etree):
+            all_passed = False
+            logging.warning("{} {} post-xsl did not validate!!!!".format(alias, pointer))
+    if all_passed:
+        logging.info("This group of files post-xsl Validated")
+
+
+year_month_day = re.compile(r'^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$')     # 1234-56-78 or 1234-5-6
+year_last = re.compile(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')      # 12-34-5678 or 1-2-3456
+year_only = re.compile(r'^(\d{4})$')                                  # 1234
+year_month = re.compile(r'^(\d{4})[/.-](\d{1,2})$')                      # 1234-56 or 1234-5
+
+correct_year_month_day = re.compile(r'^(\d{4})[/.-](\d{2})[/.-](\d{2})$')     # 1234-5-6
+correct_year_last = re.compile(r'^(\d{2})[/.-](\d{2})[/.-](\d{4})$')      # 1-2-3456
+correct_year_month = re.compile(r'^(\d{4})[/.-](\d{2})$')                      # 1234-5
+
+
 def check_date_format(alias, flat_final_dir):
     item_xml_files = [os.path.join(root, file) for root, dirs, files in os.walk(flat_final_dir)
                       for file in files if '.xml' in file]
@@ -435,21 +422,34 @@ def check_date_format(alias, flat_final_dir):
                 logging.warning('{}.json has date "{}"'.format(file, i.text))
 
 
-def merge_same_fields(orig_etree):
-    for elem in orig_etree:
-        for following_elem in elem.itersiblings():
-            if elem.tag == following_elem.tag and elem.attrib == following_elem.attrib:
-                for child in following_elem.iterchildren():
-                    elem.insert(-1, child)
-    return orig_etree
+def flatten_cpd_dir(cpd_dir):
+    source_dir = os.path.join(cpd_dir, 'original_format')
+    flattened_dir = os.path.join(cpd_dir, 'presaxon_flattened')
+    os.makedirs(flattened_dir, exist_ok=True)
+    for root, dirs, files in os.walk(source_dir):
+        for file in files:
+            if ".xml" in file:
+                source_folder_name = os.path.split(root)[-1]
+                dest_filepath = os.path.join(flattened_dir, '{}.xml'.format(source_folder_name))
+                copyfile(os.path.join(root, file), dest_filepath)
 
 
-def delete_empty_fields(orig_etree):
-    elems_list = [i for i in orig_etree]
-    for elem in elems_list:
-        if not elem.text and len(elem) == 0:
-            orig_etree.remove(elem)
-    return orig_etree
+def reinflate_cpd_dir(cpd_dir):
+    original_format_path = os.path.join(cpd_dir, 'original_format')
+    original_format = [(root, dirs, files) for root, dirs, files in os.walk(original_format_path)]
+    for file in os.listdir(os.path.join(cpd_dir, 'post-saxon')):
+        for root, dirs, files in original_format:
+            if file.split('.')[0] == os.path.split(root)[-1]:
+                source_file = os.path.join(cpd_dir, 'post-saxon', file)
+                dest_path = root.replace('original_format', 'final_format')
+                os.makedirs(dest_path, exist_ok=True)
+                dest_file = os.path.join(dest_path, 'MODS.xml')
+                copyfile(source_file, dest_file)
+    for root, dirs, files in original_format:
+        if 'structure.cpd' in files:
+            source_file = os.path.join(root, 'structure.cpd')
+            dest_file = os.path.join(root.replace('original_format', 'final_format'), 'structure.cpd')
+            copyfile(source_file, dest_file)
 
 
 def setup_logging():
