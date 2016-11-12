@@ -36,6 +36,7 @@ def convert_to_mods(alias):
 
     remove_previous_mods(alias)
 
+    # root level simples
     for pointer in simple_pointers:
         output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
         output_file = os.path.join(output_path, '{}.xml'.format(pointer))
@@ -45,9 +46,9 @@ def convert_to_mods(alias):
                            if target_file in files][0]
         ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
         make_a_single_mods(ingredients)
-
     logging.info('finished preliminary mods: simples')
 
+    # root level compounds
     for pointer, _ in parents_children.items():
         output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', pointer)
         output_file = os.path.join(output_path, 'MODS.xml')
@@ -56,6 +57,7 @@ def convert_to_mods(alias):
         make_a_single_mods(ingredients)
         copyfile(os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(pointer)), os.path.join(output_path, 'structure.cpd'))
 
+    # child level simples
     for parent, children_pointers in parents_children.items():
         for pointer in children_pointers:
             output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', parent, pointer)
