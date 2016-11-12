@@ -85,9 +85,10 @@ class IsCountsCorrect():
 
 class PullInBinaries():
     def __init__(self, alias):
-        sourcefiles_paths = PullInBinaries.makedict_sourcefiles(alias)
-        simplexmls_list = PullInBinaries.makelist_simpleoutfolderxmls(alias)
-        compoundxmls_list = PullInBinaries.makelist_compoundoutfolderxmls(alias)
+        self.alias = alias
+        sourcefiles_paths = self.makedict_sourcefiles()
+        simplexmls_list = self.makelist_simpleoutfolderxmls()
+        compoundxmls_list = self.makelist_compoundoutfolderxmls()
         for filelist in (simplexmls_list, compoundxmls_list):
             for kind, outroot, pointer in filelist:
                 if pointer not in sourcefiles_paths:
@@ -95,29 +96,27 @@ class PullInBinaries():
                         continue  # root of cpd is expected to have no binary
                     else:
                         logging.warning("{} pointer {} has no matching binary".format(kind, pointer))
-                if PullInBinaries.is_binary_in_output_dir(kind, outroot, pointer):
+                if self.is_binary_in_output_dir(kind, outroot, pointer):
                     continue
                 if pointer not in sourcefiles_paths:
                     continue
                 sourcepath, sourcefile = sourcefiles_paths[pointer]
-                PullInBinaries.copy_binary(kind, sourcepath, sourcefile, outroot, pointer)
+                self.copy_binary(kind, sourcepath, sourcefile, outroot, pointer)
         logging.info('PullInBinaries done')
 
-    @staticmethod
-    def makedict_sourcefiles(alias):
+    def makedict_sourcefiles(self):
         sourcefiles_paths = dict()
-        input_dir = os.path.join(SOURCE_DIR, alias)
+        input_dir = os.path.join(SOURCE_DIR, self.alias)
         for root, dirs, files in os.walk(input_dir):
             for file in files:
                 if file.split('.')[-1] in ('jp2', 'mp4', 'mp3', 'pdf'):
-                    alias = file.split('.')[0]
-                    sourcefiles_paths[alias] = (root, file)
+                    pointer = file.split('.')[0]
+                    sourcefiles_paths[pointer] = (root, file)
         return sourcefiles_paths
 
-    @staticmethod
-    def makelist_simpleoutfolderxmls(alias):
+    def makelist_simpleoutfolderxmls(self):
         xml_filelist = []
-        subfolder = os.path.abspath(os.path.join('output', '{}_simples'.format(alias), 'final_format'))
+        subfolder = os.path.abspath(os.path.join('output', '{}_simples'.format(self.alias), 'final_format'))
         for root, dirs, files in os.walk(subfolder):
             for file in files:
                 if '.xml' in file:
@@ -125,10 +124,9 @@ class PullInBinaries():
                     xml_filelist.append(('simple', root, pointer))
         return xml_filelist
 
-    @staticmethod
-    def makelist_compoundoutfolderxmls(alias):
+    def makelist_compoundoutfolderxmls(self):
         xml_filelist = []
-        subfolder = os.path.abspath(os.path.join('output', '{}_compounds'.format(alias), 'final_format'))
+        subfolder = os.path.abspath(os.path.join('output', '{}_compounds'.format(self.alias), 'final_format'))
         for root, dirs, files in os.walk(subfolder):
             for file in files:
                 if file == 'MODS.xml':
@@ -136,8 +134,7 @@ class PullInBinaries():
                     xml_filelist.append(('compound', root, pointer))
         return xml_filelist
 
-    @staticmethod
-    def is_binary_in_output_dir(kind, root, pointer):
+    def is_binary_in_output_dir(self, kind, root, pointer):
         acceptable_binary_types = ('mp3', 'mp4', 'jp2', 'pdf')
         if kind == 'simple':
             for filetype in acceptable_binary_types:
@@ -149,8 +146,7 @@ class PullInBinaries():
                     return True
         return False
 
-    @staticmethod
-    def copy_binary(kind, sourcepath, sourcefile, outroot, pointer):
+    def copy_binary(self, kind, sourcepath, sourcefile, outroot, pointer):
         if kind == 'simple':
             copyfile(os.path.join(sourcepath, sourcefile), os.path.join(outroot, sourcefile))
         elif kind == 'compound':
