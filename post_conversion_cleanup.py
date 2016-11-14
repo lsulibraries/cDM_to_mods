@@ -9,17 +9,15 @@ from lxml import etree as ET
 
 
 class IsCountsCorrect():
-    def __init__(self, alias, SOURCE_DIR):
-        self.SOURCE_DIR = SOURCE_DIR
-
-        list_of_json_elems_files = self.make_list_of_elem_jsons(alias)
+    def __init__(self, alias, cdm_data_dir):
+        list_of_json_elems_files = self.make_list_of_elem_jsons(alias, cdm_data_dir)
         root_count_json = self.get_root_count(list_of_json_elems_files)
         root_compounds_json = self.name_root_compounds_json(list_of_json_elems_files)
 
         simples = root_count_json - len(root_compounds_json)
         compounds = 0
         for parent in root_compounds_json:
-            compounds += self.count_child_pointers(alias, parent)
+            compounds += self.count_child_pointers(alias, parent, cdm_data_dir)
             compounds += 1  # we count compound root objects as 1 item here.
 
         logging.info('Count Simples xmls: {}'.format(simples))
@@ -34,8 +32,8 @@ class IsCountsCorrect():
             logging.warning("BIG DEAL:  Compounds Don't Match.  Expected: {}.  Observed: {}".format(compounds, self.count_observed_compounds(alias)))
         logging.info('IsCountsCorrect done')
 
-    def make_list_of_elem_jsons(self, alias):
-        input_dir = os.path.join(self.SOURCE_DIR, alias)
+    def make_list_of_elem_jsons(self, alias, cdm_data_dir):
+        input_dir = os.path.join(cdm_data_dir, alias)
         return [os.path.join(input_dir, file) for file in os.listdir(input_dir)
                 if 'Elems_in_Collection' in file and '.json' in file]
 
@@ -62,8 +60,8 @@ class IsCountsCorrect():
                     compound_pointers.append(str(pointer))
         return compound_pointers
 
-    def count_child_pointers(self, alias, cpd_pointer):
-        structure_file = os.path.abspath(os.path.join(self.SOURCE_DIR, alias, 'Cpd/{}_cpd.xml'.format(cpd_pointer)))
+    def count_child_pointers(self, alias, cpd_pointer, cdm_data_dir):
+        structure_file = os.path.abspath(os.path.join(cdm_data_dir, alias, 'Cpd/{}_cpd.xml'.format(cpd_pointer)))
         structure_etree = ET.parse(structure_file)
         child_pointers = [i for i in structure_etree.findall('//pageptr') if i.text]
         return len(child_pointers)
@@ -84,11 +82,10 @@ class IsCountsCorrect():
 
 
 class PullInBinaries():
-    def __init__(self, alias):
-        self.alias = alias
-        sourcefiles_paths = self.makedict_sourcefiles()
-        simplexmls_list = self.makelist_simpleoutfolderxmls()
-        compoundxmls_list = self.makelist_compoundoutfolderxmls()
+    def __init__(self, alias, cdm_data_dir):
+        sourcefiles_paths = self.makedict_sourcefiles(alias, cdm_data_dir)
+        simplexmls_list = self.makelist_simpleoutfolderxmls(alias)
+        compoundxmls_list = self.makelist_compoundoutfolderxmls(alias)
         for filelist in (simplexmls_list, compoundxmls_list):
             for kind, outroot, pointer in filelist:
                 if pointer not in sourcefiles_paths:
@@ -104,9 +101,9 @@ class PullInBinaries():
                 self.copy_binary(kind, sourcepath, sourcefile, outroot, pointer)
         logging.info('PullInBinaries done')
 
-    def makedict_sourcefiles(self):
+    def makedict_sourcefiles(self, alias, cdm_data_dir):
         sourcefiles_paths = dict()
-        input_dir = os.path.join(SOURCE_DIR, self.alias)
+        input_dir = os.path.join(cdm_data_dir, alias)
         for root, dirs, files in os.walk(input_dir):
             for file in files:
                 if file.split('.')[-1] in ('jp2', 'mp4', 'mp3', 'pdf'):
@@ -114,9 +111,9 @@ class PullInBinaries():
                     sourcefiles_paths[pointer] = (root, file)
         return sourcefiles_paths
 
-    def makelist_simpleoutfolderxmls(self):
+    def makelist_simpleoutfolderxmls(self, alias):
         xml_filelist = []
-        subfolder = os.path.abspath(os.path.join('output', '{}_simples'.format(self.alias), 'final_format'))
+        subfolder = os.path.abspath(os.path.join('output', '{}_simples'.format(alias), 'final_format'))
         for root, dirs, files in os.walk(subfolder):
             for file in files:
                 if '.xml' in file:
@@ -124,9 +121,9 @@ class PullInBinaries():
                     xml_filelist.append(('simple', root, pointer))
         return xml_filelist
 
-    def makelist_compoundoutfolderxmls(self):
+    def makelist_compoundoutfolderxmls(self, alias):
         xml_filelist = []
-        subfolder = os.path.abspath(os.path.join('output', '{}_compounds'.format(self.alias), 'final_format'))
+        subfolder = os.path.abspath(os.path.join('output', '{}_compounds'.format(alias), 'final_format'))
         for root, dirs, files in os.walk(subfolder):
             for file in files:
                 if file == 'MODS.xml':
@@ -237,16 +234,16 @@ if __name__ == '__main__':
     setup_logging()
     try:
         alias = sys.argv[1]
-        SOURCE_DIR = sys.argv[2]
+        cdm_data_dir = sys.argv[2]
     except IndexError:
         logging.warning('')
         logging.warning('Change to: "python post_conversion_cleanup.py $aliasname $path/to/U-Drive/Cached_Cdm_files"')
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
-    PullInBinaries(alias)
+    PullInBinaries(alias, cdm_data_dir)
     MakeStructureFile(alias)
-    IsCountsCorrect(alias, SOURCE_DIR)
+    IsCountsCorrect(alias, cdm_data_dir)
     report_restricted_files(alias)
     report_filetype(alias)
     logging.info('finished {}'.format(alias))
