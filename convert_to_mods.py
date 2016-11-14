@@ -19,22 +19,14 @@ MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
 
-def convert_to_mods(alias):
-    cdm_data_dir = os.path.realpath(os.path.join(SOURCE_DIR, alias))
+def convert_to_mods(alias, cdm_data_dir):
+    remove_previous_mods(alias)
+    cdm_data_dir = os.path.realpath(os.path.join(cdm_data_dir, alias))
     nicks_to_names_dict = make_nicks_to_names(cdm_data_dir)
     mappings_dict = parse_mappings_file(alias)
-
     cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(cdm_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
-
-    parents_children = dict()
-    for cpd_parent in cpd_parent_pointers:
-        cpd_parent_filepath = os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(cpd_parent))
-        cpd_parent_etree = ET.parse(cpd_parent_filepath)
-        children_pointers = [i.text for i in cpd_parent_etree.findall('.//pageptr')]
-        parents_children[cpd_parent] = children_pointers
-
-    remove_previous_mods(alias)
+    parents_children = parse_parents_children(cdm_data_dir, cpd_parent_pointers)
 
     # root level simples
     for pointer in simple_pointers:
@@ -68,7 +60,7 @@ def convert_to_mods(alias):
     logging.info('finished preliminary mods: compounds')
 
     polish_mods(alias)
-    IsCountsCorrect(alias, SOURCE_DIR)
+    IsCountsCorrect(alias, cdm_data_dir)
     logging.info('completed')
     logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
 
@@ -98,6 +90,15 @@ def parse_mappings_file(alias):
     with open('mappings_files/{}.csv'.format(alias), 'r', encoding='utf-8') as f:
         csv_reader = csv.reader(f, delimiter=',')
         return {i: j for i, j in csv_reader}
+
+
+def parse_parents_children(cdm_data_dir, cpd_parent_pointers):
+    parents_children = dict()
+    for cpd_parent in cpd_parent_pointers:
+        cpd_parent_filepath = os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(cpd_parent))
+        cpd_parent_etree = ET.parse(cpd_parent_filepath)
+        children_pointers = [i.text for i in cpd_parent_etree.findall('.//pageptr')]
+        parents_children[cpd_parent] = children_pointers
 
 
 def parse_root_cdm_pointers(cdm_data_filestructure):
@@ -145,8 +146,8 @@ def make_a_single_mods(ingredients):
     careful_tag_split(mods, 'subject', 'hierarchicalGeographic')
     normalize_date(mods, pointer)
     delete_empty_fields(mods)
-    reorder_location(mods)
     reorder_title(mods)
+    reorder_location(mods)
 
     mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
     mods_string = mods_bytes.decode('utf-8')
@@ -356,12 +357,12 @@ def read_alias_xslt_file(alias):
 
 
 def flatten_simple_dir(simple_dir):
-    source_dir = os.path.join(simple_dir, 'original_format')
+    orig_format_dir = os.path.join(simple_dir, 'original_format')
     flattened_dir = os.path.join(simple_dir, 'presaxon_flattened')
     os.makedirs(flattened_dir, exist_ok=True)
-    for file in os.listdir(source_dir):
+    for file in os.listdir(orig_format_dir):
         if '.xml' in file:
-            copyfile(os.path.join(source_dir, file), os.path.join(flattened_dir, file))
+            copyfile(os.path.join(orig_format_dir, file), os.path.join(flattened_dir, file))
 
 
 def run_saxon(output_dir, alias_xslts, cpd_or_simple):
@@ -430,10 +431,10 @@ def check_date_format(alias, flat_final_dir):
 
 
 def flatten_cpd_dir(cpd_dir):
-    source_dir = os.path.join(cpd_dir, 'original_format')
+    orig_format_dir = os.path.join(cpd_dir, 'original_format')
     flattened_dir = os.path.join(cpd_dir, 'presaxon_flattened')
     os.makedirs(flattened_dir, exist_ok=True)
-    for root, dirs, files in os.walk(source_dir):
+    for root, dirs, files in os.walk(orig_format_dir):
         for file in files:
             if ".xml" in file:
                 source_folder_name = os.path.split(root)[-1]
@@ -483,12 +484,12 @@ if __name__ == '__main__':
     setup_logging()
     try:
         alias = sys.argv[1]
-        SOURCE_DIR = sys.argv[2]
+        cdm_data_dir = sys.argv[2]
     except IndexError:
         logging.warning('')
         logging.warning('Change to: "python convert_to_mods.py $aliasname $path/to/Cached_Cdm_files"')
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
-    convert_to_mods(alias)
+    convert_to_mods(alias, cdm_data_dir)
     logging.info('finished {}'.format(alias))
