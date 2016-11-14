@@ -392,15 +392,14 @@ def run_saxon(output_dir, alias_xslts, cpd_or_simple):
 
 
 def validate_mods(alias, directory):
-    all_passed = True
     xml_files = [file for file in os.listdir(directory) if ".xml" in file]
     for file in xml_files:
         file_etree = ET.parse(os.path.join(directory, file))
         pointer = file.split('.')[0]
         if not MODS_SCHEMA.validate(file_etree):
-            all_passed = False
             logging.warning("{} {} post-xsl did not validate!!!!".format(alias, pointer))
-    if all_passed:
+            break
+    else:
         logging.info("This group of files post-xsl Validated")
 
 
