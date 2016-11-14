@@ -21,12 +21,12 @@ MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
 def convert_to_mods(alias, cdm_data_dir):
     remove_previous_mods(alias)
-    cdm_data_dir = os.path.realpath(os.path.join(cdm_data_dir, alias))
-    nicks_to_names_dict = make_nicks_to_names(cdm_data_dir)
+    alias_data_dir = os.path.realpath(os.path.join(cdm_data_dir, alias))
+    nicks_to_names_dict = make_nicks_to_names(alias_data_dir)
     mappings_dict = parse_mappings_file(alias)
-    cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(cdm_data_dir)]
+    cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(alias_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
-    parents_children = parse_parents_children(cdm_data_dir, cpd_parent_pointers)
+    parents_children = parse_parents_children(alias_data_dir, cpd_parent_pointers)
 
     # root level simples
     for pointer in simple_pointers:
@@ -44,22 +44,23 @@ def convert_to_mods(alias, cdm_data_dir):
     for pointer, _ in parents_children.items():
         output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', pointer)
         output_file = os.path.join(output_path, 'MODS.xml')
-        path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', '{}.json'.format(pointer))
+        path_to_pointer = os.path.join(alias_data_dir, 'Cpd', '{}.json'.format(pointer))
         ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
         make_a_single_mods(ingredients)
-        copyfile(os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(pointer)), os.path.join(output_path, 'structure.cpd'))
+        copyfile(os.path.join(alias_data_dir, 'Cpd', '{}_cpd.xml'.format(pointer)), os.path.join(output_path, 'structure.cpd'))
 
     # child level simples
     for parent, children_pointers in parents_children.items():
         for pointer in children_pointers:
             output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', parent, pointer)
             output_file = os.path.join(output_path, 'MODS.xml')
-            path_to_pointer = os.path.join(cdm_data_dir, 'Cpd', parent, '{}.json'.format(pointer))
+            path_to_pointer = os.path.join(alias_data_dir, 'Cpd', parent, '{}.json'.format(pointer))
             ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
             make_a_single_mods(ingredients)
     logging.info('finished preliminary mods: compounds')
 
-    polish_mods(alias)
+    saxon_n_cleanup_mods(alias)
+    print(cdm_data_dir)
     IsCountsCorrect(alias, cdm_data_dir)
     logging.info('completed')
     logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
@@ -99,6 +100,7 @@ def parse_parents_children(cdm_data_dir, cpd_parent_pointers):
         cpd_parent_etree = ET.parse(cpd_parent_filepath)
         children_pointers = [i.text for i in cpd_parent_etree.findall('.//pageptr')]
         parents_children[cpd_parent] = children_pointers
+    return parents_children
 
 
 def parse_root_cdm_pointers(cdm_data_filestructure):
@@ -325,7 +327,7 @@ def reorder_node(root_element, target_tagname, subtag_order_dict):
         location_elem.append(i)
 
 
-def polish_mods(alias):
+def saxon_n_cleanup_mods(alias):
     alias_xslts = read_alias_xslt_file(alias)
 
     simples_output_dir = os.path.join('output', '{}_simples'.format(alias))
