@@ -146,6 +146,7 @@ def make_a_single_mods(ingredients):
     normalize_date(mods, pointer)
     delete_empty_fields(mods)
     reorder_location(mods)
+    reorder_title(mods)
 
     mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
     mods_string = mods_bytes.decode('utf-8')
