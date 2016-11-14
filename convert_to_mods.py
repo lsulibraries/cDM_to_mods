@@ -136,8 +136,17 @@ def make_a_single_mods(ingredients):
     pointer_json = get_cdm_pointer_json(path_to_pointer)
     nicks_texts = parse_json(pointer, pointer_json)
     propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
-    mods = make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
-    reorder_sequence(mods)
+    mods = build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
+    merge_same_fields(mods)
+    careful_tag_split(mods, 'name', 'namePart')
+    careful_tag_split(mods, 'subject', 'topic')
+    careful_tag_split(mods, 'subject', 'geographic')
+    careful_tag_split(mods, 'subject', 'temporal')
+    careful_tag_split(mods, 'subject', 'hierarchicalGeographic')
+    normalize_date(mods, pointer)
+    delete_empty_fields(mods)
+    reorder_location(mods)
+
     mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
     mods_string = mods_bytes.decode('utf-8')
     with open(output_file, 'w', encoding="utf-8") as f:
@@ -161,7 +170,7 @@ def convert_nicks_to_propers(nicks_to_names_dict, nicks_texts):
     return propers_texts
 
 
-def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict):
+def build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict):
     NSMAP = {None: "http://www.loc.gov/mods/v3",
              'mods': "http://www.loc.gov/mods/v3",
              'xsi': "http://www.w3.org/2001/XMLSchema-instance",
@@ -188,17 +197,6 @@ def make_pointer_mods(path_to_pointer, pointer, pointer_json, propers_texts, ali
     id_elem = ET.Element("identifier", attrib={'type': 'uri', 'invalid': 'yes', 'displayLabel': "Migrated From"})
     id_elem.text = 'http://cdm16313.contentdm.oclc.org/cdm/singleitem/collection/{}/id/{}'.format(alias, pointer)
     root_element.append(id_elem)
-
-    merge_same_fields(root_element)
-    careful_tag_split(root_element, 'name', 'namePart')
-    careful_tag_split(root_element, 'subject', 'topic')
-    careful_tag_split(root_element, 'subject', 'geographic')
-    careful_tag_split(root_element, 'subject', 'temporal')
-    careful_tag_split(root_element, 'subject', 'hierarchicalGeographic')
-    normalize_date(root_element, pointer)
-    delete_empty_fields(root_element)
-    reorder_sequence(root_element)
-
     return root_element
 
 
@@ -296,17 +294,29 @@ def delete_empty_fields(orig_etree):
     return orig_etree
 
 
-def reorder_sequence(root_element):
-    if root_element.find('./location') is None:  # lxml wants this syntax
+def reorder_title(root_element):
+    subtag_order_dict = {"title": 0,
+                         "subTitle": 1, }
+    target_tagname = 'titleInfo'
+    reorder_node(root_element, target_tagname, subtag_order_dict)
+
+
+def reorder_location(root_element):
+    subtag_order_dict = {"physicalLocation": 0,
+                         "shelfLocator": 1,
+                         "url": 2,
+                         "holdingSimple": 3,
+                         "holdingExternal": 4, }
+    target_tagname = 'location'
+    reorder_node(root_element, target_tagname, subtag_order_dict)
+
+
+def reorder_node(root_element, target_tagname, subtag_order_dict):
+    if root_element.find('./{}'.format(target_tagname)) is None:  # lxml wants this syntax
         return
-    location_elem = root_element.find('./location')
-    order_dict = {"physicalLocation": 0,
-                  "shelfLocator": 1,
-                  "url": 2,
-                  "holdingSimple": 3,
-                  "holdingExternal": 4, }
+    location_elem = root_element.find('./{}'.format(target_tagname))
     child_elems = location_elem.getchildren()
-    detached_list = sorted(child_elems, key=lambda x: order_dict[x.tag])
+    detached_list = sorted(child_elems, key=lambda x: subtag_order_dict[x.tag])
     for child in location_elem:
         location_elem.remove(child)
     for i in detached_list:
