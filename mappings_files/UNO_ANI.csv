@@ -20,7 +20,7 @@ null4,"<location><holdingSimple><copyInformation><subLocation>Louisiana and Spec
 Rights,"<accessCondition type='restriction on access' displayLabel='Rights'>%value%</accessCondition>"
 null7,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>Contact the University of New Orleans, Earl K. Long Library for more information about use and reproduction. libspec@uno.edu</accessCondition>"
 Object File Name,"<identifier type='local' displayLabel='Object File Name'>%value%</identifier>"
-Cataloged Date,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
+Catalog Date,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 Date modified,"<recordInfo><recordChangeDate>%value%</recordChangeDate></recordInfo>"
 Cataloged By,"<extension><cataloger>%value%</cataloger></extension>"
 null5,"<extension><CONTENTdmData></CONTENTdmData></extension>"

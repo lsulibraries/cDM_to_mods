@@ -19,7 +19,7 @@
     
     <xsl:template match="note[@type='content']">
         <xsl:choose>
-            <xsl:when test="matches($resource, 'audio')">
+            <xsl:when test="matches($resource, 'sound')">
                 <note type="performers">
                     <xsl:value-of select="."/>
                 </note>
