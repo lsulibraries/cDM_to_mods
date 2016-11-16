@@ -5,7 +5,7 @@ Thesis Advisor,"<name displayLabel='Thesis Advisor'><namePart>%value%</namePart>
 Advisory Committee,"<name displayLabel='Advisory Committee'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>ths</roleTerm><roleTerm type='text' authority='marcrelator'>Thesis advisor</roleTerm></role></name>"
 Date Degree Awarded,"<originInfo><dateIssued keyDate='yes'>%value%</dateIssued></originInfo>"
 Digitized Date,"<originInfo><dateCaptured>%value%</dateCaptured></originInfo>"
-Keywords,"<subject authority='local'><topic>%value%</topic></subject>"
+Keywords,"<note type='thesis' displayLabel='Keywords'>%value%</note>"
 Abstract/Introduction,"<abstract displayLabel='Abstract'>%value%</abstract>"
 Degree,"<note type='thesis' displayLabel='Degree'>%value%</note>"
 Degree Program,"<note type='thesis' displayLabel='Degree Program'>%value%</note>"
