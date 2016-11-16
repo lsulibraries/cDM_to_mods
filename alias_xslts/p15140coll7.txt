@@ -2,5 +2,6 @@ blankNodes
 titleNonSort
 blankNamePart
 subjectSplit
+removeSemicolon-UNO_ANI
 locationMerge
 OrderedTemplates
