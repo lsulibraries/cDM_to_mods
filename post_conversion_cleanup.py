@@ -3,7 +3,7 @@
 import os
 import sys
 import logging
-from shutil import copyfile
+from shutil import copyfile, move
 import json
 from lxml import etree as ET
 
@@ -230,6 +230,24 @@ def setup_logging():
     logging.getLogger('').addHandler(console)
 
 
+def folder_by_extension(alias):
+    starting_folder = os.path.join(os.getcwd(), 'output', '{}_simples'.format(alias), 'final_format')
+    walk_folder = os.walk(starting_folder)
+    for root, dirs, files in os.walk(starting_folder):
+        print(root, dirs, files)
+    root, dirs, files = [i for i in walk_folder][0]
+    set_ext = {i.split(".")[1] for i in files if i.split(".")[1] != 'xml'}
+    for extension in set_ext:
+        os.makedirs(os.path.join(starting_folder, extension), exist_ok=True)
+        list_x = []
+        for file in files:
+            if file.split('.')[1] == extension:
+                list_x.append(file.split('.')[0])
+        for file in files:
+            if file.split('.')[0] in list_x:
+                move(os.path.join(root, file), os.path.join(root, extension, file))
+
+
 if __name__ == '__main__':
     setup_logging()
     try:
@@ -246,4 +264,5 @@ if __name__ == '__main__':
     IsCountsCorrect(alias, cdm_data_dir)
     report_restricted_files(alias)
     report_filetype(alias)
+    folder_by_extension(alias)
     logging.info('finished {}'.format(alias))
