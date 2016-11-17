@@ -231,21 +231,15 @@ def setup_logging():
 
 
 def folder_by_extension(alias):
-    starting_folder = os.path.join(os.getcwd(), 'output', '{}_simples'.format(alias), 'final_format')
-    walk_folder = os.walk(starting_folder)
-    for root, dirs, files in os.walk(starting_folder):
-        print(root, dirs, files)
-    root, dirs, files = [i for i in walk_folder][0]
-    set_ext = {i.split(".")[1] for i in files if i.split(".")[1] != 'xml'}
-    for extension in set_ext:
+    starting_folder = os.path.join('output', '{}_simples'.format(alias), 'final_format')
+    files = [i for i in os.listdir(starting_folder) if os.path.isfile(os.path.join(starting_folder, i))]
+    extensions = {i.split(".")[1] for i in files if i.split(".")[1] != 'xml'}
+    for extension in extensions:
         os.makedirs(os.path.join(starting_folder, extension), exist_ok=True)
-        list_x = []
-        for file in files:
-            if file.split('.')[1] == extension:
-                list_x.append(file.split('.')[0])
-        for file in files:
-            if file.split('.')[0] in list_x:
-                move(os.path.join(root, file), os.path.join(root, extension, file))
+        files_limited_to_extension = {file.split('.')[0] for file in files if file.split('.')[1] == extension}
+        files_with_extension_plus_samenames = [file for file in files if file.split('.')[0] in files_limited_to_extension]
+        for file in files_with_extension_plus_samenames:
+            move(os.path.join(starting_folder, file), os.path.join(starting_folder, extension, file))
 
 
 if __name__ == '__main__':
