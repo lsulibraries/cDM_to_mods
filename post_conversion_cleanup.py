@@ -108,6 +108,9 @@ class PullInBinaries():
             for file in files:
                 if file.split('.')[-1] in ('jp2', 'mp4', 'mp3', 'pdf'):
                     pointer = file.split('.')[0]
+                    if pointer in sourcefiles_paths:
+                        logging.warning("pointer {} has multiple possible source binaries -- please cull unwanted version".format(pointer))
+                        quit()
                     sourcefiles_paths[pointer] = (root, file)
         return sourcefiles_paths
 
