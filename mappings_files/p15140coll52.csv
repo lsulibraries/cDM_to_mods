@@ -25,7 +25,7 @@ Source,"<note type='ownership' displayLabel='Source'>National Hansen's Disease P
 null10,"<note type='ownership' displayLabel='Repository'>LSU Health Sciences Center New Orleans ( http://www.lsuhsc.edu/library/ )</note>"
 null2,"<location><physicalLocation displayLabel='Physical Location'>Gillis W. Long Center, 5445 Point Clair Road, Bldg. 12, Carville, LA</physicalLocation></location>"
 Rights,"<accessCondition type='restriction on access' displayLabel='Rights'>%value%</accessCondition>"
-null11,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>SEND MAIL & INQUIRIES TO: Curator, National Hansen's Disease Museum, 1770 Physicians Park Drive, Baton Rouge, LA 70816</accessCondition>"
+null11,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>SEND MAIL AND INQUIRIES TO: Curator, National Hansen's Disease Museum, 1770 Physicians Park Drive, Baton Rouge, LA 70816</accessCondition>"
 Object File Name,"<identifier type='local' displayLabel='Object File Name'>%value%</identifier>"
 Cataloged Date,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 Date modified,"<recordInfo><recordChangeDate>%value%</recordChangeDate></recordInfo>"
