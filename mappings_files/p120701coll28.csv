@@ -19,7 +19,6 @@ null2,"<location><physicalLocation displayLabel='Physical Location'>Loyola Unive
 null3,"<location><url displayLabel='Institution Web Site'>http://library.loyno.edu/</url></location>"
 null4,"<location><holdingSimple><copyInformation><subLocation>Special Collections and Archives</subLocation></copyInformation></holdingSimple></location>"
 Rights,"<accessCondition type='restriction on access' displayLabel='Rights'>%value%</accessCondition>"
-Permissions,"<accessCondition type='restriction on access' displayLabel='Permissions'>%value%</accessCondition>"
 Contact Information,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>%value%</accessCondition>"
 Object File Name,"<identifier type='local' displayLabel='Object File Name'>%value%</identifier>"
 Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
