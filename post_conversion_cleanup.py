@@ -235,6 +235,8 @@ def setup_logging():
 
 def folder_by_extension(alias):
     starting_folder = os.path.join('output', '{}_simples'.format(alias), 'final_format')
+    if not os.path.isdir(starting_folder):
+        return
     files = [i for i in os.listdir(starting_folder) if os.path.isfile(os.path.join(starting_folder, i))]
     extensions = {i.split(".")[1] for i in files if i.split(".")[1] != 'xml'}
     for extension in extensions:
