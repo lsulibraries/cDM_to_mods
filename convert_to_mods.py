@@ -299,8 +299,11 @@ def delete_empty_fields(orig_etree):
 
 
 def reorder_title(root_element):
-    subtag_order_dict = {"title": 0,
-                         "subTitle": 1, }
+    subtag_order_dict = {"nonSort": 0,
+                         "title": 1,
+                         "subTitle": 2,
+                         "partNumber": 3,
+                         "partName": 4, }
     target_tagname = 'titleInfo'
     reorder_node(root_element, target_tagname, subtag_order_dict)
 

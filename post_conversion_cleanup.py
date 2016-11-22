@@ -195,7 +195,7 @@ def report_restricted_files(alias):
         with open('output/{}_restrictions.txt'.format(alias), 'w') as f:
             for k, v in restrictions_dict.items():
                 output_text += '{}: {}\n'.format(k.replace('.xml', ''), v)
-            f.write(output_text, encoding='utf-8')
+            f.write(output_text)
         logging.info('report_restricted_files done')
         logging.info('List of restricted items in file at output/{}_restricted_item.txt'.format(alias))
     else:
