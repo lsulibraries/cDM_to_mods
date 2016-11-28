@@ -16,7 +16,7 @@ Engraver/lithographer,"<name displayLabel='Engraver/lithographer'><namePart>%val
 Donated by,"<name displayLabel='Donated by'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>dnr</roleTerm><roleTerm type='text' authority='marcrelator'>Donor</roleTerm></role></name>"
 Subjects,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Location of bird drawn,"<subject displayLabel='Location of bird drawn'><geographic>%value%</geographic></subject>"
-Physical description,"<abstract>%value%</abstract>"
+Physical description,"<abstract displayLabel='Description'>%value%</abstract>"
 General Type,"<typeOfResource>still image</typeOfResource>"
 Type,"<physicalDescription><form>%value%</form></physicalDescription>"
 Original Format,"<physicalDescription><note type='medium'>%value%</note></physicalDescription>"
