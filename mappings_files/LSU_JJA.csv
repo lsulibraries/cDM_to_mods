@@ -5,7 +5,7 @@ Scientific name of plant,"<titleInfo displayLabel='Scientific name of plant'><su
 Notes,"<note type='content'>%value%</note>"
 Current common name,"<note type='content' displayLabel='Current common name'>%value%</note>"
 Current scientific name,"<note type='content' displayLabel='Current scientific name'>%value%</note>"
-Current scientific plant name,"<subject authority='local' displayLabel='Current scientific plant name'><topic>%value%</topic></subject>"
+Current scientific plant name,"<note type='content' displayLabel='Current scientific plant name'>%value%</note>"
 Plate number,"<titleInfo displayLabel='Plate'><partNumber>Plate %value%</partNumber></titleInfo>"
 Part number,"<titleInfo displayLabel='Part'><partNumber>Part %value%</partNumber></titleInfo>"
 Artist,"<name displayLabel='Artist'><namePart>Audubon, John James (1785-1851)</namePart><role><roleTerm type='code' authority='marcrelator'>art</roleTerm><roleTerm type='text' authority='marcrelator'>Artist</roleTerm></role></name>"
