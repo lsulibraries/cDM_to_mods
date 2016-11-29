@@ -8,7 +8,7 @@ County,"<subject authority='local' displayLabel='County'><hierarchicalGeographic
 City,"<subject authority='local' displayLabel='City'><hierarchicalGeographic><city>%value%</city></hierarchicalGeographic></subject>"
 State,"<subject authority='local' displayLabel='State'><hierarchicalGeographic><state>%value%</state></hierarchicalGeographic></subject>"
 Outside US,"<subject authority='local' displayLabel='Outside US'><hierarchicalGeographic><country>%value%</country></hierarchicalGeographic></subject>"
-Coverage-Temporal,"<subject authority='local' displayLabel='Temporal Subject'><temporal>%value%</temporal></subject>"
+Coverage-Temporal,"<subject authority='local' displayLabel='Time Period'><temporal>%value%</temporal></subject>"
 Collection Code,"<identifier type='local' displayLabel='Collection Code'>%value%</identifier>"
 Contact Info (Name; email; phone),"<accessCondition type='use and reproduction' displayLabel='Contact Information'>%value%</accessCondition>"
 null5,"<extension><CONTENTdmData></CONTENTdmData></extension>"

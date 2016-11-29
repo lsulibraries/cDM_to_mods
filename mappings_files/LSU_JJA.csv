@@ -23,7 +23,7 @@ Original Format,"<physicalDescription><note type='medium'>%value%</note></physic
 null7,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
 Language,"<language><languageTerm type='code'>%value%</languageTerm></language>"
 Digital Collection,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>%value%</title></titleInfo></relatedItem>"
-Repository,"<note type='ownership' displayLabel='Repository'>Louisiana State University Libraries, Special Collections ( http://www.lib.lsu.edu/special )</note>"
+Repository,"<note type='ownership' displayLabel='Source'>Louisiana State University Libraries, Special Collections ( http://www.lib.lsu.edu/special )</note>"
 Repository Collection,"<relatedItem type='host'><titleInfo type='alternative' displayLabel='Repository Collection'><title>%value%</title></titleInfo></relatedItem>"
 null6,"<relatedItem type='host'><location><url displayLabel='Relation'>http://lsu.louisianadigitallibrary.org/lsu-jja%3Acollection</url></location></relatedItem>"
 null1,"<location><physicalLocation authority='oclcorg' displayLabel='OCLC Member Symbol'>LUU</physicalLocation></location>"

@@ -19,7 +19,7 @@ Measurements,"<physicalDescription><extent>%value%</extent></physicalDescription
 Weight,"<physicalDescription><extent>%value%</extent></physicalDescription>"
 Condition,"<physicalDescription><note type='condition'>%value%</note></physicalDescription>"
 null1,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
-null6,"<note type='ownership' displayLabel='Repository'>The Historic New Orleans Collection (http://www.hnoc.org)</note>"
+null6,"<note type='ownership' displayLabel='Source'>The Historic New Orleans Collection (http://www.hnoc.org)</note>"
 Source,"<note type='ownership' displayLabel='Source'>%value%</note>"
 Ownership,"<note type='ownership' displayLabel='Ownership'>%value%</note>"
 Provenance,"<note type='ownership' displayLabel='Provenance'>%value%</note>"
