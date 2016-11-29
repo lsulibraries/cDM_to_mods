@@ -29,9 +29,9 @@
                 </name>
             </xsl:when>
             <xsl:otherwise>
-                <name>
-                    <xsl:apply-templates />
-                </name>
+                <xsl:copy>
+                    <xsl:apply-templates select="@*|node()" />
+                </xsl:copy>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
