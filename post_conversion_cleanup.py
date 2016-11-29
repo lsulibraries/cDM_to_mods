@@ -3,7 +3,7 @@
 import os
 import sys
 import logging
-from shutil import copyfile
+from shutil import copyfile, move
 import json
 from lxml import etree as ET
 
@@ -108,6 +108,9 @@ class PullInBinaries():
             for file in files:
                 if file.split('.')[-1] in ('jp2', 'mp4', 'mp3', 'pdf'):
                     pointer = file.split('.')[0]
+                    if pointer in sourcefiles_paths:
+                        logging.warning("pointer {} has multiple possible source binaries -- please cull unwanted version".format(pointer))
+                        quit()
                     sourcefiles_paths[pointer] = (root, file)
         return sourcefiles_paths
 
@@ -192,7 +195,7 @@ def report_restricted_files(alias):
         with open('output/{}_restrictions.txt'.format(alias), 'w') as f:
             for k, v in restrictions_dict.items():
                 output_text += '{}: {}\n'.format(k.replace('.xml', ''), v)
-            f.write(output_text, encoding='utf-8')
+            f.write(output_text)
         logging.info('report_restricted_files done')
         logging.info('List of restricted items in file at output/{}_restricted_item.txt'.format(alias))
     else:
@@ -230,6 +233,20 @@ def setup_logging():
     logging.getLogger('').addHandler(console)
 
 
+def folder_by_extension(alias):
+    starting_folder = os.path.join('output', '{}_simples'.format(alias), 'final_format')
+    if not os.path.isdir(starting_folder):
+        return
+    files = [i for i in os.listdir(starting_folder) if os.path.isfile(os.path.join(starting_folder, i))]
+    extensions = {i.split(".")[1] for i in files if i.split(".")[1] != 'xml'}
+    for extension in extensions:
+        os.makedirs(os.path.join(starting_folder, extension), exist_ok=True)
+        files_limited_to_extension = {file.split('.')[0] for file in files if file.split('.')[1] == extension}
+        files_with_extension_plus_samenames = [file for file in files if file.split('.')[0] in files_limited_to_extension]
+        for file in files_with_extension_plus_samenames:
+            move(os.path.join(starting_folder, file), os.path.join(starting_folder, extension, file))
+
+
 if __name__ == '__main__':
     setup_logging()
     try:
@@ -246,4 +263,5 @@ if __name__ == '__main__':
     IsCountsCorrect(alias, cdm_data_dir)
     report_restricted_files(alias)
     report_filetype(alias)
+    folder_by_extension(alias)
     logging.info('finished {}'.format(alias))

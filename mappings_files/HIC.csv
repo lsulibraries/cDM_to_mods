@@ -12,7 +12,7 @@ Notes,"<relatedItem type='host'><part><detail><title>%value%</title></detail></p
 Type,"<typeOfResource>still image</typeOfResource>"
 Format,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
 Language,"<language><languageTerm type='code'>%value%</languageTerm></language>"
-Source,"<note type='ownership' displayLabel='Repository'>University of New Orleans (http://library.uno.edu)</note>"
+Source,"<note type='ownership' displayLabel='Source'>University of New Orleans (http://library.uno.edu)</note>"
 null9,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>Higgins Industries</title></titleInfo></relatedItem>"
 Relation,"<relatedItem type='host'><location><url displayLabel='Relation'>http://uno.louisianadigitallibrary.org/uno-hic%3Acollection</url></location></relatedItem>"
 null1,"<location><physicalLocation authority='oclcorg' displayLabel='OCLC Member Symbol'>LNU</physicalLocation></location>"
