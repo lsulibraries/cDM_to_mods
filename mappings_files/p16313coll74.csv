@@ -12,7 +12,7 @@ Degree Program,"<note type='thesis' displayLabel='Degree Program'>%value%</note>
 null6,"<typeOfResource>text</typeOfResource>"
 Format,"<physicalDescription><internetMediaType>pdf</internetMediaType></physicalDescription>"
 null7,"<language><languageTerm type='code'>en</languageTerm></language>"
-null8,"<note type='ownership' displayLabel='Repository'>McNeese State University (http://libguides.mcneese.edu/archives)</note>"
+null8,"<note type='ownership' displayLabel='Source'>McNeese State University (http://libguides.mcneese.edu/archives)</note>"
 null9,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>McNeese State University Electronic Theses</title></titleInfo></relatedItem>"
 Relation,"<relatedItem type='host'><location><url displayLabel='Relation'>http://mcneese.louisianadigitallibrary.org/mcneese-p16313coll74%3Acollection</url></location></relatedItem>"
 null1,"<location><physicalLocation authority='oclcorg' displayLabel='OCLC Member Symbol'>LHA</physicalLocation></location>"
