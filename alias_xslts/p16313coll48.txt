@@ -1,4 +1,5 @@
 dateIssuedSplit
+dateCreatedSplit
 titleNonSort
 subjectSplit
 blankNodes

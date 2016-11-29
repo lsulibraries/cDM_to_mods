@@ -7,6 +7,7 @@ typeOfResource
 noteExtentJAZ
 internetMediaType
 dateIssuedSplit
+dateCreatedSplit
 blankNodes
 locationMerge
 OrderedTemplates

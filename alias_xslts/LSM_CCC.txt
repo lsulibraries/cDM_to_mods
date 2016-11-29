@@ -3,7 +3,9 @@ blankNamePart
 subjectSplit
 multiNamePart
 dateIssuedSplit
+dateCreatedSplit
 dateIssuedLSM_CCC
+dateCreatedLSM_CCC
 blankNodes
 locationMerge
 OrderedTemplates

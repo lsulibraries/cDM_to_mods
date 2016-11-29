@@ -1,5 +1,6 @@
 blankNamePart
 dateIssuedSplit
+dateCreatedSplit
 noteTypeMediumExtent
 subjectSplit
 locationMerge

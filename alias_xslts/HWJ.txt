@@ -1,6 +1,8 @@
 titleNonSort
 dateIssuedSplit
+dateCreatedSplit
 dateIssuedHWJ
+dateCreatedHWJ
 subjectSplit
 subjectTemporalSemicolon
 typeOfResource

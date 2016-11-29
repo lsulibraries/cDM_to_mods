@@ -3,5 +3,6 @@ blankNamePart
 internetMediaType
 subjectSplit
 dateIssuedSplit
+dateCreatedSplit
 locationMerge
 OrderedTemplates

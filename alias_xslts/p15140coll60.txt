@@ -1,5 +1,6 @@
 subjectSplit
 dateIssuedSplit
+dateCreatedSplit
 languageTermSplit
 blankNodes
 locationMerge

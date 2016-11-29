@@ -3,6 +3,7 @@ blankNamePart
 namePartSemicolon
 subjectSplit
 dateIssuedSplit
+dateCreatedSplit
 blankNodes
 locationMerge
 OrderedTemplates
