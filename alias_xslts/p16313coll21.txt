@@ -2,6 +2,7 @@ titleNonSort
 blankNamePart
 subjectSplit
 dateIssuedSplit
+dateCreatedSplit
 locationMerge
 OrderedTemplates
 blankNodes

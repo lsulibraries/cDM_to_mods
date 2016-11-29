@@ -3,6 +3,7 @@ multiNamePart
 removeSemicolon-UNO_ANI
 subjectSplit
 dateIssuedSplit
+dateCreatedSplit
 blankNodes
 locationMerge
 OrderedTemplates

@@ -2,6 +2,7 @@ replaceAtSymbolsGlobal
 blankNamePart
 subjectSplit
 dateIssuedSplit
+dateCreatedSplit
 blankNodes
 locationMerge
 OrderedTemplates

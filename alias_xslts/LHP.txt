@@ -4,5 +4,6 @@ blankNamePart
 multiNamePart
 subjectSplit
 dateIssuedSplit
+dateCreatedSplit
 locationMerge
 OrderedTemplates

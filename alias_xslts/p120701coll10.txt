@@ -1,5 +1,6 @@
 blankNodes
 subjectSplit
 dateIssuedSplit
+dateCreatedSplit
 locationMerge
 OrderedTemplates

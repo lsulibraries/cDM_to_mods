@@ -1,4 +1,5 @@
 dateIssuedSplit
+dateCreatedSplit
 subjectSplit
 subjectTemporalSemicolon
 typeOfResource

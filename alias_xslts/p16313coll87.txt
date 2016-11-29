@@ -3,6 +3,7 @@ subjectSplit
 typeOfResource
 internetMediaType
 dateIssuedSplit
+dateCreatedSplit
 blankNodes
 locationMerge
 OrderedTemplates

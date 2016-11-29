@@ -3,6 +3,7 @@ titleNonSort
 multiNamePart
 blankNamePart
 dateIssuedSplit
+dateCreatedSplit
 subjectSplit
 typeOfResource
 locationMerge

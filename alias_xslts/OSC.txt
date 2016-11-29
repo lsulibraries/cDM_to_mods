@@ -2,6 +2,7 @@ titleNonSort
 subjectSplit
 extentIdentifier-OSC
 dateIssuedSplit
+dateCreatedSplit
 blankNodes
 locationMerge
 OrderedTemplates

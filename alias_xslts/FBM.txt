@@ -3,5 +3,6 @@ noteTypeMediumExtent-FBM
 titleNonSort
 subjectSplit
 dateIssuedSplit
+dateCreatedSplit
 locationMerge
 OrderedTemplates

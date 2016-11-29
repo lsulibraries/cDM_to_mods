@@ -1,5 +1,6 @@
 titleNonSort
 dateIssuedSplit
+dateCreatedSplit
 subjectSplit
 typeOfResource
 locationMerge

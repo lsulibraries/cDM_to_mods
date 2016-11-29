@@ -2,6 +2,7 @@ replaceAtSymbolsGlobal
 titleNonSort
 blankNamePart
 dateIssuedSplit
+dateCreatedSplit
 subjectSplit
 typeOfResource
 locationMerge
