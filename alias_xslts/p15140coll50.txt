@@ -1,0 +1,12 @@
+replaceAtSymbolsGlobal
+typeOfResourcep15140coll50
+internetMediaTypep15140coll50
+titleNonSort
+multiNamePart
+blankNamePart
+subjectSplit
+dateIssuedSplit
+normalizeDate
+blankNodes
+locationMerge
+OrderedTemplates
