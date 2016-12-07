@@ -35,6 +35,7 @@
             <xsl:apply-templates select="note[@type='ownership']" />
             <xsl:apply-templates select="relatedItem" />
             <xsl:apply-templates select="location" />
+            <xsl:apply-templates select="classification" />
             <xsl:apply-templates select="accessCondition" />
             <xsl:apply-templates select="note[@type='preferred citation']"/>
             <xsl:apply-templates select="identifier" />
