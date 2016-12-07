@@ -49,6 +49,9 @@
             <xsl:when test="matches(., 'tiff', 'i')">
                 <internetMediaType>jp2</internetMediaType>
             </xsl:when>
+            <xsl:when test="matches(., 'tif', 'i')">
+                <internetMediaType>jp2</internetMediaType>
+            </xsl:when>
             <xsl:when test="matches(., 'audio', 'i')">
                 <internetMediaType>mp3</internetMediaType>
             </xsl:when>
