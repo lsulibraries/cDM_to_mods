@@ -21,12 +21,11 @@
                 <typeOfResource>still image</typeOfResource>
                 <physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>
             </xsl:when>
-            <xsl:when test="matches(., 'video')">
+            <xsl:when test="matches(., 'Video')">
                 <typeOfResource>moving image</typeOfResource>
                 <physicalDescription><internetMediaType>mp4</internetMediaType></physicalDescription>
             </xsl:when>
-
-            <xsl:when test="matches(., 'pdf')">
+            <xsl:when test="matches(., 'PDF')">
                 <typeOfResource>text</typeOfResource>
                 <physicalDescription><internetMediaType>pdf</internetMediaType></physicalDescription>
             </xsl:when>
