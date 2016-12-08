@@ -7,7 +7,7 @@
       version="2.0"
       xmlns="http://www.loc.gov/mods/v3">
     
-    <!-- splits internetMediaType "mp4: 16mm film" into internetMediaType and note, or lowercase PDF, specific for Loyola Athletic collection-->
+    <!-- converts to standardized typeOfResource and internetMediaType, specific for LSUHSCS audiovisiual collection-->
     
     <xsl:template match="@* | node()">
         <xsl:copy>
@@ -16,7 +16,7 @@
     </xsl:template>
     
     <xsl:variable name="targetText" select="node()/physicalDescription/internetMediaType/text()"/>
-    <xsl:variable name="myRegEx" select="'([0-9a-zA-Z\s,]+);\s?([0-9\sa-zA-Z.&quot;]+)'"/>
+    <xsl:variable name="myRegEx" select="'([0-9a-zA-Z]+);([0-9\sa-zA-Z.&quot;]+)'"/>
     
     <xsl:template match="typeOfResource">
         <xsl:choose>
