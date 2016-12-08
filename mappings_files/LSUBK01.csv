@@ -16,7 +16,7 @@ null11,"<relatedItem type='host'><location><url displayLabel='Relation'>http://l
 null1,"<location><physicalLocation authority='oclcorg' displayLabel='OCLC Member Symbol'>LNM</physicalLocation></location>"
 null2,"<location><physicalLocation displayLabel='Physical Location'>LSU Health New Orleans: John P. Isché Library</physicalLocation></location>"
 null3,"<location><url displayLabel='Institution Web Site'>http://www.lsuhsc.edu/library/</url></location>"	
-Call Number,"<classification>%value%</classification>"
+Call Number,"<classification displayLabel='Call Number'>%value%</classification>"
 null12,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>Contact LSU Health Sciences Center New Orleans for more information about use and reproduction. digitalarchives@lsuhsc.edu</accessCondition>"
 Object File Name,"<identifier type='local' displayLabel='Object File Name'>%value%</identifier>"
 Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
