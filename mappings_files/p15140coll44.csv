@@ -6,7 +6,7 @@ Coverage-Spatial,"<subject authority='lcsh' displayLabel='Location'><geographic>
 Description,"<abstract displayLabel='Description'>%value%</abstract>"
 Notes,"<note type='content'>%value%</note>"
 Run Time of AV Clip,"<physicalDescription><extent>%value%</extent></physicalDescription>"
-Format,"<physicalDescription><internetMediaType>%value%</internetMediaType></physicalDescription>"
+Format,"<typeOfResource>%value%</typeOfResource>"
 Source 1,"<note type='content'>%value%</note>"
 Language,"<language><languageTerm type='code'>%value%</languageTerm></language>"
 Source 2,"<note type='ownership' displayLabel='Source'>Louisiana State University in Shreveport Noel Memorial Library Archives and Special Collections (http://www.lsus.edu/library/archives.htm)</note>"

@@ -18,25 +18,26 @@
     <xsl:variable name="targetText" select="node()/physicalDescription/internetMediaType/text()"/>
     <xsl:variable name="myRegEx" select="'([0-9a-zA-Z\s,]+);\s?([0-9\sa-zA-Z.&quot;]+)'"/>
     
-    <xsl:template match="physicalDescription/internetMediaType">
+    <xsl:template match="typeOfResource">
         <xsl:choose>
             <xsl:when test="matches(., 'video', 'i')">
-                <internetMediaType>mp4</internetMediaType>
                 <typeOfResource>moving image</typeOfResource>
+                <physicalDescription><internetMediaType>mp4</internetMediaType></physicalDescription>
             </xsl:when>
             <xsl:when test="matches(., 'videos', 'i')">
-                <internetMediaType>mp4</internetMediaType>
-                <typeOfResource>moving image</typeOfResource>
+                <typeOfResource>still image</typeOfResource>
+                <physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>
             </xsl:when>
             <xsl:when test="matches(., 'pdf', 'i')">
-                <internetMediaType>pdf</internetMediaType>
+                <typeOfResource>text</typeOfResource>
+                <physicalDescription><internetMediaType>pdf</internetMediaType></physicalDescription>
             </xsl:when>
             <xsl:otherwise>
-                <internetMediaType>
+                <typeOfResource>
                     <xsl:value-of select="."/>
-                </internetMediaType>
+                </typeOfResource>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
-    
+
  </xsl:stylesheet>
