@@ -1,4 +1,4 @@
-blankNamePart 
+blankNamePart
 subjectSplit
 dateCreatedSplit
 normalizeDate
