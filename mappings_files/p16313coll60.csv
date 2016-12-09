@@ -1,4 +1,4 @@
-Title,"<titleInfo><partName>%value%</partName></titleInfo>"  
+Title,"<titleInfo><title>%value%</title></titleInfo>"  
 Date,"<originInfo><dateCreated keyDate='yes'>%value%</dateCreated></originInfo>"
 Subject,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Coverage-Spatial,"<subject authority='lcsh' displayLabel='Location'><geographic>%value%</geographic></subject>"
