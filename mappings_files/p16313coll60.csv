@@ -18,7 +18,7 @@ null2,"<location><physicalLocation displayLabel='Physical Location'>University o
 null3,"<location><url displayLabel='Institution Web Site'>http://library.uno.edu</url></location>"
 null4,"<location><holdingSimple><copyInformation><subLocation>Louisiana and Special Collections</subLocation></copyInformation></holdingSimple></location>"	
 Rights,"<accessCondition type='restriction on access' displayLabel='Rights'>%value%</accessCondition>"
-null9,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>%value%</accessCondition>"
+null9,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>Contact the University of New Orleans, Earl K. Long Library for more information about use and reproduction. libspec@uno.edu</accessCondition>"
 Photo File ID,"<identifier type='local' displayLabel='Object File Name'>%value%</identifier>"
 Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 null6,"<recordInfo><recordChangeDate>2016-12-09</recordChangeDate></recordInfo>"
