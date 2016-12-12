@@ -13,7 +13,7 @@ Format,"<physicalDescription><internetMediaType>jp2</internetMediaType></physica
 Source,"<note type='ownership' displayLabel='Source'>University of New Orleans (http://library.uno.edu)</note>"
 null8,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>Louisiana Photographs Collection</title></titleInfo></relatedItem>"
 Relation,"<relatedItem type='host'><location><url displayLabel='Relation'>http://uno.louisianadigitallibrary.org/uno-p16313coll22%3Acollection</url></location></relatedItem>"
-Location,"<relatedItem type='host'><titleInfo displayLabel='Location'><partNumber>%value%</partNumber></titleInfo></relatedItem>"
+Location,"<relatedItem type='host'><titleInfo displayLabel='Archives Location'><partNumber>%value%</partNumber></titleInfo></relatedItem>"
 null1,"<location><physicalLocation authority='oclcorg' displayLabel='OCLC Member Symbol'>LNU</physicalLocation></location>"
 null2,"<location><physicalLocation displayLabel='Physical Location'>University of New Orleans: Earl K Long Library</physicalLocation></location>"
 null3,"<location><url displayLabel='Institution Web Site'>http://library.uno.edu</url></location>"
