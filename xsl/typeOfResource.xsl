@@ -20,6 +20,9 @@
             <xsl:when test="matches(., 'Moving Image', 'i')">
                 <typeOfResource>moving image</typeOfResource>
             </xsl:when>
+            <xsl:when test="matches(., 'Video', 'i')">
+                <typeOfResource>moving image</typeOfResource>
+            </xsl:when>
             <xsl:when test="matches(., 'image', 'i')">
                 <typeOfResource>still image</typeOfResource>
             </xsl:when>
