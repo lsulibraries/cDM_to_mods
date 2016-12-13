@@ -313,8 +313,7 @@ def move_zips_to_U(cdm_data_dir, alias):
 
 
 def cleanup_leftover_files(alias):
-    leftover_folders = [root for root, dirs, files in os.walk('output') if alias in root.split('/')[-1]]
-    print(leftover_folders)
+    leftover_folders = [root for root, dirs, files in os.walk('output') if alias in os.path.split(root)[1]]
     for folder in leftover_folders:
         shutil.rmtree(folder)
 
