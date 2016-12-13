@@ -16,8 +16,7 @@
     </xsl:template>
     
     <xsl:template match="name[@displayLabel='Veteran']">
-        <xsl:value-of select="name[@displayLabel='Veteran']/namePart"/>    
-           <titleInfo>
+            <titleInfo>
                 <title>
                     <xsl:value-of select="./namePart"/>
                 </title>
