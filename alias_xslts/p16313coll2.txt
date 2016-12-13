@@ -1,3 +1,5 @@
+typeOfResourcep16313coll2
+internetMediaTypep16313coll2
 titleNonSort
 multiNamePart
 blankNamePart
