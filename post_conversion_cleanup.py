@@ -2,6 +2,7 @@
 
 import os
 import sys
+import shutil
 import logging
 from shutil import copyfile, move
 import json
@@ -26,10 +27,12 @@ class IsCountsCorrect():
             logging.info('simples metadata counts match')
         else:
             logging.warning("BIG DEAL:  Simples Don't Match.  Expected: {}.  Observed: {}".format(simples, self.count_observed_simples(alias)))
+            quit()
         if compounds == self.count_observed_compounds(alias):
             logging.info('compounds metadata counts match')
         else:
             logging.warning("BIG DEAL:  Compounds Don't Match.  Expected: {}.  Observed: {}".format(compounds, self.count_observed_compounds(alias)))
+            quit()
         logging.info('IsCountsCorrect done')
 
     def make_list_of_elem_jsons(self, alias, cdm_data_dir):
@@ -93,6 +96,7 @@ class PullInBinaries():
                         continue  # root of cpd is expected to have no binary
                     else:
                         logging.warning("{} pointer {} has no matching binary".format(kind, pointer))
+                        quit()
                 if self.is_binary_in_output_dir(kind, outroot, pointer):
                     continue
                 if pointer not in sourcefiles_paths:
@@ -188,7 +192,6 @@ def report_restricted_files(alias):
             original_metadata = json.loads(child.text)
             restriction = original_metadata['dmaccess']
             if restriction:
-                logging.warning('{} must be restricted to {}'.format(alias, restriction))
                 restrictions_dict[pointer] = restriction
     if restrictions_dict:
         output_text = ''
@@ -197,7 +200,8 @@ def report_restricted_files(alias):
                 output_text += '{}: {}\n'.format(k.replace('.xml', ''), v)
             f.write(output_text)
         logging.info('report_restricted_files done')
-        logging.info('List of restricted items in file at output/{}_restricted_item.txt'.format(alias))
+        logging.warning('Add a "Restricted" Label to the {} ETL card'.format(alias))
+        logging.warning('Add output/{}_restrictions.txt to the card'.format(alias))
     else:
         logging.info('report_restricted_files done.')
         logging.info('No restricted items.')
@@ -247,6 +251,74 @@ def folder_by_extension(alias):
             move(os.path.join(starting_folder, file), os.path.join(starting_folder, extension, file))
 
 
+def make_zips(alias):
+    os.makedirs('Upload_to_Islandora', exist_ok=True)
+    institution = lookup_institution(alias)
+
+    cpd_output = 'output/{}_compounds/final_format'.format(alias)
+    if os.path.isdir(cpd_output):
+        zipfilename = 'Upload_to_Islandora/{}-{}-cpd'.format(institution, alias)
+        shutil.make_archive(zipfilename, 'zip', cpd_output)
+        logging.info('{}.zip created'.format(zipfilename))
+
+    simple_output = 'output/{}_simples/final_format'.format(alias)
+    if os.path.isdir(simple_output):
+        subdirs = [i for i in os.listdir(simple_output) if os.path.isdir(os.path.join(simple_output, i))]
+        for subdir in subdirs:
+            subdir_path = os.path.join(simple_output, subdir)
+            zipfilename = 'Upload_to_Islandora/{}-{}-{}'.format(institution, alias, subdir)
+            shutil.make_archive(zipfilename, 'zip', subdir_path)
+            logging.info('{}.zip created'.format(zipfilename))
+
+
+def lookup_institution(alias):
+    inst_colls = {'lsuhscs': ['lsuhscs_gwm', 'p15140coll23', 'p15140coll44', 'p16313coll3'],
+                  'state': ['lhp', 'lwp', 'p267101coll4'],
+                  'tulane': ['ama', 'htu', 'p15140coll15', 'p15140coll24', 'p15140coll25', 'p15140coll29', 'p15140coll3', 'p15140coll34', 'p15140coll37', 'p15140coll38', 'p15140coll39', 'p15140coll40', 'p15140coll45', 'p15140coll47', 'p15140coll58', 'p15140coll9', 'p16313coll11', 'p16313coll12', 'p16313coll13', 'p16313coll14', 'p16313coll15', 'p16313coll16', 'p16313coll27', 'p16313coll29', 'p16313coll30', 'p16313coll33', 'p16313coll37', 'p16313coll38', 'p16313coll39', 'p16313coll4', 'p16313coll40', 'p16313coll41', 'p16313coll42', 'p16313coll46', 'p16313coll47', 'p16313coll53', 'p16313coll59', 'p16313coll6', 'p16313coll63', 'p16313coll64', 'p16313coll66', 'p16313coll68', 'p16313coll71', 'p16313coll73', 'p16313coll75', 'p16313coll78', 'p16313coll84'],
+                  'lsuhsc': ['lsubk01', 'lsuhsc_ncc', 'p120701coll26', 'p120701coll7', 'p15140coll16', 'p15140coll19', 'p15140coll49', 'p15140coll50', 'p15140coll52', 'p16313coll19'],
+                  'hnoc': ['aww', 'clf', 'lph', 'p15140coll1', 'p15140coll28', 'p15140coll33', 'p15140coll43', 'p15140coll61', 'p16313coll17', 'p16313coll21', 'p16313coll36', 'p16313coll65'],
+                  'lsm': ['cca', 'fjc', 'gfm', 'hlm', 'jaz', 'jnt', 'lct', 'lhc', 'loh', 'lps', 'lsm_ccc', 'lsm_fqa', 'lsm_koh', 'lsm_mpc', 'lsm_nac', 'lsm_ncc', 'lst', 'osc', 'p120701coll18', 'p15140coll22', 'p15140coll60', 'p16313coll83', 'rmc', 'rsp', 'rtc'],
+                  'uno': ['fbm', 'hic', 'omsa', 'p120701coll13', 'p120701coll15', 'p120701coll25', 'p120701coll29', 'p120701coll8', 'p15140coll30', 'p15140coll31', 'p15140coll4', 'p15140coll42', 'p15140coll53', 'p15140coll7', 'p16313coll18', 'p16313coll2', 'p16313coll22', 'p16313coll23', 'p16313coll60', 'p16313coll61', 'p16313coll62', 'p16313coll7', 'p16313coll72', 'p16313coll86', 'uno_ani', 'uno_jbf'],
+                  'nsu': ['mpa', 'ncc'],
+                  'ulm': ['p120701coll10', 'p15140coll26', 'p15140coll27', 'p16313coll1', 'p16313coll43'],
+                  'mcneese': ['p16313coll74', 'psl'],
+                  'tahil': ['aaw', 'abw', 'apc', 'bba', 'hpl', 'lpc', 'rtp', 'tah'],
+                  'ull': ['acc', 'lsa', 'p16313coll25', 'p16313coll26', 'sip'],
+                  'latech': ['cmprt'],
+                  'ldl': ['p16313coll97'],
+                  'loyno': ['jsn', 'lmnp01', 'loyola_etd', 'loyola_etda', 'loyola_etdb', 'p120701coll17', 'p120701coll27', 'p120701coll28', 'p120701coll9', 'p16313coll20', 'p16313coll24', 'p16313coll28', 'p16313coll48', 'p16313coll5', 'p16313coll87', 'p16313coll91', 'p16313coll93', 'p16313coll95', 'p16313coll96', 'p16313coll98'],
+                  'subr': ['hwj', 'vbc'],
+                  'nicholls': ['p15140coll51'],
+                  'lsus': ['lsus_tbp', 'nwm', 'stc'],
+                  'lsu': ['brs', 'crd', 'cwd', 'hnf', 'ibe', 'lapur', 'lmp', 'lsap', 'lsu_act', 'lsu_brt', 'lsu_cff', 'lsu_clt', 'lsu_cnp', 'lsu_cwp', 'lsu_dyp', 'lsu_fcc', 'lsu_gcs', 'lsu_gfm', 'lsu_gsc', 'lsu_hpl', 'lsu_jja', 'lsu_lhc', 'lsu_lnp', 'lsu_mdp', 'lsu_mrf', 'lsu_nmi', 'lsu_noe', 'lsu_pvc', 'lsu_rbc', 'lsu_rbo', 'lsu_sce', 'lsu_tjp', 'lsu_uap', 'lsu_wls', 'mmf', 'msw', 'neworleans', 'nonegexposures', 'p120701coll12', 'p120701coll19', 'p120701coll22', 'p120701coll23', 'p120701coll24', 'p15140coll10', 'p15140coll12', 'p15140coll14', 'p15140coll17', 'p15140coll18', 'p15140coll21', 'p15140coll35', 'p15140coll41', 'p15140coll46', 'p15140coll54', 'p15140coll56', 'p15140coll6', 'p16313coll10', 'p16313coll31', 'p16313coll34', 'p16313coll35', 'p16313coll45', 'p16313coll51', 'p16313coll52', 'p16313coll54', 'p16313coll56', 'p16313coll57', 'p16313coll58', 'p16313coll69', 'p16313coll76', 'p16313coll77', 'p16313coll79', 'p16313coll8', 'p16313coll80', 'p16313coll81', 'p16313coll85', 'p16313coll89', 'p16313coll9', 'p16313coll92', 'rjr', 'sartainengravings', 'tensas', 'thw', 'tld', 'wri-boy'],
+                  }
+    for inst, colls in inst_colls.items():
+        if alias.lower() in colls:
+            return inst
+    logging.warning('Couldnt find alias {} in lookup_institution'.format(alias))
+    quit()
+
+
+def move_zips_to_U(cdm_data_dir, alias):
+    files = [os.path.join('Upload_to_Islandora', i) for i in os.listdir('Upload_to_Islandora') if alias.lower() in i]
+    dest_drive = os.path.split(os.path.split(cdm_data_dir)[0])[0]
+    dest_path = os.path.join(dest_drive, 'Upload_to_Islandora')
+    os.makedirs(dest_path, exist_ok=True)
+    for file in files:
+        dest_file = os.path.split(file)[1]
+        dest_filepath = os.path.join(dest_path, dest_file)
+        shutil.move(file, dest_filepath)
+        logging.info('moved {} to {}'.format(dest_file, dest_filepath))
+    logging.info('attach this text to the ETL card & move card to "Whole Collection Packaged at U"')
+
+
+def cleanup_leftover_files(alias):
+    leftover_folders = [root for root, dirs, files in os.walk('output') if alias in root.split('/')[-1]]
+    print(leftover_folders)
+    for folder in leftover_folders:
+        shutil.rmtree(folder)
+
+
 if __name__ == '__main__':
     setup_logging()
     try:
@@ -264,4 +336,7 @@ if __name__ == '__main__':
     report_restricted_files(alias)
     report_filetype(alias)
     folder_by_extension(alias)
+    make_zips(alias)
+    move_zips_to_U(cdm_data_dir, alias)
+    cleanup_leftover_files(alias)
     logging.info('finished {}'.format(alias))
