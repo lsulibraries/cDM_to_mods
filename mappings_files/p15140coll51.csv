@@ -1,4 +1,5 @@
-Veteran,"<titleInfo><title>%value%</title></titleInfo><name type='personal' displayLabel='Veteran'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>dpc</roleTerm><roleTerm type='text' authority='marcrelator'>Depicted</roleTerm></role></name>"
+Veteran,"<titleInfo><title>%value%</title></titleInfo>"
+Veteran,"<name type='personal' displayLabel='Veteran'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>dpc</roleTerm><roleTerm type='text' authority='marcrelator'>Depicted</roleTerm></role></name>"
 Branch of Service,"<name type='personal' displayLabel='Veteran'><affiliation>%value%</affiliation></name>"
 Rank,"<name type='personal' displayLabel='Veteran'><description>Rank: %value%</description></name>"
 Unit,"<name type='personal' displayLabel='Veteran'><affiliation>Unit: %value%</affiliation></name>"
