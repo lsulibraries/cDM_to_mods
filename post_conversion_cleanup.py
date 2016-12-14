@@ -308,12 +308,13 @@ def move_zips_to_U(cdm_data_dir, alias):
         dest_file = os.path.split(file)[1]
         dest_filepath = os.path.join(dest_path, dest_file)
         shutil.move(file, dest_filepath)
-        logging.info('moved {} to {}'.format(dest_file, dest_filepath))
+        logging.info('moved {}'.format(dest_filepath))
     logging.info('attach this text to the ETL card & move card to "Whole Collection Packaged at U"')
 
 
 def cleanup_leftover_files(alias):
-    leftover_folders = [root for root, dirs, files in os.walk('output') if alias in os.path.split(root)[1]]
+    root_simples, root_compounds = '{}_simples'.format(alias), '{}_compounds'.format(alias)
+    leftover_folders = [root for root, dirs, files in os.walk('output') if os.path.split(root)[1] in (root_simples, root_compounds)]
     for folder in leftover_folders:
         shutil.rmtree(folder)
 
