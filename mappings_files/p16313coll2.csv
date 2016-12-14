@@ -10,7 +10,7 @@ Relationship_OfInterviewerB,"<name type='personal' displayLabel='Inverviewer B'>
 Facilitator,"<name displayLabel='Facilitator'><namePart>%value%</namePart><role><roleTerm type='text' authority='marcrelator'>Contributor</roleTerm><roleTerm type='code' authority='marcrelator'>ctb</roleTerm></role></name>"
 Contributor,"<name displayLabel='Contributor'><namePart>StoryCorps (Project)</namePart><role><roleTerm type='text' authority='marcrelator'>Contributor</roleTerm><roleTerm type='code' authority='marcrelator'>ctb</roleTerm></role></name>"
 Publisher,"<originInfo><publisher>%value%</publisher></originInfo>"
-InterviewDateTime,"<originInfo><dateCreated keyDate='yes'>%value%</dateCreated></originInfo>"
+DateOfInterview,"<originInfo><dateCreated keyDate='yes'>%value%</dateCreated></originInfo>"
 InterviewLocation,"<originInfo><place><placeTerm>%value%</placeTerm></place></originInfo>"
 Venue,"<originInfo><place><placeTerm>%value%</placeTerm></place></originInfo>"
 Coverage-Spatial,"<subject authority='lcsh' displayLabel='Location'><geographic>%value%</geographic></subject>"
