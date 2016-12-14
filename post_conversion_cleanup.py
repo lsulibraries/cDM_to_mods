@@ -110,12 +110,12 @@ class PullInBinaries():
         input_dir = os.path.join(cdm_data_dir, alias)
         for root, dirs, files in os.walk(input_dir):
             for file in files:
-                if file.split('.')[-1] in ('jp2', 'mp4', 'mp3', 'pdf'):
-                    pointer = file.split('.')[0]
-                    if pointer in sourcefiles_paths:
-                        logging.warning("pointer {} has multiple possible source binaries -- please cull unwanted version".format(pointer))
+                filename, extension = os.path.splitext(file)
+                if extension.lower() in ('.jp2', '.mp4', '.mp3', '.pdf'):
+                    if filename in sourcefiles_paths:
+                        logging.warning("pointer {} has multiple possible source binaries -- please cull unwanted version".format(filename))
                         quit()
-                    sourcefiles_paths[pointer] = (root, file)
+                    sourcefiles_paths[filename] = (root, file)
         return sourcefiles_paths
 
     def makelist_simpleoutfolderxmls(self, alias):
