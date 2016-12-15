@@ -1,7 +1,7 @@
 Title,"<titleInfo><title>%value%</title></titleInfo>"
 Creator,"<name displayLabel='Creator'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>cre</roleTerm><roleTerm type='text' authority='marcrelator'>Creator</roleTerm></role></name>"
 Date,"<originInfo><dateCreated keyDate='yes'>%value%</dateCreated></originInfo>"
-Subject,"<subject authority='lcsh'><topic>%value%</topic></subject>"
+Subjects,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 null10,"<typeOfResource>still image</typeOfResource>"
 Original Format/Size,"<physicalDescription><extent>%value%</extent></physicalDescription>"
 null9,"<genre authority='aat'>architectural drawings (visual works)</genre>"
