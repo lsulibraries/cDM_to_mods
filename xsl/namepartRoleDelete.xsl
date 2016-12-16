@@ -20,6 +20,7 @@
     <xsl:variable name="myRegEx" select="'([0-9a-zA-Z\s.&amp;]+),\s([0-9\sa-zA-Z]+)'"/>
     
     <xsl:template match="name[@displayLabel='Engraver']">
+        <xsl:copy>
         <xsl:analyze-string select="$targetText" regex="{$myRegEx}">
             <xsl:matching-substring>
                 <namePart>
@@ -31,6 +32,7 @@
                 </role>
             </xsl:matching-substring>
         </xsl:analyze-string>
+        </xsl:copy>            
     </xsl:template>
   
 </xsl:stylesheet>
