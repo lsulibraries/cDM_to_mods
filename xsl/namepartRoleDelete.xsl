@@ -19,19 +19,11 @@
     <xsl:variable name="targetText" select="node()/name[@displayLabel='Engraver']/namePart/text()"/>
     <xsl:variable name="myRegEx" select="'([0-9a-zA-Z\s.&amp;]+),\s([0-9\sa-zA-Z]+)'"/>
     
-    <xsl:template match="name[@displayLabel='Engraver']">
+    <xsl:template match="name[@displayLabel='Engraver']/namePart">
         <xsl:copy>
         <xsl:analyze-string select="$targetText" regex="{$myRegEx}">
             <xsl:matching-substring>
-                <name displayLabel='Engraver'>
-                <namePart>
-                    <xsl:value-of select="regex-group(1)"/>
-                </namePart>
-                <role>
-                    <roleTerm type="code" authority="marcrelator">egr</roleTerm>
-                    <roleTerm type="text" authority="marcrelator">Engraver</roleTerm>
-                </role>
-                </name>
+                <xsl:value-of select="regex-group(1)"/>
             </xsl:matching-substring>
         </xsl:analyze-string>
         </xsl:copy>            
