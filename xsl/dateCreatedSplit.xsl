@@ -69,7 +69,7 @@
                     </xsl:matching-substring>
                 </xsl:analyze-string>
             </xsl:when>
-            <xsl:when test="matches(., $questionableRegEx)">
+            <xsl:when test="matches(., $questionableRegEx) and not(matches(., '-'))">
                 <xsl:analyze-string select="." regex="{$questionableRegEx}">
                     <xsl:matching-substring>
                         <dateCreated keyDate="yes" qualifier="questionable">
