@@ -1,5 +1,4 @@
 titleNonSort
-blankNamePart
 noteTypeMediumExtent
 noteValueNoneDelete
 namepartRoleDelete
