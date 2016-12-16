@@ -23,6 +23,7 @@
         <xsl:copy>
         <xsl:analyze-string select="$targetText" regex="{$myRegEx}">
             <xsl:matching-substring>
+                <name displayLabel='Engraver'>
                 <namePart>
                     <xsl:value-of select="regex-group(1)"/>
                 </namePart>
@@ -30,6 +31,7 @@
                     <roleTerm type="code" authority="marcrelator">egr</roleTerm>
                     <roleTerm type="text" authority="marcrelator">Engraver</roleTerm>
                 </role>
+                </name>
             </xsl:matching-substring>
         </xsl:analyze-string>
         </xsl:copy>            
