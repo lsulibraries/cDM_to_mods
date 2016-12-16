@@ -1,7 +1,6 @@
 titleNonSort
 noteTypeMediumExtent
 noteValueNoneDelete
-namepartRoleDelete
 subjectSplit
 normalizeDate
 blankNodes
