@@ -1,5 +1,5 @@
 Title,"<titleInfo><title>%value%</title></titleInfo>"
-Photographer,"<name displayLabel='Engraver'><namePart>%value%</namePart><role><roleTerm type="code" authority="marcrelator">egr</roleTerm><roleTerm type="text" authority="marcrelator">Engraver</roleTerm></role></name>"
+Photographer,"<name displayLabel='Engraver'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>egr</roleTerm><roleTerm type='text' authority='marcrelator'>Engraver</roleTerm></role></name>"
 Index Terms,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Notes,"<note type='content'>%value%</note>"
 null9,"<typeOfResource>still image</typeOfResource>"
