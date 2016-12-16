@@ -41,6 +41,7 @@
     <xsl:variable name="centuryRegEx" select="'([0-9]{2})th\s[cC]entury'"/> <!-- YYth century -->
     <xsl:variable name="priorRegEx" select="'[Pp]rior\sto\s([0-9]{4})|[Bb]efore\s([0-9]{4})'"/> <!-- prior to YYYY or before YYYY -->
     <xsl:variable name="questionableRegEx" select="'([0-9]{4})\(?\?\)?'"/> <!-- YYYY? or YYYY(?) -->
+    <xsl:variable name="questionableRangeRegEx" select="'([0-9]{4})\(?\?\)?\s?-\s?([0-9]{4})\(?\?\)?'"/> <!-- YYYY?-YYYY? or YYYY? - YYYY? -->
        
     <xsl:template match="originInfo/dateCreated">
         <xsl:choose>
@@ -73,6 +74,18 @@
                     <xsl:matching-substring>
                         <dateCreated keyDate="yes" qualifier="questionable">
                             <xsl:value-of select="replace(regex-group(1), '\s+', ' ')"/>
+                        </dateCreated>
+                    </xsl:matching-substring>
+                </xsl:analyze-string>
+            </xsl:when>
+            <xsl:when test="matches(., $questionableRangeRegEx)">
+                <xsl:analyze-string select="." regex="{$questionableRangeRegEx}">
+                    <xsl:matching-substring>
+                        <dateCreated point="start" keyDate="yes" qualifier="questionable">
+                            <xsl:value-of select="replace(regex-group(1), '\s+', ' ')"/>
+                        </dateCreated>
+                        <dateCreated point="end" qualifier="questionable">
+                            <xsl:value-of select="replace(regex-group(2), '\s+', ' ')"/>
                         </dateCreated>
                     </xsl:matching-substring>
                 </xsl:analyze-string>
