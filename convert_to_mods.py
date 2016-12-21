@@ -240,7 +240,7 @@ def careful_tag_split(etree, parent_tag_name, child_tag_name):
                     if not len(split):
                         continue
                     new_child_elem = deepcopy(child)
-                    new_child_elem.text = split.strip()
+                    new_child_elem.text = split
                     copied_name_elem = deepcopy(name_elem)
                     for i in copied_name_elem:
                         if i.tag == child_tag_name:
@@ -248,7 +248,7 @@ def careful_tag_split(etree, parent_tag_name, child_tag_name):
                     copied_name_elem.insert(0, new_child_elem)
                     name_elem.getparent().append(copied_name_elem)
         if remove_orig_parent:
-            etree.remove(name_elem)
+            name_elem.getparent().remove(name_elem)
 
 
 def normalize_date(root_elem, pointer):
