@@ -9,7 +9,7 @@ Digital Format,"<physicalDescription><internetMediaType>jp2</internetMediaType><
 Original Format/Size,"<physicalDescription><note type='medium'>%value%</note></physicalDescription>"
 Repository,"<note type='ownership' displayLabel='Source'>Louisiana State University Libraries, Special Collections ( http://www.lib.lsu.edu/special )</note>"
 Digital Collection,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>%value%</title></titleInfo></relatedItem>"
-Collection URL,"<relatedItem type='host'><location><url displayLabel='Relation'>http://lsu.louisianadigitallibrary.org/lsu-tensas%3Acollection</url></location></relatedItem>"
+Collection URL,"<relatedItem type='host'><location><url displayLabel='Relation'>http://lsu.louisianadigitallibrary.org/lsu-gfm%3Acollection</url></location></relatedItem>"
 Repository Collection,"<relatedItem type='host'><titleInfo type='alternative' displayLabel='Repository Collection'><title>%value%</title></titleInfo></relatedItem>"
 Repository Collection Guide,"<relatedItem type='host'><location><url displayLabel='Repository Collection Guide'>http://www.lib.lsu.edu/sites/default/files/sc/findaid/n1089.htm</url></location></relatedItem>"
 null1,"<location><physicalLocation authority='oclcorg' displayLabel='OCLC Member Symbol'>LUU</physicalLocation></location>"
