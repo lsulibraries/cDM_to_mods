@@ -7,6 +7,9 @@ import logging
 from shutil import copyfile, move
 import json
 from lxml import etree as ET
+import io
+
+import trello_integration as TI
 
 
 class IsCountsCorrect():
@@ -226,15 +229,21 @@ def report_filetype(alias):
 
 
 def setup_logging():
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     logging.basicConfig(filename='post_conversion_cleanup_log.txt',
                         level=logging.INFO,
                         format='%(asctime)s: %(levelname)-8s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
     console = logging.StreamHandler()
     console.setLevel(logging.WARNING)
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
+    logging_string = io.StringIO()
+    string_handler = logging.StreamHandler(logging_string)
+    string_handler.setLevel(logging.DEBUG)
+    string_handler.setFormatter(formatter)
+    logging.getLogger('').addHandler(string_handler)
+    return logging_string
 
 
 def folder_by_extension(alias):
@@ -314,7 +323,7 @@ def move_zips_to_U(cdm_data_dir, alias):
         dest_file = os.path.split(file)[1]
         dest_filepath = os.path.join(dest_path, dest_file)
         shutil.move(file, dest_filepath)
-        logging.info('moved {}'.format(dest_filepath))
+        logging.info('moved to {}'.format(dest_filepath))
     logging.info('attach this text to the ETL card & move card to "Whole Collection Packaged at U"')
 
 
@@ -323,10 +332,18 @@ def cleanup_leftover_files(alias):
     leftover_folders = [root for root, dirs, files in os.walk('output') if os.path.split(root)[1] in (root_simples, root_compounds)]
     for folder in leftover_folders:
         shutil.rmtree(folder)
+    logging.info('intermediate folders deleted')
+
+
+def trelloize(alias, log_contents, target_column):
+    client = TI.setup_client('trello_keys.json')
+    IslandoraETL = TI.lookup_board(client, 'Islandora ETL')
+    TI.find_card(IslandoraETL, alias).comment(log_contents)
+    TI.move_card_to_target_column(IslandoraETL, alias, target_column)
 
 
 if __name__ == '__main__':
-    setup_logging()
+    logging_string = setup_logging()
     try:
         alias = sys.argv[1]
         cdm_data_dir = sys.argv[2]
@@ -346,3 +363,6 @@ if __name__ == '__main__':
     move_zips_to_U(cdm_data_dir, alias)
     cleanup_leftover_files(alias)
     logging.info('finished {}'.format(alias))
+    log_contents = logging_string.getvalue()
+    trelloize(alias, log_contents, 'Whole Collection Packaged at U')
+    logging_string.close()
