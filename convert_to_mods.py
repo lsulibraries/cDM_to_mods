@@ -60,7 +60,6 @@ def convert_to_mods(alias, cdm_data_dir):
     logging.info('finished preliminary mods: compounds')
 
     saxon_n_cleanup_mods(alias)
-    print(cdm_data_dir)
     IsCountsCorrect(alias, cdm_data_dir)
     logging.info('completed')
     logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
@@ -142,10 +141,10 @@ def make_a_single_mods(ingredients):
     mods = build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
     merge_same_fields(mods)
     careful_tag_split(mods, 'name', 'namePart')
-    careful_tag_split(mods, 'subject', 'topic')
-    careful_tag_split(mods, 'subject', 'geographic')
-    careful_tag_split(mods, 'subject', 'temporal')
-    careful_tag_split(mods, 'subject', 'hierarchicalGeographic')
+    for sub_subject in ('topic', 'geographic', 'temporal'):
+        careful_tag_split(mods, 'subject', sub_subject)
+    for sub_subject in ("continent", "country", "province", "region", "state", "territory", "county", "city", "citySection", "island", "area"):
+        careful_tag_split(mods, 'hierarchicalGeographic', sub_subject)
     normalize_date(mods, pointer)
     delete_empty_fields(mods)
     reorder_title(mods)
