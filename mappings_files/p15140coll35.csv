@@ -1,7 +1,7 @@
 Title,"<titleInfo><title>%value%</title></titleInfo>"
 Creator,"<name displayLabel='Creator'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>cre</roleTerm><roleTerm type='text' authority='marcrelator'>Creator</roleTerm></role></name>"
 Publisher,"<originInfo><publisher>%value%</publisher></originInfo>"
-Date,"<originInfo><dateCreated keyDate='yes'>%value%</dateCreated></originInfo>"
+Date,"<originInfo><dateIssued keyDate='yes'>%value%</dateIssued></originInfo>"
 Subject Headings,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Caption/Description,"<abstract displayLabel='Description'>%value%</abstract>"
 Notes,"<note type='content'>%value%</note>"
