@@ -254,9 +254,10 @@ def folder_by_extension(alias):
 def make_zips(alias):
     os.makedirs('Upload_to_Islandora', exist_ok=True)
     institution = lookup_institution(alias)
+    inst_alias = dont_repeat_inst(institution.lower(), alias.lower())
     cpd_output = 'output/{}_compounds/final_format'.format(alias)
     if os.path.isdir(cpd_output):
-        zipfilename = 'Upload_to_Islandora/{}-{}-cpd'.format(institution, alias.lower())
+        zipfilename = 'Upload_to_Islandora/{}-cpd'.format(inst_alias)
         shutil.make_archive(zipfilename, 'zip', cpd_output)
         logging.info('{}.zip created'.format(zipfilename))
 
@@ -265,9 +266,15 @@ def make_zips(alias):
         subdirs = [i for i in os.listdir(simple_output) if os.path.isdir(os.path.join(simple_output, i))]
         for subdir in subdirs:
             subdir_path = os.path.join(simple_output, subdir)
-            zipfilename = 'Upload_to_Islandora/{}-{}-{}'.format(institution, alias.lower(), subdir)
+            zipfilename = 'Upload_to_Islandora/{}-{}'.format(inst_alias, subdir)
             shutil.make_archive(zipfilename, 'zip', subdir_path)
             logging.info('{}.zip created'.format(zipfilename))
+
+
+def dont_repeat_inst(inst, alias):
+    if alias.split('_')[0] == inst:
+        return '{}-{}'.format(inst, alias.split('_')[1])
+    return '{}-{}'.format(inst, alias)
 
 
 def lookup_institution(alias):
