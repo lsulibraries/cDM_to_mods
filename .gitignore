@@ -7,3 +7,4 @@ Cached_Cdm_files_onlymetadata/
 *.log
 .project
 .pydevproject
+trello_keys.json
