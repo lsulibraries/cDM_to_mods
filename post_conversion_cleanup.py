@@ -324,7 +324,6 @@ def move_zips_to_U(cdm_data_dir, alias):
         dest_filepath = os.path.join(dest_path, dest_file)
         shutil.move(file, dest_filepath)
         logging.info('moved to {}'.format(dest_filepath))
-    logging.info('attach this text to the ETL card & move card to "Whole Collection Packaged at U"')
 
 
 def cleanup_leftover_files(alias):
