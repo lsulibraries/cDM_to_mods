@@ -4,7 +4,7 @@ for converting the output of cdm_xporter/scrape_cdm.py into mods format (especia
   
   1a) Windows:  Check if Anaconda is your default python, by typing in a command prompt: `python --version`.  It should read `python3 Anaconda ...`.  Install dependencies, using Powershell as an Administrator, `pip install py-trello`
         
-  1b) Linux/Mac:  Turn on your python3 virtualenv.  It needs lxml.  Also run in you virtualenv `pip install py-trello`.
+  1b) Linux/Mac:  Turn on your python3 virtualenv.  `pip install lxml`.  If there are any libraries it fails on, then `sudo apt-get install` those prerequesites.  There's some obscure library they forget to tell you to install.  After apt-getting those libraries, `pip install lxml` works.  Also run in you virtualenv `pip install py-trello`.
  
   2) Have the folder Cached_Cdm_files (the output of cdm_xporter/scrape_cdm.py) on your computer (or network).
   
