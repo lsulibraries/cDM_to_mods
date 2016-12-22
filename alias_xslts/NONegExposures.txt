@@ -1,9 +1,7 @@
- titleNonSort
- multiNamePart
- blankNamePart
+titleNonSort
+noteTYpeMediumExtent_brtag
 subjectSplit
- dateIssuedSplit
- dateCreatedSplit
+dateCreatedSplit
 normalizeDate
 blankNodes
 locationMerge
