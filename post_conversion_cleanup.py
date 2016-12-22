@@ -314,7 +314,7 @@ def lookup_institution(alias):
     quit()
 
 
-def move_zips_to_U(cdm_data_dir, alias):
+def move_zips_to_U(alias, cdm_data_dir):
     files = [os.path.join('Upload_to_Islandora', i) for i in os.listdir('Upload_to_Islandora') if alias.lower() in i]
     dest_drive = os.path.split(os.path.split(cdm_data_dir)[0])[0]
     dest_path = os.path.join(dest_drive, 'Upload_to_Islandora')
@@ -341,6 +341,18 @@ def trelloize(alias, log_contents, target_column):
     TI.move_card_to_target_column(IslandoraETL, alias, target_column)
 
 
+def do_post_conversion(alias, cdm_data_dir):
+    PullInBinaries(alias, cdm_data_dir)
+    MakeStructureFile(alias)
+    IsCountsCorrect(alias, cdm_data_dir)
+    report_restricted_files(alias)
+    report_filetype(alias)
+    folder_by_extension(alias)
+    make_zips(alias)
+    move_zips_to_U(alias, cdm_data_dir)
+    cleanup_leftover_files(alias)
+
+
 if __name__ == '__main__':
     logging_string = setup_logging()
     try:
@@ -352,16 +364,9 @@ if __name__ == '__main__':
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
-    PullInBinaries(alias, cdm_data_dir)
-    MakeStructureFile(alias)
-    IsCountsCorrect(alias, cdm_data_dir)
-    report_restricted_files(alias)
-    report_filetype(alias)
-    folder_by_extension(alias)
-    make_zips(alias)
-    move_zips_to_U(cdm_data_dir, alias)
-    cleanup_leftover_files(alias)
+    do_post_conversion(alias, cdm_data_dir)
     logging.info('finished {}'.format(alias))
+
     log_contents = logging_string.getvalue()
     trelloize(alias, log_contents, 'Whole Collection Packaged at U')
     logging_string.close()
