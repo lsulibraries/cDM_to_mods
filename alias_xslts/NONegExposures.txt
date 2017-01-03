@@ -1,5 +1,5 @@
 titleNonSort
-noteTYpeMediumExtent_brtag
+noteTypeMediumExtent
 subjectSplit
 dateCreatedSplit
 normalizeDate
