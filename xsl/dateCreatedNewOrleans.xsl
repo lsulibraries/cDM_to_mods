@@ -7,7 +7,7 @@
     version="2.0"
     xmlns="http://www.loc.gov/mods/v3">
     
-    <!-- reformats non parsing dates for p15140coll46, fonville winans collection -->
+    <!-- reformats non parsing dates for NewOrleans, new orleans photos at lsu collection -->
     
     <xsl:template match="@* | node()">
         <xsl:copy>
