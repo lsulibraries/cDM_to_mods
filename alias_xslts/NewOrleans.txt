@@ -3,7 +3,7 @@ blankNamePart
 brToSemicolon
 noteTypeMediumExtent
 subjectSplit
-dateCreatedNewOrleans
+dateCreatedNatural
 dateCreatedSplit
 normalizeDate
 blankNodes
