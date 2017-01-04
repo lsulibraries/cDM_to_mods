@@ -1,5 +1,5 @@
 Title,"<titleInfo><title>%value%</title></titleInfo>"
-Photographer,"<note type='content>Photographer unknown</note>"
+Photographer,"<note type='content'>Photographer unknown</note>"
 Subjects,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Notes,"<abstract displayLabel='Description'>%value%</abstract>"
 Date,"<originInfo><dateCreated keyDate='yes' qualifier='approximate'>1857</dateCreated></originInfo>"
