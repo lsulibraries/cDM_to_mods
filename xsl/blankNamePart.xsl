@@ -7,7 +7,7 @@
     version="2.0"
     xmlns="http://www.loc.gov/mods/v3" >
     
-    <!-- If the namePart is blank, or is "Unknown" then delete the name node -->
+    <!-- If the namePart is blank, or is "Unknown" or "NA" then delete the name node -->
     
     <xsl:template match="@* | node()">
         <xsl:copy>
@@ -22,6 +22,8 @@
             <xsl:when test="namePart = 'Unknown'">                
             </xsl:when>
             <xsl:when test="namePart = 'unknown'">                
+            </xsl:when>
+            <xsl:when test="namePart = 'NA'">                
             </xsl:when>
             <xsl:when test="namePart = 'Creator unknown'">                
             </xsl:when>
