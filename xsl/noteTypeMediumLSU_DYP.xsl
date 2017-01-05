@@ -16,7 +16,7 @@
         </xsl:copy>
     </xsl:template>  
     
-    <xsl:template match="./note[@type='medium']">
+    <xsl:template match="physicalDescription/note[@type='medium']">
         <xsl:choose>
             <xsl:when test="matches(., 'jpeg', 'i')" />
             <xsl:when test="matches(., 'tif', 'i')" />
