@@ -1,8 +1,9 @@
 titleNonSort
-noteTypeMediumExtent
+blankNamePart
 subjectSplit
-dateCreatedNONegExposures
+blankSubject
 dateCreatedSplit
+dateCreatedCWD
 normalizeDate
 blankNodes
 locationMerge
