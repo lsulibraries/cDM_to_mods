@@ -12,7 +12,7 @@ Original Format,"<physicalDescription><note type='medium'>%value%</note></physic
 Original Size,"<physicalDescription><extent>%value%</extent></physicalDescription>"
 Digital Format,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
 Repository,"<note type='ownership' displayLabel='Source'>Louisiana State University Museum of Art (http://www.lsumoa.org/)</note>"
-Repository Collection Guide,"<relatedItem type='host'><location><url displayLabel='Repository Collection Guide'>%value%</url></location></relatedItem>"
+Repository Collection Guide,"<relatedItem type='host'><location><url displayLabel='Repository Collection Guide'>http://www.lib.lsu.edu/sites/default/files/sc/findaid/d3827.html</url></location></relatedItem>"
 null8,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>Caroline Wogan Durieux Works of Art</title></titleInfo></relatedItem>"
 null9,"<relatedItem type='host'><location><url displayLabel='Relation'>http://lsu.louisianadigitallibrary.org/lsu-cwd%3Acollection</url></location></relatedItem>"
 null2,"<location><physicalLocation displayLabel='Physical Location'>Louisiana State University: LSU Museum of Art, Shaw Center for the Arts, Baton Rouge, LA</physicalLocation></location>"
