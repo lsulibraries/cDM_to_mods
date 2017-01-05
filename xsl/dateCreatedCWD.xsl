@@ -17,7 +17,7 @@
         
     <xsl:template match="originInfo/dateCreated">
         <xsl:choose>
-            <xsl:when test="matches(., 'CA. 1960-65')">
+            <xsl:when test="matches(., 'ca. 1960-65', 'i')">
                 <dateCreated keyDate="yes" qualifier='approximate' point='start'>1960</dateCreated>
                 <dateCreated qualifier='approximate' point='end'>1965</dateCreated>
             </xsl:when>
@@ -25,7 +25,7 @@
                 <dateCreated keyDate="yes" qualifier='approximate' point='start'>1955</dateCreated>
                 <dateCreated qualifier='approximate' point='end'>1956</dateCreated>
             </xsl:when>
-            <xsl:when test="matches(., 'ca. 1955-62')">
+            <xsl:when test="matches(., 'ca. 1955-62', 'i')">
                 <dateCreated keyDate="yes" qualifier='approximate' point='start'>1955</dateCreated>
                 <dateCreated qualifier='approximate' point='end'>1962</dateCreated>
             </xsl:when>
