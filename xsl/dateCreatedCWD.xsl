@@ -38,4 +38,16 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
+    
+    <xsl:template match="originInfo/dateCaptured">
+        <xsl:choose>
+            <xsl:when test="matches(., 'NA')">
+            </xsl:when>            
+            <xsl:otherwise>
+                <dateCaptured>
+                    <xsl:value-of select="."/>
+                </dateCaptured>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
 </xsl:stylesheet>
