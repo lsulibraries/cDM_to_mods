@@ -12,8 +12,10 @@ from copy import deepcopy
 import logging
 
 from lxml import etree as ET
+import dateparser
 
 from post_conversion_cleanup import IsCountsCorrect
+
 
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
@@ -252,41 +254,48 @@ def careful_tag_split(etree, parent_tag_name, child_tag_name):
 
 
 def normalize_date(root_elem, pointer):
-    date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued')
-                  for i in root_elem.findall('.//{}'.format(tag))]
-    for i in date_elems:
-        i.text = i.text.strip()
-        yearmonthday = year_month_day.search(i.text)
-        yearlast = year_last.search(i.text)
-        yearonly = year_only.search(i.text)
-        yearmonth = year_month.search(i.text)
+    date_elems = [elem for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued')
+                  for elem in root_elem.findall('.//{}'.format(tag))]
+    for elem in date_elems:
+        elem.text = parse_dates(elem.text)
 
-        if yearmonthday:
-            year = yearmonthday.group(1)
-            month = yearmonthday.group(2)
-            day = yearmonthday.group(3)
-            if len(month) == 1:
-                month = '0{}'.format(month)
-            if len(day) == 1:
-                day = '0{}'.format(day)
-            i.text = '{}-{}-{}'.format(year, month, day)
-        elif yearlast:
-            year = yearlast.group(3)
-            month = yearlast.group(1)
-            day = yearlast.group(2)
-            if len(month) == 1:
-                month = '0{}'.format(month)
-            if len(day) == 1:
-                day = '0{}'.format(day)
-            i.text = '{}-{}-{}'.format(year, month, day)
-        elif yearmonth:
-            year = yearmonth.group(1)
-            month = yearmonth.group(2)
-            if len(month) == 1:
-                month = '0{}'.format(month)
-            i.text = '{}-{}'.format(year, month)
-        elif yearonly:
-            i.text = yearonly.group()
+
+year_only = re.compile(r'^(\d{4})$')
+
+
+def parse_dates(text):
+    # EMPTY CASE
+    if not text:
+        return ''
+
+    # YYYY CASE
+    text = text.strip().replace('[', '').replace(']', '')
+    yearonly = year_only.search(text)
+    if yearonly:
+        return yearonly.group()
+
+    # checking if dateparser is assigning a 'day' when none is in the text
+    a = dateparser.parse(text, languages=['en'], settings={'PREFER_DAY_OF_MONTH': 'first'})
+    b = dateparser.parse(text, languages=['en'], settings={'PREFER_DAY_OF_MONTH': 'last'})
+
+    # converting datetime object with format 'xxxx-x-x' into
+    # string '0x' for day and '0x' for month
+    if a:
+        year, month, day = str(a.year), str(a.month), str(a.day)
+        if len(month) == 1:
+            month = '0{}'.format(month)
+        if len(day) == 1:
+            day = '0{}'.format(day)
+
+    # YYYY-MM-DD CASE
+    if a and (a == b):
+        return '{}-{}-{}'.format(year, month, day)
+    # YYYY-MM CASE
+    elif a and b and (a != b):
+        return '{}-{}'.format(year, month)
+    # ALL OTHER CASES
+    else:
+        return text
 
 
 def delete_empty_fields(orig_etree):
@@ -405,14 +414,9 @@ def validate_mods(alias, directory):
         logging.info("This group of files post-xsl Validated")
 
 
-year_month_day = re.compile(r'^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$')     # 1234-56-78 or 1234-5-6
-year_last = re.compile(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')      # 12-34-5678 or 1-2-3456
-year_only = re.compile(r'^(\d{4})$')                                  # 1234
-year_month = re.compile(r'^(\d{4})[/.-](\d{1,2})$')                      # 1234-56 or 1234-5
-
-correct_year_month_day = re.compile(r'^(\d{4})[/.-](\d{2})[/.-](\d{2})$')     # 1234-05-06
-correct_year_last = re.compile(r'^(\d{2})[/.-](\d{2})[/.-](\d{4})$')      # 01-02-3456
-correct_year_month = re.compile(r'^(\d{4})[/.-](\d{2})$')                      # 1234-05
+correct_year_month_day = re.compile(r'^(\d{4})[-](\d{2})[-](\d{2})$')     # 1234-05-06
+correct_year_only = re.compile(r'^(\d{4})$')                              # 3456
+correct_year_month = re.compile(r'^(\d{4})[-](\d{2})$')                   # 1234-05
 
 
 def check_date_format(alias, flat_final_dir):
@@ -427,7 +431,7 @@ def check_date_format(alias, flat_final_dir):
         for i in date_elems:
             i.text = i.text.strip().replace('[', '').replace(']', '')
             yearmonthday = correct_year_month_day.search(i.text)
-            yearonly = correct_year_last.search(i.text)
+            yearonly = correct_year_only.search(i.text)
             yearmonth = correct_year_month.search(i.text)
             if not (yearmonthday or yearonly or yearmonth):
                 logging.warning('{}.json has date "{}"'.format(file, i.text))
