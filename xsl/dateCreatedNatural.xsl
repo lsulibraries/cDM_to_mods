@@ -17,24 +17,13 @@
         
     <xsl:template match="originInfo/dateCreated">
         <xsl:choose>
-            <xsl:when test="matches(., '1906 Feb.')">
-                <dateCreated keyDate="yes">1906-02</dateCreated>
+            <xsl:when test="matches(., '2003 April 4-7')">
+                <dateCreated keyDate="yes" point="start">2003-04-04</dateCreated>
+                <dateCreated point="end">2003-04-07</dateCreated>
             </xsl:when>
-            <xsl:when test="matches(., '1927 July 27')">
-                <dateCreated keyDate="yes">1927-07-27</dateCreated>
-            </xsl:when>
-            <xsl:when test="matches(., '1927 Dec. 12')">
-                <dateCreated keyDate="yes">1927-12-12</dateCreated>
-            </xsl:when>
-            <xsl:when test="matches(., '1944 June 15')">
-                <dateCreated keyDate="yes">1944-06-15</dateCreated>
-            </xsl:when>
-            <xsl:when test="matches(., '1948 Dec. 13')">
-                <dateCreated keyDate="yes">1948-12-13</dateCreated>
-            </xsl:when>
-            <xsl:when test="matches(., 'unknown')">
-            </xsl:when>
-            <xsl:when test="matches(., 'none')">
+            <xsl:when test="matches(., '2005 March 22-23')">
+                <dateCreated keyDate="yes" point="start">2005-03-22</dateCreated>
+                <dateCreated point="end">2005-03-23</dateCreated>
             </xsl:when>
             <xsl:otherwise>
                 <dateCreated keyDate="yes">
