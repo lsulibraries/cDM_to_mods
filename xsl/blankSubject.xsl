@@ -7,7 +7,7 @@
     version="2.0"
     xmlns="http://www.loc.gov/mods/v3" >
     
-    <!-- If the namePart is blank, or is "Unknown" or "NA" then delete the name node -->
+    <!-- If the topic subelement is "NA" then delete the subject node -->
     
     <xsl:template match="@* | node()">
         <xsl:copy>
@@ -15,19 +15,9 @@
         </xsl:copy>
     </xsl:template>
     
-    <xsl:template match="name">
+    <xsl:template match="subject">
         <xsl:choose>
-            <xsl:when test="namePart = ''">
-            </xsl:when>
-            <xsl:when test="namePart = 'Unknown'">                
-            </xsl:when>
-            <xsl:when test="namePart = 'unknown'">                
-            </xsl:when>
-            <xsl:when test="namePart = 'NA'">                
-            </xsl:when>
-            <xsl:when test="namePart = 'Creator unknown'">                
-            </xsl:when>
-            <xsl:when test="namePart = 'Creator unknown;'">                
+            <xsl:when test="topic = 'NA'">
             </xsl:when>
             <xsl:otherwise>
                 <xsl:copy>
