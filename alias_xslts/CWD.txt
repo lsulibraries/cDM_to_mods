@@ -2,8 +2,8 @@ titleNonSort
 blankNamePart
 subjectSplit
 blankSubject
-dateCreatedCWD
 dateCreatedSplit
+dateCreatedCWD
 normalizeDate
 blankNodes
 locationMerge
