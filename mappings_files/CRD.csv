@@ -3,7 +3,7 @@ Creator,"<name displayLabel='Creator'><namePart>%value%</namePart><role><roleTer
 Contributors,"<name displayLabel='Contributor'><namePart>%value%</namePart><role><roleTerm type='text' authority='marcrelator'>Contributor</roleTerm><roleTerm type='code' authority='marcrelator'>ctb</roleTerm></role></name>"
 Publisher,"<originInfo><publisher>%value%</publisher></originInfo>"
 Date,"<originInfo><dateCreated keyDate='yes'>%value%</dateCreated></originInfo>"
-Subjects,"<subject authority='lcsh'><topic>%value%</topic></subject>"
+Subject,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Coverage,"<subject authority='lcsh' displayLabel='Coordinates'><cartographics><coordinates>%value%</coordinates></cartographics></subject>"
 Description,"<abstract displayLabel='Description'>%value%</abstract>"
 Notes,"<note type='content'>%value%</note>"
