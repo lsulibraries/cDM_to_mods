@@ -414,27 +414,31 @@ def validate_mods(alias, directory):
         logging.info("This group of files post-xsl Validated")
 
 
+def check_date_format(alias, flat_final_dir):
+    item_xml_files = [os.path.join(root, file) for root, dirs, files in os.walk(flat_final_dir)
+                      for file in files if '.xml' in file]
+    for file in item_xml_files:
+        file_etree = ET.parse(file)
+        date_elems = [elem for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued', 'dateCreated',)
+                      for elem in file_etree.findall('.//{{http://www.loc.gov/mods/v3}}{}'.format(tag))]
+        for i in date_elems:
+            if not good_format_date(i.text):
+                logging.warning('{} {} has bad date: "{}"'.format(file, i.tag.replace('{http://www.loc.gov/mods/v3}', ''), i.text))
+
+
 correct_year_month_day = re.compile(r'^(\d{4})[-](\d{2})[-](\d{2})$')     # 1234-05-06
 correct_year_only = re.compile(r'^(\d{4})$')                              # 3456
 correct_year_month = re.compile(r'^(\d{4})[-](\d{2})$')                   # 1234-05
 
 
-def check_date_format(alias, flat_final_dir):
-    item_xml_files = [os.path.join(root, file) for root, dirs, files in os.walk(flat_final_dir)
-                      for file in files if '.xml' in file]
-    for file in item_xml_files:
-        with open(file, 'r', encoding='utf-8') as f:
-            file_text = bytes(bytearray(f.read(), encoding='utf-8'))
-            file_etree = ET.fromstring(file_text)
-        date_elems = [i for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued')
-                      for i in file_etree.findall('.//{}'.format(tag))]
-        for i in date_elems:
-            i.text = i.text.strip().replace('[', '').replace(']', '')
-            yearmonthday = correct_year_month_day.search(i.text)
-            yearonly = correct_year_only.search(i.text)
-            yearmonth = correct_year_month.search(i.text)
-            if not (yearmonthday or yearonly or yearmonth):
-                logging.warning('{}.json has date "{}"'.format(file, i.text))
+def good_format_date(text):
+        yearmonthday = correct_year_month_day.search(text)
+        yearonly = correct_year_only.search(text)
+        yearmonth = correct_year_month.search(text)
+        if (yearmonthday or yearonly or yearmonth):
+            return True
+        else:
+            return False
 
 
 def flatten_cpd_dir(cpd_dir):
