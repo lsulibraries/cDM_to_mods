@@ -254,7 +254,7 @@ def careful_tag_split(etree, parent_tag_name, child_tag_name):
 
 
 def normalize_date(root_elem, pointer):
-    date_elems = [elem for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued')
+    date_elems = [elem for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued', 'dateCreated',)
                   for elem in root_elem.findall('.//{}'.format(tag))]
     for elem in date_elems:
         elem.text = parse_dates(elem.text)
