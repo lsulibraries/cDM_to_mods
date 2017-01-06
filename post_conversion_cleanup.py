@@ -318,7 +318,8 @@ def lookup_institution(alias):
 
 
 def move_zips_to_U(alias, cdm_data_dir):
-    files = [os.path.join('Upload_to_Islandora', i) for i in os.listdir('Upload_to_Islandora') if alias.lower() in i]
+    source_dir = 'Upload_to_Islandora'
+    files = [os.path.join(source_dir, i) for i in os.listdir(source_dir) if alias.lower().replace('_', '-') in i]
     dest_drive = os.path.split(os.path.split(cdm_data_dir)[0])[0]
     dest_path = os.path.join(dest_drive, 'Upload_to_Islandora')
     os.makedirs(dest_path, exist_ok=True)
