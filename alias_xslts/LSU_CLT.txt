@@ -1,7 +1,6 @@
-titleNonSort
-noteTypeMediumExtent
+blankNamePart
 subjectSplit
-dateCreatedNONegExposures
+noteTypeMediumExtent
 dateCreatedSplit
 normalizeDate
 blankNodes

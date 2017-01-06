@@ -1,7 +1,8 @@
 titleNonSort
+brToSemicolon
 noteTypeMediumExtent
 subjectSplit
-dateCreatedNONegExposures
+dateCreatedNatural
 dateCreatedSplit
 normalizeDate
 blankNodes

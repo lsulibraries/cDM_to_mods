@@ -1,8 +1,8 @@
 titleNonSort
-noteTypeMediumExtent
+noteTypeMediumLSU_DYP
 subjectSplit
-dateCreatedNONegExposures
 dateCreatedSplit
+dateCreatedNatural
 normalizeDate
 blankNodes
 locationMerge
