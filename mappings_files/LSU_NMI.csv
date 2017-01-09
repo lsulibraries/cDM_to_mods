@@ -16,7 +16,7 @@ null3,"<location><url displayLabel='Institution Web Site'>http://lib.lsu.edu</ur
 null4,"<location><holdingSimple><copyInformation><subLocation>Hill Memorial Library: Special Collections</subLocation></copyInformation></holdingSimple></location>"		
 Cite As,"<note type='preferred citation' displayLabel='Cite As'>%value%</note>"
 Restrictions,"<accessCondition type='restriction on access' displayLabel='Rights'>%value%</accessCondition>"
-Contact and Ordering Information,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>E-mail lsudiglib@lsu.edu with questions or comments. See instructions for ordering reprints of this item here: http://www.lib.lsu.edu/special/services/duplication.html</accessCondition>"
+Contact Info,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>E-mail lsudiglib@lsu.edu with questions or comments. See instructions for ordering reprints of this item here: http://www.lib.lsu.edu/special/services/duplication.html</accessCondition>"
 Index Number,"<identifier type='local' displayLabel='Item Number'>%value%</identifier>"
 Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 null6,"<recordInfo><recordChangeDate>2017-01-09</recordChangeDate></recordInfo>"
