@@ -1,5 +1,5 @@
-subjectSplit
 dateCreatedSplit
+subjectSplit
 normalizeDate
 blankNodes
 locationMerge
