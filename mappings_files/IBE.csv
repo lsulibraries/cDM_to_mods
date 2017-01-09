@@ -5,7 +5,7 @@ Date(s) of interview,"<originInfo><dateCreated keyDate='yes'>%value%</dateCreate
 Subjects (LCSH),"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Summary,"<abstract displayLabel='Description'>%value%</abstract>"
 Original Format,"<physicalDescription><form>%value%</form></physicalDescription>"
-Physical Description,"<physicalDescription><extent>%value%</extent></physicalDescription><typeOfResource>sound recording</typeOfResource><typeOfResource>still image</typeOfResource><typeOfResource>text</typeOfResource>"
+Physical Description,"<physicalDescription><extent>%value%</extent></physicalDescription>"
 Language,"<language><languageTerm type='code'>%value%</languageTerm></language>"
 Source,"<note type='ownership' displayLabel='Source'>T. Harry Williams Center for Oral History, a division of Louisiana State University Libraries Special Collections (http://www.lib.lsu.edu/oralhistory)</note>"
 null8,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>Integration and the Black Experience at LSU</title></titleInfo></relatedItem>"
