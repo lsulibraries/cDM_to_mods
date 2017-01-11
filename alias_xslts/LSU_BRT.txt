@@ -1,7 +1,8 @@
- blankNamePart
- noteTypeMediumExtent
+blankNamePart
+brToSemicolon
+noteTypeMediumExtent
 subjectSplit
- dateCreatedSplit
+dateCreatedSplit
 normalizeDate
 blankNodes
 locationMerge
