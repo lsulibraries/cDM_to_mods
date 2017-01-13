@@ -16,7 +16,7 @@
         </xsl:copy>
     </xsl:template>
     
-    <xsl:template match="subject">
+    <xsl:template match="subject/topic">
         <xsl:copy>
             <xsl:copy-of select="@*"/>
             <xsl:value-of select="replace(., ' – ', '--')"/>
