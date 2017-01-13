@@ -40,7 +40,7 @@
     <xsl:template match="titleInfo/title">
         <xsl:copy>
             <xsl:copy-of select="@*"/>
-            <xsl:value-of select="replace(., '&lt;br&gt;', '')"/>
+            <xsl:value-of select="replace(., '&lt;br&gt;', ' ')"/>
         </xsl:copy>
     </xsl:template>
     
