@@ -1,0 +1,8 @@
+noteTypeMediumExtent
+subjectSplit
+noteRemoveBreak
+dateCreatedSplit
+normalizeDate
+blankNodes
+locationMerge
+OrderedTemplates
