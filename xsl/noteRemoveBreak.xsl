@@ -7,7 +7,7 @@
       version="2.0"
       xmlns="http://www.loc.gov/mods/v3">
     
-    <!-- removes <br> tags from note element 
+    <!-- removes <br> tags from note element; also subject/topic and abstract elements 
     basic find & replace -->
     
     <xsl:template match="@* | node()">
@@ -17,6 +17,20 @@
     </xsl:template>
     
     <xsl:template match="note[@type='content']">
+        <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:value-of select="replace(., '&lt;br&gt;', '')"/>
+        </xsl:copy>
+    </xsl:template>
+    
+    <xsl:template match="abstract">
+        <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:value-of select="replace(., '&lt;br&gt;', '')"/>
+        </xsl:copy>
+    </xsl:template>
+    
+    <xsl:template match="subject/topic">
         <xsl:copy>
             <xsl:copy-of select="@*"/>
             <xsl:value-of select="replace(., '&lt;br&gt;', '')"/>
