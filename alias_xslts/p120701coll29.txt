@@ -2,9 +2,9 @@ titleNonSort
 blankNamePart
 multiNamePart
 subjectSplit
+removeSemicolon
 dateIssuedSplit
-dateCreatedSplit
-removeSemicolon-UNO_ANI
+dateIssuedSplitIsidoreNewman
 blankNodes
 locationMerge
 OrderedTemplates
