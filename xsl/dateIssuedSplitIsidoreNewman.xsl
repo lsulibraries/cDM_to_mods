@@ -15,16 +15,7 @@
         </xsl:copy>
     </xsl:template>
     
-    <xsl:template match="originInfo/dateCaptured">
-        <xsl:if test="substring(., string-length()) = ';'">
-        <xsl:for-each select="tokenize(substring(., 1, string-length(.)-1), ';')">
-            <xsl:element name="dateCaptured">
-                <xsl:value-of select="replace(replace(concat(upper-case(substring(.,1,1)),substring(.,2)), '^\s+|\s+$', ''),'\.$','')"/>         
-            </xsl:element>
-        </xsl:for-each>
-        </xsl:if>
-    </xsl:template>
-    
+   
     <xsl:template match="originInfo/dateIssued">          
         <xsl:for-each select="tokenize(., ';')">
           <xsl:choose>
