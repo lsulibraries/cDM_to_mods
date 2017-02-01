@@ -349,6 +349,12 @@
             <xsl:when test="matches(., 'undated', 'i')">
                 <!-- delete node by doing nothing on the match -->
             </xsl:when>
+            <xsl:when test="matches(., 'n.d.', 'i')">
+                <!-- delete node by doing nothing on the match -->
+            </xsl:when>
+            <xsl:when test="matches(., 'n,d,', 'i')">
+                <!-- delete node by doing nothing on the match -->
+            </xsl:when>
             <xsl:otherwise>
                 <dateCreated keyDate="yes">
                     <xsl:value-of select="."/>
