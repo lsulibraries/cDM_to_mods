@@ -58,6 +58,9 @@
             <xsl:when test="matches(., 'pdf', 'i')">
                 <internetMediaType>pdf</internetMediaType>
             </xsl:when>
+            <xsl:when test="matches(., 'text', 'i')">
+                <internetMediaType>pdf</internetMediaType>
+            </xsl:when>
             <xsl:when test="matches(., 'M4v', 'i')">
                 <internetMediaType>mp4</internetMediaType>
             </xsl:when>
