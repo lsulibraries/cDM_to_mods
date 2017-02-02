@@ -18,13 +18,13 @@
     
     <xsl:template match="typeOfResource">
         <xsl:choose>
-            <xsl:when test="matches(., 'Image')">
+            <xsl:when test="matches(., 'Image', 'i')">
                 <typeOfResource>still image</typeOfResource>
             </xsl:when>
-            <xsl:when test="matches(., 'Photograph')">
+            <xsl:when test="matches(., 'Photograph', 'i')">
                 <typeOfResource>still image</typeOfResource>
             </xsl:when>
-            <xsl:when test="matches(., 'Text')">
+            <xsl:when test="matches(., 'Text', 'i')">
                 <typeOfResource>text</typeOfResource>
             </xsl:when>
             <xsl:otherwise>
