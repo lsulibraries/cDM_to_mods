@@ -71,4 +71,18 @@
         </xsl:for-each>
     </xsl:template>
     
+    <xsl:template match="name[@displayLabel='Collector']">
+        <xsl:for-each select="namePart">
+            <name displayLabel="Collector">
+                <role>
+                    <roleTerm type="text" authority="marcrelator">Collector</roleTerm>
+                    <roleTerm type="code" authority="marcrelator">col</roleTerm>
+                </role>
+                <namePart>
+                    <xsl:value-of select="."/>
+                </namePart>
+            </name>
+        </xsl:for-each>
+    </xsl:template>
+    
 </xsl:stylesheet>
