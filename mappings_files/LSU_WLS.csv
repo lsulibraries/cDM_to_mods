@@ -3,7 +3,6 @@ Photographer,"<name displayLabel='Creator'><namePart>Ward, John Langdon</namePar
 Date,"<originInfo><dateCreated keyDate='yes' qualifier='approximate'>1880</dateCreated></originInfo>"
 Subjects,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Notes,"<note type='content'>%value%</note>"
-Type,"<physicalDescription><form>%value%</form></physicalDescription>"
 General Type,"<typeOfResource>still image</typeOfResource>"
 Digital Format,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
 Original Format/Size,"<physicalDescription><note type='medium'>%value%</note></physicalDescription>"
