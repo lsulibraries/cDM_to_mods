@@ -7,8 +7,8 @@
       version="2.0"
       xmlns="http://www.loc.gov/mods/v3">
     
-    <!-- if typeOfResource value is image, photograph, or text, translate as appropriate; 
-        otherwise remove from typeOfResource and put into medium note -->
+    <!-- if value is image, photograph, or text, put into typeofresource and translate as appropriate; 
+        otherwise value should be medium note -->
     
     <xsl:template match="@* | node()">
         <xsl:copy>
@@ -16,7 +16,7 @@
         </xsl:copy>
     </xsl:template>
     
-    <xsl:template match="typeOfResource">
+    <xsl:template match="physicalDescription/note[@type='medium']">
         <xsl:choose>
             <xsl:when test="matches(., 'Image')">
                 <typeOfResource>still image</typeOfResource>
