@@ -7,7 +7,7 @@ Origin,"<originInfo><place><placeTerm>%value%</placeTerm></place></originInfo>"
 Facsimile Publisher,"<originInfo><publisher>%value%</publisher></originInfo>"
 Contents,"<abstract displayLabel="Contents">%value%</abstract>"
 Description,"<abstract displayLabel='Description'>%value%</abstract>"
-Century,"<note type='content' displayLabel='Century'>
+Century,"<note type='content' displayLabel='Century'>"
 Illustration,"<note type='content' displayLabel='Illustration'>%value%</note>"
 Extent,"<note type='content' displayLabel='Contents'>%value%</note>"
 Scripts,"<physicalDescription><note type='script'>%value%</note></physicalDescription>"
