@@ -1,5 +1,5 @@
 Title,"<titleInfo><title>%value%</title></titleInfo>"
-Photographer,"<name type='personal' displayLabel='Photographer'><namePart>Lytle, Andrew David</namePart><namePart type='date'>1834-1917</namePart><role><roleTerm type='code' authority='marcrelator'>pht</roleTerm><roleTerm type='text' authority='marcrelator'>Photographer</roleTerm></role></name>"
+Photographer,"<name type='personal' displayLabel='Photographer'><namePart>Lytle, Andrew David, 1834-1917</namePart><role><roleTerm type='code' authority='marcrelator'>pht</roleTerm><roleTerm type='text' authority='marcrelator'>Photographer</roleTerm></role></name>"
 Date,"<originInfo><dateCreated keyDate='yes'>%value%</dateCreated></originInfo>"
 Subjects,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Notes,"<note type='content'>%value%</note>"
