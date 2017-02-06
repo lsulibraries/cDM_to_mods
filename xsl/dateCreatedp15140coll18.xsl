@@ -7,7 +7,7 @@
     version="2.0"
     xmlns="http://www.loc.gov/mods/v3">
     
-    <!-- reformats non parsing dates for NONegExposures, New Orleans Negatives Exposures and Prints -->
+    <!-- reformats non parsing dates for p15140coll18, Hermann Moyse coll -->
     
     <xsl:template match="@* | node()">
         <xsl:copy>
