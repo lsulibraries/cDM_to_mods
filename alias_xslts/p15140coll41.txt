@@ -1,5 +1,5 @@
 blankNamePart
- subjectSplit
+subjectSplit
 dateCreatedSplit
 normalizeDate
 blankNodes
