@@ -20,7 +20,6 @@
         <xsl:copy>
             <xsl:copy-of select="@*"/>
             <xsl:value-of select="replace(., 'Finding aid: ', '')"/>
-            <xsl:value-of select="replace(., 'Fiding aid: ', '')"/>
         </xsl:copy>
     </xsl:template>
     
