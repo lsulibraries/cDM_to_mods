@@ -17,7 +17,7 @@ null9,"<relatedItem type='host'><location><url displayLabel='Relation'>http://ls
 null1,"<location><physicalLocation authority='oclcorg' displayLabel='OCLC Member Symbol'>LUU</physicalLocation></location>"
 null2,"<location><physicalLocation displayLabel='Physical Location'>Louisiana State University: LSU Libraries</physicalLocation></location>"
 null3,"<location><url displayLabel='Institution Web Site'>http://lib.lsu.edu</url></location>"
-Location of originals,"<location><holdingSimple><copyInformation><subLocation>Hill Memorial Library: Special Collections</subLocation></copyInformation><shelfLocator>%value%</shelfLocator></holdingSimple></location>"
+Location of originals,"<location><holdingSimple><copyInformation><subLocation>Hill Memorial Library: Special Collections</subLocation><shelfLocator>%value%</shelfLocator></copyInformation></holdingSimple></location>"
 null8,"<accessCondition type='use and reproduction' displayLabel='Contact Information'>E-mail lsudiglib@lsu.edu with questions or comments. See instructions for ordering reprints of this item here: http://www.lib.lsu.edu/special/services/duplication.html</accessCondition>"
 Date created,"<recordInfo><recordCreationDate>%value%</recordCreationDate></recordInfo>"
 null6,"<recordInfo><recordChangeDate>2017-02-06</recordChangeDate></recordInfo>"
