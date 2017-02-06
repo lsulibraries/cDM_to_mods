@@ -7,7 +7,7 @@ Category,"<note type='content' displayLabel='Category'>%value%</note>"
 Sub-category,"<note type='content' displayLabel='Sub-category'>%value%</note>"
 Caption/Description,"<abstract displayLabel='Description'>%value%</abstract>"
 Notes,"<note type='content'>%value%</note>"
-Physical description,"<genre>photograph</genre>
+Physical description,"<genre>photograph</genre>"
 null12,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
 null11,"<typeOfResource>still image</typeOfResource>"
 Repository,"<note type='ownership' displayLabel='Source'>%value%</note>"
