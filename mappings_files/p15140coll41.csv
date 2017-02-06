@@ -11,7 +11,7 @@ Writing Location,"<originInfo><place><placeTerm>%value%</placeTerm></place></ori
 Subject,"<subject authority='lcsh'><topic>%value%</topic></subject>"
 Lingustic Category,"<note type='content' displayLabel='Lingustic Category'>%value%</note>"
 Document Type,"<note type='content' displayLabel='Document Type'>%value%</note>"
-Notes,"<abstract displayLabel='Description'>%value%</note>"
+Notes,"<abstract displayLabel='Description'>%value%</abstract>"
 null3,"<typeOfResource>text</typeOfResource>"
 Extent (Pages),"<physicalDescription><extent>%value% pages</extent></physicalDescription>"
 null2,"<genre>correspondence</genre>"
