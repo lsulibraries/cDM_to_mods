@@ -8,7 +8,7 @@ Provenance state or other,"<subject authority='lcsh' displayLabel='Provenance'><
 Associated artifacts,"<note type='citation/reference' displayLabel='Associated Artifacts'>%value%</note>"
 Description,"<abstract displayLabel='Description'>%value%</abstract>"
 null12,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
-Size,"<physicalDescription><extent>%value% pages</extent></physicalDescription>"
+Size,"<physicalDescription><extent>%value%</extent></physicalDescription>"
 null11,"<typeOfResource>three dimensional object</typeOfResource>"
 Repository,"<note type='ownership' displayLabel='Source'>Louisiana State University Libraries, Special Collections ( http://www.lib.lsu.edu/special )</note>"
 null4,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>	Edith Dabney Doll Collection</title></titleInfo></relatedItem>"
