@@ -6,7 +6,7 @@ Geographic Location,"<subject authority='lcsh' displayLabel='Location'><geograph
 Description/Notes,"<abstract displayLabel='Description'>%value%</abstract>"
 null12,"<physicalDescription><internetMediaType>jp2</internetMediaType></physicalDescription>"
 Physical Description,"<physicalDescription><note type='medium'>%value%</note></physicalDescription>"
-Type,"<typeOfResource>still image</typeOfResource>"
+null4,"<typeOfResource>still image</typeOfResource>"
 Repository,"<note type='ownership' displayLabel='Source'>Louisiana State University Libraries, Special Collections ( http://www.lib.lsu.edu/special )</note>"
 Digital Collection,"<relatedItem type='host'><titleInfo displayLabel='Digital Collection'><title>LSU Libraries Postcard Collections</title></titleInfo></relatedItem>"
 Repository collection guide,"<relatedItem type='host'><location><url displayLabel='Repository Collection Guide'>http://www.lib.lsu.edu/special/findaid/3645post.pdf</url></location></relatedItem>"
