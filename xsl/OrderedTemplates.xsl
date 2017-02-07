@@ -40,6 +40,7 @@
             <xsl:apply-templates select="accessCondition" />
             <xsl:apply-templates select="note[@type='preferred citation']"/>
             <xsl:apply-templates select="note[@type='citation/reference']"/>
+            <xsl:apply-templates select="note[@type='acquisition']"/>
             <xsl:apply-templates select="identifier" />
             <xsl:apply-templates select="recordInfo" />
             <xsl:apply-templates select="extension" />
