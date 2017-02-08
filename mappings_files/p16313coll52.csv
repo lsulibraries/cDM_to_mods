@@ -1,5 +1,5 @@
 Title,"<titleInfo><title>%value%</title></titleInfo>"
-Negative #,"<identifier authority='local' displayLabel='Negative No.'>%value%</identifier>"
+Negative #,"<identifier type='local' displayLabel='Negative No.'>%value%</identifier>"
 Photographer,"<name displayLabel='Photographer'><namePart>%value%</namePart><role><roleTerm type='code' authority='marcrelator'>pht</roleTerm><roleTerm type='text' authority='marcrelator'>Photographer</roleTerm></role></name>"
 Date,"<originInfo><dateCreated keyDate='yes'>%value%</dateCreated></originInfo>"
 Region,"<subject authority='local' displayLabel='Location'><hierarchicalGeographic><region>%value%</region></hierarchicalGeographic></subject>"
