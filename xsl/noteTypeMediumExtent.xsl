@@ -16,7 +16,7 @@
     </xsl:template>
     
     <xsl:variable name="targetText" select="node()/physicalDescription/note[@type='medium']/text()"/>
-    <xsl:variable name="myRegEx" select="'([0-9a-zA-Z\s,]+);\s?([0-9\sa-zA-Z\(\)/.±&quot;]+)'"/>
+    <xsl:variable name="myRegEx" select="'([0-9a-zA-Z\s,]+);\s?([0-9\sa-zA-Z\-\(\)/.±&quot;]+)'"/>
     
     <xsl:template match="physicalDescription/note[@type='medium']">
         <xsl:choose>
