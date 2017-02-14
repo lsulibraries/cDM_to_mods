@@ -1,0 +1,8 @@
+titleNonSort
+subjectSplit
+dateIssuedSplit
+typeOfResource
+normalizeDate
+blankNodes
+locationMerge
+OrderedTemplates
