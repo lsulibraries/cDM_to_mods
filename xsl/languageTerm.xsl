@@ -18,10 +18,10 @@
     <xsl:template match="languageTerm[@type='code']">
         <xsl:choose>
             <xsl:when test="matches(., 'en;')">
-                <languageTerm>en</languageTerm>
+                <languageTerm type="code">en</languageTerm>
             </xsl:when>
             <xsl:otherwise>
-                <languageTerm>
+                <languageTerm type="code">
                     <xsl:value-of select="."/>
                 </languageTerm>
             </xsl:otherwise>
