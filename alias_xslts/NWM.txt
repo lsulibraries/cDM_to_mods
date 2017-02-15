@@ -2,7 +2,6 @@ blankNodes
 blankNamePart
 subjectSplit
 dateIssuedSplit
-dateCreatedSplit
 multiNamePart
 languageTerm
 locationMerge
