@@ -1,6 +1,5 @@
 titleNonSort
 subjectSplit
-dateIssuedSplit
 dateCreatedSplit
 blankNodes
 locationMerge
