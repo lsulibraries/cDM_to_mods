@@ -4,30 +4,22 @@ import os
 import sys
 import shutil
 import logging
-from shutil import copyfile, move, rmtree
 import json
-from lxml import etree as ET
 import io
 
+from lxml import etree as ET
 import trello_integration as TI
 
 
 class IsCountsCorrect():
     def __init__(self, alias, cdm_data_dir):
         elems_json_filelist = self.make_list_of_elem_jsons(alias, cdm_data_dir)
-        print('elems_json_filelist', elems_json_filelist)
         elems_in_coll_cpds = self.name_root_compounds_json(elems_json_filelist)
-        print(len(elems_in_coll_cpds))
         all_exp_children, all_exp_parents, all_exp_compounds = self.lookup_expected_cpds(alias, cdm_data_dir, elems_in_coll_cpds)
-        print(len(all_exp_children), len(all_exp_parents), len(all_exp_compounds))
         exp_root_count = self.get_root_count(elems_json_filelist)
-        print(exp_root_count)
         exp_simples = exp_root_count - len(all_exp_parents)
-        print(exp_simples)
         all_obs_simples = self.count_observed_simples(alias)
-        print(len(all_obs_simples))
         all_obs_compounds = self.lookup_observed_compounds(alias)
-        print(len(all_obs_simples))
 
         logging.info('Count Simples xmls: {}'.format(exp_simples))
         logging.info('Count Compounds xmls: {}'.format(len(all_exp_compounds)))
@@ -170,9 +162,9 @@ class PullInBinaries():
 
     def copy_binary(self, kind, sourcepath, sourcefile, outroot, pointer):
         if kind == 'simple':
-            copyfile(os.path.join(sourcepath, sourcefile), os.path.join(outroot, sourcefile))
+            shutil.copyfile(os.path.join(sourcepath, sourcefile), os.path.join(outroot, sourcefile))
         elif kind == 'compound':
-            copyfile(os.path.join(sourcepath, sourcefile), os.path.join(outroot, "OBJ.{}".format(sourcefile.split('.')[-1])))
+            shutil.copyfile(os.path.join(sourcepath, sourcefile), os.path.join(outroot, "OBJ.{}".format(sourcefile.split('.')[-1])))
 
 
 class MakeStructureFile():
@@ -270,12 +262,12 @@ def folder_by_extension(alias):
     for extension in extensions:
         dest_folder = os.path.join(starting_folder, extension)
         if os.path.isdir(os.path.realpath(dest_folder)):
-            rmtree(dest_folder)
+            shutil.rmtree(dest_folder)
         os.makedirs(dest_folder, exist_ok=True)
         files_limited_to_extension = {file.split('.')[0] for file in files if file.split('.')[1] == extension}
         files_with_extension_plus_samenames = [file for file in files if file.split('.')[0] in files_limited_to_extension]
         for file in files_with_extension_plus_samenames:
-            copyfile(os.path.join(starting_folder, file), os.path.join(dest_folder, file))
+            shutil.copyfile(os.path.join(starting_folder, file), os.path.join(dest_folder, file))
 
 
 def make_zips(alias):
