@@ -1,9 +1,10 @@
 replaceAtSymbolsGlobal
-blankNodes
+internetMediaType
 titleNonSort
 blankNamePart
 subjectSplit
 dateIssuedSplit
-dateCreatedSplit
+dateCapturedSplit
 locationMerge
+blankNodes
 OrderedTemplates

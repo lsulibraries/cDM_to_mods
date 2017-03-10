@@ -1,4 +1,3 @@
-multiNamePart
 blankNamePart
 subjectSplit
 dateCreatedSplit

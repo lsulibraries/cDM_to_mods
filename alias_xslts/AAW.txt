@@ -1,8 +1,8 @@
+titleNonSort
 multiNamePart
 blankNamePart
-subjectSplit
 dateCreatedSplit
+subjectSplit
 normalizeDate
-blankNodes
-locationMerge
 OrderedTemplates
+blankNodes
