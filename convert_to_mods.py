@@ -268,6 +268,12 @@ def parse_dates(text):
     if not text:
         return ''
 
+    # checking if dateparser is failing & just returning today's date
+    x, y = dateparser.parse(text), dateparser.parse('now')
+    if x and x.year and x.month and x.day:
+        if (x.year, x.month, x.day) == (y.year, y.month, y.day):
+            return text
+
     # YYYY CASE
     text = text.strip().replace('[', '').replace(']', '')
     yearonly = year_only.search(text)
