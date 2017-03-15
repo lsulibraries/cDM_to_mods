@@ -32,5 +32,4 @@ Image Manipulation (Archival),"<extension><imageManipulation>%value%</imageManip
 File Size (Archival),"<extension><fileSize>%value%</fileSize></extension>"
 Hardware/Software (Archival),"<extension><hardwareSoftware>%value%</hardwareSoftware></extension>"
 Digitized By,"<extension><digitizedBy>%value%</digitizedBy></extension>"
-Transcript,"<extension><transcript displayLabel='Transcript'>%value%</transcript></extension>"
 null5,"<extension><CONTENTdmData></CONTENTdmData></extension>"
