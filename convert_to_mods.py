@@ -17,8 +17,8 @@ import dateparser
 from post_conversion_cleanup import IsCountsCorrect
 
 
-MODS_DEF = ET.parse('schema/mods-3-6.xsd')
-MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
+# MODS_DEF = ET.parse('schema/mods-3-6.xsd')
+# MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
 
 def convert_to_mods(alias, cdm_data_dir):
@@ -268,6 +268,11 @@ def parse_dates(text):
     if not text:
         return ''
 
+    has_bracket = False
+    if '[' in text and ']' in text:
+        has_bracket = True
+        text = text.strip().replace('[', '').replace(']', '')
+
     # checking if dateparser is failing & just returning today's date
     x, y = dateparser.parse(text), dateparser.parse('now')
     if x and x.year and x.month and x.day:
@@ -275,10 +280,13 @@ def parse_dates(text):
             return text
 
     # YYYY CASE
-    text = text.strip().replace('[', '').replace(']', '')
+    text = text.strip()
     yearonly = year_only.search(text)
     if yearonly:
-        return yearonly.group()
+        if has_bracket:
+            return '[{}]'.format(yearonly.group())
+        else:
+            return yearonly.group()
 
     # checking if dateparser is assigning a 'day' when none is in the text
     a = dateparser.parse(text, languages=['en'], settings={'PREFER_DAY_OF_MONTH': 'first'})
@@ -295,13 +303,22 @@ def parse_dates(text):
 
     # YYYY-MM-DD CASE
     if a and (a == b):
-        return '{}-{}-{}'.format(year, month, day)
+        if has_bracket:
+            return '[{}-{}-{}]'.format(year, month, day)
+        else:
+            return '{}-{}-{}'.format(year, month, day)
     # YYYY-MM CASE
     elif a and b and (a != b):
-        return '{}-{}'.format(year, month)
+        if has_bracket:
+            return '[{}-{}]'.format(year, month)
+        else:
+            return '{}-{}'.format(year, month)
     # ALL OTHER CASES
     else:
-        return text
+        if has_bracket:
+            return '[{}]'.format(text)
+        else:
+            return text
 
 
 def delete_empty_fields(orig_etree):
