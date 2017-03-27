@@ -17,8 +17,8 @@ import dateparser
 from post_conversion_cleanup import IsCountsCorrect
 
 
-# MODS_DEF = ET.parse('schema/mods-3-6.xsd')
-# MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
+MODS_DEF = ET.parse('schema/mods-3-6.xsd')
+MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
 
 def convert_to_mods(alias, cdm_data_dir):
