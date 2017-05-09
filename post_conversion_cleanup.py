@@ -175,7 +175,7 @@ class MakeStructureFile():
                 new_etree = ET.Element("islandora_compound_object", title=parent)
                 old_etree = ET.parse("{}/structure.cpd".format(root))
                 for i in old_etree.findall('.//pageptr'):
-                    new_etree.append(ET.Element('child', content=i.text))
+                    new_etree.append(ET.Element('child', content='{}/{}'.format(parent, i.text)))
 
                 with open('{}/structure.xml'.format(root), 'wb') as f:
                     f.write(ET.tostring(new_etree, encoding="utf-8", xml_declaration=True, pretty_print=True))
