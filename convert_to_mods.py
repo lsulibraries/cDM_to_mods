@@ -17,8 +17,8 @@ import dateparser
 from post_conversion_cleanup import IsCountsCorrect
 
 
-MODS_DEF = ET.parse('schema/mods-3-6.xsd')
-MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
+# MODS_DEF = ET.parse('schema/mods-3-6.xsd')
+# MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
 
 def convert_to_mods(alias, cdm_data_dir):
@@ -260,7 +260,7 @@ def normalize_date(root_elem, pointer):
         elem.text = parse_dates(elem.text)
 
 
-year_only = re.compile(r'^(\d{4})$')
+year_only = re.compile(r'^(\d{4}\??)$')
 
 
 def parse_dates(text):

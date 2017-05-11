@@ -21,3 +21,5 @@ def test_parse_dates():
     assert convert_to_mods.parse_dates('[ca. 1750] ') == '[ca. 1750]'
     assert convert_to_mods.parse_dates('[1750-01]') == '[1750-01]'
     assert convert_to_mods.parse_dates('[1750 august 23]') == '[1750-08-23]'
+    assert convert_to_mods.parse_dates('[1913?]') == '[1913?]'
+    assert convert_to_mods.parse_dates('1913?') == '1913?'
