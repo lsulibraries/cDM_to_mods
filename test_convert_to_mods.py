@@ -23,4 +23,8 @@ def test_parse_dates():
     assert convert_to_mods.parse_dates('[1750 august 23]') == '[1750-08-23]'
     assert convert_to_mods.parse_dates('[1913?]') == '[1913?]'
     assert convert_to_mods.parse_dates('1913?') == '1913?'
+    assert convert_to_mods.parse_dates('1970?-1980?') == '1970?-1980?'
     assert convert_to_mods.parse_dates('[192?]') == '[192?]'
+    assert convert_to_mods.parse_dates('1900? - 1909?') == '1900? - 1909?'
+    assert convert_to_mods.parse_dates('1950? (probable year)') == '1950? (probable year)'
+    assert convert_to_mods.parse_dates('1900? - 1919') == '1900? - 1919'
