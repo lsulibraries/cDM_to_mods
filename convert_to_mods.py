@@ -260,13 +260,16 @@ def normalize_date(root_elem, pointer):
         elem.text = parse_dates(elem.text)
 
 
-year_only = re.compile(r'^(\d{4})$')
+year_only = re.compile(r'^(\d{4}\??)$')
+three_number_only = re.compile(r'^(\d{3}\??)$')
 
 
 def parse_dates(text):
     # EMPTY CASE
     if not text:
         return ''
+
+    original_text = ''.join(i for i in text)
 
     has_bracket = False
     if '[' in text and ']' in text:
@@ -277,16 +280,19 @@ def parse_dates(text):
     x, y = dateparser.parse(text), dateparser.parse('now')
     if x and x.year and x.month and x.day:
         if (x.year, x.month, x.day) == (y.year, y.month, y.day):
-            return text
+            return original_text
 
     # YYYY CASE
     text = text.strip()
     yearonly = year_only.search(text)
     if yearonly:
-        if has_bracket:
-            return '[{}]'.format(yearonly.group())
-        else:
-            return yearonly.group()
+        return original_text
+
+    # YYY? CASE
+    text = text.strip()
+    threenumberonly = three_number_only.search(text)
+    if threenumberonly:
+        return original_text
 
     # checking if dateparser is assigning a 'day' when none is in the text
     a = dateparser.parse(text, languages=['en'], settings={'PREFER_DAY_OF_MONTH': 'first'})

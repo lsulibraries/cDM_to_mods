@@ -1,4 +1,5 @@
-output/*
+Upload_to_Islandora/
+output/
 *.pyc
 convert_to_mods_log.txt
 post_conversion_cleanup_log.txt
