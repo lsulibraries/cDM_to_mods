@@ -1,9 +1,7 @@
 titleNonSort
 blankNamePart
 subjectSplit
-dateIssuedPSL
 dateCreatedPSL
-dateIssuedSplit
 dateCreatedSplit
 locationMerge
 OrderedTemplates
