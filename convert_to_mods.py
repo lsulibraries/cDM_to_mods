@@ -260,8 +260,8 @@ def normalize_date(root_elem, pointer):
         elem.text = parse_dates(elem.text)
 
 
-year_only = re.compile(r'^(\d{4}\??)$')
-three_number_only = re.compile(r'^(\d{3}\??)$')
+year_question_only = re.compile(r'^(\d{4}\??)$')
+three_number_question_only = re.compile(r'^(\d{3}\??)$')
 
 
 def parse_dates(text):
@@ -282,15 +282,15 @@ def parse_dates(text):
         if (x.year, x.month, x.day) == (y.year, y.month, y.day):
             return original_text
 
-    # YYYY CASE
+    # YYYY? CASE
     text = text.strip()
-    yearonly = year_only.search(text)
+    yearonly = year_question_only.search(text)
     if yearonly:
         return original_text
 
     # YYY? CASE
     text = text.strip()
-    threenumberonly = three_number_only.search(text)
+    threenumberonly = three_number_question_only.search(text)
     if threenumberonly:
         return original_text
 
