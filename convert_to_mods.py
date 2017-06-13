@@ -35,9 +35,13 @@ def convert_to_mods(alias, cdm_data_dir):
         output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
         output_file = os.path.join(output_path, '{}.xml'.format(pointer))
         target_file = '{}.json'.format(pointer)
-        path_to_pointer = [os.path.join(root, target_file)
-                           for root, dirs, files in cdm_data_filestructure
-                           if target_file in files][0]
+        try:
+            path_to_pointer = [os.path.join(root, target_file)
+                               for root, dirs, files in cdm_data_filestructure
+                               if target_file in files][0]
+        except IndexError:
+            logging.warning('Conversion halted! Pointer {} is missing in your source data'.format(pointer))
+            quit()
         ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
         make_a_single_mods(ingredients)
     logging.info('finished preliminary mods: simples')
