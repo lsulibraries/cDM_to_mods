@@ -24,6 +24,7 @@
             <xsl:apply-templates select="note[@type='biographical/historical']"/>
             <xsl:apply-templates select="note[@type='thesis']"/>
             <xsl:apply-templates select="originInfo" />
+            <xsl:apply-templates select="note[@type='date']"/>
             <xsl:apply-templates select="subject" />
             <xsl:apply-templates select="abstract" />
             <xsl:apply-templates select="note[@type='content']"/>
