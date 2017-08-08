@@ -147,7 +147,7 @@ def make_a_single_mods(ingredients):
     mods = build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
     merge_same_fields(mods)
     careful_tag_split(mods, 'name', 'namePart')
-    for sub_subject in ('topic', 'geographic', 'temporal'):
+    for sub_subject in ('topic', 'geographic', 'temporal', 'occupation'):
         careful_tag_split(mods, 'subject', sub_subject)
     for sub_subject in ("continent", "country", "province", "region", "state", "territory", "county", "city", "citySection", "island", "area"):
         careful_tag_split(mods, 'hierarchicalGeographic', sub_subject)
