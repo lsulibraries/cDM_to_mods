@@ -26,6 +26,9 @@
             <xsl:when test="matches(., 'image', 'i')">
                 <typeOfResource>still image</typeOfResource>
             </xsl:when>
+            <xsl:when test="matches(., 'still image', 'i')">
+                <typeOfResource>still image</typeOfResource>
+            </xsl:when>
             <xsl:when test="matches(., 'audio', 'i')">
                 <typeOfResource>sound recording-musical</typeOfResource>
             </xsl:when>
@@ -34,6 +37,10 @@
             </xsl:when>
             <xsl:when test="matches(., 'text', 'i')">
                 <typeOfResource>text</typeOfResource>
+            </xsl:when>
+            <xsl:when test="matches(., 'text; image')">
+                <typeOfResource>text</typeOfResource>
+                <typeOfResource>still image</typeOfResource>
             </xsl:when>
             <xsl:otherwise>
                 <typeOfResource>

@@ -86,4 +86,29 @@
             </xsl:element>
         </xsl:for-each>
     </xsl:template>
+    
+    <xsl:template match="subject[occupation]">
+        <xsl:variable name="authAttr" select="@authority"/>
+        <xsl:variable name="displayLabel" select="@displayLabel"/>
+        <xsl:for-each select="occupation">
+            <xsl:element name="subject">
+                <xsl:if test="$authAttr"> <!--add authority attribute only if present in source-->
+                    <xsl:attribute name="authority">
+                        <xsl:value-of select="$authAttr" />
+                    </xsl:attribute>
+                </xsl:if>
+                <xsl:if test="$displayLabel"> <!--add label attribute only if present in source-->
+                    <xsl:attribute name="displayLabel">
+                        <xsl:value-of select="$displayLabel" />
+                    </xsl:attribute>
+                </xsl:if>
+                <xsl:for-each select="tokenize(.,'--')">
+                    <xsl:element name="occupation">
+                        <xsl:value-of select="replace(replace(concat(upper-case(substring(.,1,1)),substring(.,2)), '^\s+|\s+$', ''),'\.$','')"/>
+                    </xsl:element>
+                </xsl:for-each>
+            </xsl:element>
+        </xsl:for-each>
+    </xsl:template>
+    
 </xsl:stylesheet>
