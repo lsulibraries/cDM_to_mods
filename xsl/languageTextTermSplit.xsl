@@ -19,7 +19,7 @@
         <xsl:for-each select="languageTerm">
                 <xsl:for-each select="tokenize(.,';')">
                     <language>
-                        <languageTerm type="code">
+                        <languageTerm type="text">
                             <xsl:value-of select="replace(., '^\s+|\s+$', '')"/>
                         </languageTerm>
                     </language>
