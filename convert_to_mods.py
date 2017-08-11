@@ -15,6 +15,7 @@ from lxml import etree as ET
 import dateparser
 
 from post_conversion_cleanup import IsCountsCorrect
+from MonographTitleCombiner import MonographTitleCombiner
 
 
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
@@ -29,9 +30,10 @@ def convert_to_mods(alias, cdm_data_dir):
     cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(alias_data_dir)]
     simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
     parents_children = parse_parents_children(alias_data_dir, cpd_parent_pointers)
+    expanded_monograph_title_dict = MonographTitleCombiner(alias_data_dir).monograph_pointer_newtitle
 
     # root level simples
-    for pointer in simple_pointers:
+    for pointer in sorted(simple_pointers):
         output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
         output_file = os.path.join(output_path, '{}.xml'.format(pointer))
         target_file = '{}.json'.format(pointer)
@@ -42,26 +44,32 @@ def convert_to_mods(alias, cdm_data_dir):
         except IndexError:
             logging.warning('Conversion halted! Pointer {} is missing in your source data'.format(pointer))
             quit()
-        ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
+        ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict, expanded_monograph_title_dict)
         make_a_single_mods(ingredients)
     logging.info('finished preliminary mods: simples')
 
     # root level compounds
-    for pointer, _ in parents_children.items():
+    for pointer, _ in sorted(parents_children.items()):
         output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', pointer)
         output_file = os.path.join(output_path, 'MODS.xml')
         path_to_pointer = os.path.join(alias_data_dir, 'Cpd', '{}.json'.format(pointer))
-        ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
+        ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict, expanded_monograph_title_dict)
         make_a_single_mods(ingredients)
         copyfile(os.path.join(alias_data_dir, 'Cpd', '{}_cpd.xml'.format(pointer)), os.path.join(output_path, 'structure.cpd'))
 
     # child level simples
-    for parent, children_pointers in parents_children.items():
+    for parent, children_pointers in sorted(parents_children.items()):
         for pointer in children_pointers:
             output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', parent, pointer)
             output_file = os.path.join(output_path, 'MODS.xml')
             path_to_pointer = os.path.join(alias_data_dir, 'Cpd', parent, '{}.json'.format(pointer))
-            ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict)
+            ingredients = (pointer,
+                           path_to_pointer,
+                           output_path,
+                           output_file,
+                           nicks_to_names_dict,
+                           mappings_dict,
+                           expanded_monograph_title_dict)
             make_a_single_mods(ingredients)
     logging.info('finished preliminary mods: compounds')
 
@@ -139,12 +147,12 @@ def remove_previous_mods(alias):
 
 
 def make_a_single_mods(ingredients):
-    (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict) = ingredients
+    (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict, expanded_monograph_title_dict) = ingredients
     os.makedirs(output_path, exist_ok=True)
     pointer_json = get_cdm_pointer_json(path_to_pointer)
     nicks_texts = parse_json(pointer, pointer_json)
     propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
-    mods = build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict)
+    mods = build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict, expanded_monograph_title_dict)
     merge_same_fields(mods)
     careful_tag_split(mods, 'name', 'namePart')
     for sub_subject in ('topic', 'geographic', 'temporal', 'occupation'):
@@ -179,7 +187,7 @@ def convert_nicks_to_propers(nicks_to_names_dict, nicks_texts):
     return propers_texts
 
 
-def build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict):
+def build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict, expanded_monograph_title_dict):
     NSMAP = {None: "http://www.loc.gov/mods/v3",
              'mods': "http://www.loc.gov/mods/v3",
              'xsi': "http://www.w3.org/2001/XMLSchema-instance",
@@ -189,6 +197,9 @@ def build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mapp
     for k, v in mappings_dict.items():
         if k in propers_texts and propers_texts[k]:
             replacement = propers_texts[k]
+            # overwrite with the expanded title if the pointer has one, otherwise keep normal title
+            if k == 'Title':
+                replacement = expanded_monograph_title_dict.get(pointer, replacement)
             for a, b in [('&', '&amp;'),
                          ('"', '&quot;'),
                          ('<', '&lt;'),
