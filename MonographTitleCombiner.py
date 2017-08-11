@@ -8,6 +8,7 @@ class MonographTitleCombiner:
     def __init__(self, alias_data_dir):
         self.alias_data_dir = alias_data_dir
         self.monograph_pointer_newtitle = dict()
+        self.current_stucture_file = None
         self.main()
 
     def main(self):
@@ -16,6 +17,7 @@ class MonographTitleCombiner:
                            for file in files
                            if "_cpd.xml" in file]
         for structure_file in sorted(structure_files):
+            self.current_stucture_file = structure_file
             parsed_structure_file = ET.parse(structure_file)
             root_elem = parsed_structure_file.getroot()
             self.make_pointer_new_monograph_title_dict(root_elem)
@@ -44,7 +46,7 @@ class MonographTitleCombiner:
         elif child_page_elems and not child_node_elems:
             self.page_node_bunch(elem)
         else:
-            raise Exception('Error:  a page and node on the same level')
+            raise Exception('Error:  a page and node on the same level {}'.format(self.current_stucture_file))
 
     def page_node_bunch(self, node_elem):
         elem_nodetitle = self.get_this_level_nodetitle(node_elem)
@@ -65,17 +67,17 @@ class MonographTitleCombiner:
         nodetitle_elem = elem.find('nodetitle')
         if nodetitle_elem is not None:
             return nodetitle_elem.text
-        raise Exception('No nodetitle at this level {}'.format(elem.tag))
+        raise Exception('No nodetitle at this level {} {}'.format(elem.tag, self.current_stucture_file))
 
     def children_meet_expectations(self, elem, expected_elems=[], silent_elems=[], unique_elems=[]):
         unique_set = set()
         for child in elem.iterchildren():
             if child.tag not in expected_elems:
-                raise Exception('Unexpected node tag {}'.format(child.tag))
+                raise Exception('Unexpected node tag {} {}'.format(child.tag, self.current_stucture_file))
             if child.tag in silent_elems and self.has_text(child):
-                raise Exception('Not capturing data in {}'.format(child.tag, child.text))
+                raise Exception('Not capturing data in {} {} {}'.format(child.tag, child.text, self.current_stucture_file))
             if child.tag in unique_elems and child.tag in unique_set:
-                raise Exception('Duplicate tag {}'.format(child.tag))
+                raise Exception('Duplicate tag {} {}'.format(child.tag, self.current_stucture_file))
             else:
                 unique_set.add(child.tag)
         return True

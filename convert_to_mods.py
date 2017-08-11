@@ -188,7 +188,6 @@ def convert_nicks_to_propers(nicks_to_names_dict, nicks_texts):
 
 
 def build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict, expanded_monograph_title_dict):
-    print(pointer)
     NSMAP = {None: "http://www.loc.gov/mods/v3",
              'mods': "http://www.loc.gov/mods/v3",
              'xsi': "http://www.w3.org/2001/XMLSchema-instance",
