@@ -34,9 +34,9 @@ class MonographTitleCombiner:
             self.loop_one_layer(node_elem)
 
     def loop_one_layer(self, elem):
-        elem_nodetitle = self.get_this_level_nodetitle(elem)
-        if elem_nodetitle:
-            print('Are we losing this title info for file {}: {}'.format(self.current_stucture_file, elem_nodetitle))
+        # elem_nodetitle = self.get_this_level_nodetitle(elem)
+        # if elem_nodetitle:
+        #     print('Are we losing this title info for file {}: {}'.format(self.current_stucture_file, elem_nodetitle))
         child_node_elems = [child for child in elem.iterchildren() if child.tag == 'node']
         child_page_elems = [child for child in elem.iterchildren() if child.tag == 'page']
         if child_node_elems and not child_page_elems:
