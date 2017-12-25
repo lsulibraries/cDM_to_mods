@@ -9,3 +9,4 @@ Cached_Cdm_files_onlymetadata/
 .pydevproject
 trello_keys.json
 .cache/
+*/.ipynb_checkpoints/*
