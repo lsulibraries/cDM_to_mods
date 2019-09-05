@@ -12,7 +12,6 @@ from copy import deepcopy
 import logging
 
 from lxml import etree as ET
-import dateparser
 
 from post_conversion_cleanup import IsCountsCorrect
 from MonographTitleCombiner import MonographTitleCombiner
@@ -159,7 +158,6 @@ def make_a_single_mods(ingredients):
         careful_tag_split(mods, 'subject', sub_subject)
     for sub_subject in ("continent", "country", "province", "region", "state", "territory", "county", "city", "citySection", "island", "area"):
         careful_tag_split(mods, 'hierarchicalGeographic', sub_subject)
-    normalize_date(mods, pointer)
     delete_empty_fields(mods)
     reorder_title(mods)
     reorder_location(mods)
@@ -266,80 +264,6 @@ def careful_tag_split(etree, parent_tag_name, child_tag_name):
                     name_elem.getparent().append(copied_name_elem)
         if remove_orig_parent:
             name_elem.getparent().remove(name_elem)
-
-
-def normalize_date(root_elem, pointer):
-    date_elems = [elem for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued', 'dateCreated',)
-                  for elem in root_elem.findall('.//{}'.format(tag))]
-    for elem in date_elems:
-        elem.text = parse_dates(elem.text)
-
-
-year_question_only = re.compile(r'^(\d{4}\??)$')
-three_number_question_only = re.compile(r'^(\d{3}\??)$')
-
-
-def parse_dates(text):
-    # EMPTY CASE
-    if not text:
-        return ''
-
-    original_text = ''.join(i for i in text)
-
-    has_bracket = False
-    if '[' in text and ']' in text:
-        has_bracket = True
-        text = text.strip().replace('[', '').replace(']', '')
-
-    # checking if dateparser is failing & just returning today's date
-    x, y = dateparser.parse(text), dateparser.parse('now')
-    if x and x.year and x.month and x.day:
-        if (x.year, x.month, x.day) == (y.year, y.month, y.day):
-            return original_text
-
-    # YYYY? CASE
-    text = text.strip()
-    yearonly = year_question_only.search(text)
-    if yearonly:
-        return original_text
-
-    # YYY? CASE
-    text = text.strip()
-    threenumberonly = three_number_question_only.search(text)
-    if threenumberonly:
-        return original_text
-
-    # checking if dateparser is assigning a 'day' when none is in the text
-    a = dateparser.parse(text, languages=['en'], settings={'PREFER_DAY_OF_MONTH': 'first'})
-    b = dateparser.parse(text, languages=['en'], settings={'PREFER_DAY_OF_MONTH': 'last'})
-
-    # converting datetime object with format 'xxxx-x-x' into
-    # string '0x' for day and '0x' for month
-    if a:
-        year, month, day = str(a.year), str(a.month), str(a.day)
-        if len(month) == 1:
-            month = '0{}'.format(month)
-        if len(day) == 1:
-            day = '0{}'.format(day)
-
-    # YYYY-MM-DD CASE
-    if a and (a == b):
-        if has_bracket:
-            return '[{}-{}-{}]'.format(year, month, day)
-        else:
-            return '{}-{}-{}'.format(year, month, day)
-    # YYYY-MM CASE
-    elif a and b and (a != b):
-        if has_bracket:
-            return '[{}-{}]'.format(year, month)
-        else:
-            return '{}-{}'.format(year, month)
-    # ALL OTHER CASES
-    else:
-        if has_bracket:
-            return '[{}]'.format(text)
-        else:
-            return text
 
 
 def delete_empty_fields(orig_etree):

@@ -379,5 +379,5 @@ if __name__ == '__main__':
     logging.info('finished {}'.format(alias))
 
     log_contents = logging_string.getvalue()
-    trelloize(alias, log_contents, 'Whole Collection Packaged at U')
+    # trelloize(alias, log_contents, 'Whole Collection Packaged at U')
     logging_string.close()
