@@ -14,7 +14,7 @@ import logging
 from lxml import etree as ET
 
 from post_cdm_cleanup import IsCountsCorrect
-from MonographTitleCombiner import MonographTitleCombiner
+from utilities import MonographTitleCombiner
 from utilities import fix_permissions
 from utilities import setup_logging
 
