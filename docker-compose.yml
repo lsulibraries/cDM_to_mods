@@ -1,0 +1,11 @@
+version: '3.7'
+
+
+services:
+  cdm_to_mods:
+    build: .
+    container_name: cdm_to_mods
+    volumes:
+      - .:/cDM_to_mods
+    tty: true
+    working_dir: /cDM_to_mods

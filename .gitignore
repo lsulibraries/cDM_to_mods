@@ -10,3 +10,5 @@ Cached_Cdm_files_onlymetadata/
 trello_keys.json
 .cache/
 */.ipynb_checkpoints/*
+Source/
+log.txt

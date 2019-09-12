@@ -5,10 +5,11 @@ import sys
 import shutil
 import logging
 import json
-import io
+
+from utilities import fix_permissions
+from utilities import setup_logging
 
 from lxml import etree as ET
-import trello_integration as TI
 
 
 class IsCountsCorrect():
@@ -31,7 +32,7 @@ class IsCountsCorrect():
         if len(all_exp_compounds) == len(all_obs_compounds):
             logging.info('compounds metadata counts match')
         else:
-            logging.warning("BIG DEAL:  Compounds Don't Match.  Expected: {}.  Observed: {}".format(len(all_exp_compounds, len(all_obs_compounds))))
+            logging.warning("BIG DEAL:  Compounds Don't Match.  Expected: {}.  Observed: {}".format(len(all_exp_compounds), len(all_obs_compounds)))
             quit()
         logging.info('IsCountsCorrect done')
 
@@ -235,24 +236,6 @@ def report_filetype(alias):
     logging.info('Collection contains filetypes: {}'.format(filetypes))
 
 
-def setup_logging():
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-    logging.basicConfig(filename='post_conversion_cleanup_log.txt',
-                        level=logging.INFO,
-                        format='%(asctime)s: %(levelname)-8s %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p')
-    console = logging.StreamHandler()
-    console.setLevel(logging.WARNING)
-    console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
-    logging_string = io.StringIO()
-    string_handler = logging.StreamHandler(logging_string)
-    string_handler.setLevel(logging.DEBUG)
-    string_handler.setFormatter(formatter)
-    logging.getLogger('').addHandler(string_handler)
-    return logging_string
-
-
 def folder_by_extension(alias):
     starting_folder = os.path.join('output', '{}_simples'.format(alias), 'final_format')
     if not os.path.isdir(starting_folder):
@@ -345,14 +328,7 @@ def cleanup_leftover_files(alias):
     logging.info('intermediate folders deleted')
 
 
-def trelloize(alias, log_contents, target_column):
-    client = TI.setup_client('trello_keys.json')
-    IslandoraETL = TI.lookup_board(client, 'Islandora ETL')
-    TI.find_card(IslandoraETL, alias).comment(log_contents)
-    TI.move_card_to_target_column(IslandoraETL, alias, target_column)
-
-
-def do_post_conversion(alias, cdm_data_dir):
+def main(alias, cdm_data_dir):
     PullInBinaries(alias, cdm_data_dir)
     MakeStructureFile(alias)
     IsCountsCorrect(alias, cdm_data_dir)
@@ -360,7 +336,7 @@ def do_post_conversion(alias, cdm_data_dir):
     report_filetype(alias)
     folder_by_extension(alias)
     make_zips(alias)
-    move_zips_to_U(alias, cdm_data_dir)
+    fix_permissions()
     cleanup_leftover_files(alias)
 
 
@@ -371,13 +347,12 @@ if __name__ == '__main__':
         cdm_data_dir = sys.argv[2]
     except IndexError:
         logging.warning('')
-        logging.warning('Change to: "python post_conversion_cleanup.py $aliasname $path/to/U-Drive/Cached_Cdm_files"')
+        logging.warning('Change to: "python post_cdmconversion_cleanup.py $aliasname $path/to/U-Drive/Cached_Cdm_files"')
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
-    do_post_conversion(alias, cdm_data_dir)
+    main(alias, cdm_data_dir)
     logging.info('finished {}'.format(alias))
 
     log_contents = logging_string.getvalue()
-    # trelloize(alias, log_contents, 'Whole Collection Packaged at U')
     logging_string.close()

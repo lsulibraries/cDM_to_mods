@@ -4,11 +4,12 @@ import os
 import sys
 import shutil
 import logging
-import io
 
 from lxml import etree as ET
 
 from utilities import parse_xlsx_file
+from utilities import fix_permissions
+from utilities import setup_logging
 
 
 class IsCountsCorrect():
@@ -131,24 +132,6 @@ def report_filetype(alias):
     logging.info('Collection contains filetypes: {}'.format(filetypes))
 
 
-def setup_logging():
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-    logging.basicConfig(filename='post_csv_cleanup_log.txt',
-                        level=logging.INFO,
-                        format='%(asctime)s: %(levelname)-8s %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p')
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
-    logging_string = io.StringIO()
-    string_handler = logging.StreamHandler(logging_string)
-    string_handler.setLevel(logging.DEBUG)
-    string_handler.setFormatter(formatter)
-    logging.getLogger('').addHandler(string_handler)
-    return logging_string
-
-
 def folder_by_extension(alias):
     starting_folder = os.path.join('output', '{}_simples'.format(alias), 'final_format')
     if not os.path.isdir(starting_folder):
@@ -192,7 +175,7 @@ def cleanup_leftover_files(alias):
     logging.info('intermediate folders deleted')
 
 
-def do_post_conversion(alias, binaries_dir):
+def main(alias, binaries_dir):
     nicks_tags_dict, nicks_names_dict, items_metadata = parse_xlsx(binaries_dir, alias)
     simples, parents, cpd_children = split_source_metadata(items_metadata)
     PullInBinaries(alias, binaries_dir, simples, parents, cpd_children)
@@ -201,7 +184,8 @@ def do_post_conversion(alias, binaries_dir):
     report_filetype(alias)
     folder_by_extension(alias)
     make_zips(alias)
-    # cleanup_leftover_files(alias)
+    cleanup_leftover_files(alias)
+    fix_permissions()
 
 
 def split_source_metadata(items_metadata):
@@ -243,10 +227,10 @@ if __name__ == '__main__':
         binaries_dir = sys.argv[2]
     except IndexError:
         logging.warning('')
-        logging.warning('Change to: "python post_csv_cleanup.py $alias {}"'.format(os.path.join('$filepath', 'to', 'directory', 'with', 'the', 'binaries')))
+        logging.warning('Change to: "python post_xlsx_cleanup.py $alias {}"'.format(os.path.join('$filepath', 'to', 'directory', 'with', 'the', 'binaries')))
         logging.warning('')
         quit()
     logging.info('starting {}'.format(alias))
-    do_post_conversion(alias, binaries_dir)
+    main(alias, binaries_dir)
     logging.info('finished {}'.format(alias))
     logging_string.close()

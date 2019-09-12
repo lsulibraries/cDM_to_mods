@@ -1,5 +1,5 @@
 This notice is included in the distribution of cDM_to_mods because
-the XML Calabash distribution includes a copy of saxon9he.jar.
+the distribution includes a copy of saxon9he.jar.
 Source code, documentation, and further resources are available from
 http://saxonica.com/
 

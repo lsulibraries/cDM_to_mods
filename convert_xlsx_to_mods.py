@@ -1,160 +1,69 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 
 import os
 import sys
+import re
 from shutil import copyfile
 import subprocess
 import datetime
-import re
-import csv
-import json
 from copy import deepcopy
 import logging
 
 from lxml import etree as ET
 
-from post_conversion_cleanup import IsCountsCorrect
-from MonographTitleCombiner import MonographTitleCombiner
+from utilities import parse_xlsx_file
+from utilities import fix_permissions
+from utilities import setup_logging
 
 
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 
 
-def convert_to_mods(alias, cdm_data_dir):
+def main(xlsx_file):
+    alias = os.path.splitext(os.path.split(xlsx_file)[-1])[0]
     remove_previous_mods(alias)
-    alias_data_dir = os.path.realpath(os.path.join(cdm_data_dir, alias))
-    nicks_to_names_dict = make_nicks_to_names(alias_data_dir)
-    mappings_dict = parse_mappings_file(alias)
-    cdm_data_filestructure = [(root, dirs, files) for root, dirs, files in os.walk(alias_data_dir)]
-    simple_pointers, cpd_parent_pointers = parse_root_cdm_pointers(cdm_data_filestructure)
-    parents_children = parse_parents_children(alias_data_dir, cpd_parent_pointers)
-    expanded_monograph_title_dict = MonographTitleCombiner(alias_data_dir).monograph_pointer_newtitle
-
-    # root level simples
-    for pointer in sorted(simple_pointers):
-        output_path = os.path.join('output', '{}_simples'.format(alias), 'original_format')
-        output_file = os.path.join(output_path, '{}.xml'.format(pointer))
-        target_file = '{}.json'.format(pointer)
-        try:
-            path_to_pointer = [os.path.join(root, target_file)
-                               for root, dirs, files in cdm_data_filestructure
-                               if target_file in files][0]
-        except IndexError:
-            logging.warning('Conversion halted! Pointer {} is missing in your source data'.format(pointer))
-            quit()
-        ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict, expanded_monograph_title_dict)
-        make_a_single_mods(ingredients)
+    mappings_dict, nicks_names_dict, items_metadata = parse_xlsx_file(xlsx_file)
+    simple_objects, cpd_objects = group_by_simple_cpd(items_metadata)
+    for ItemMetadata in simple_objects:
+        output_path = os.path.join('output', "{}_simples".format(alias), 'original_format')
+        os.makedirs(output_path, exist_ok=True)
+        output_file = "{}.xml".format(os.path.splitext(ItemMetadata.FileName)[0])
+        output_filepath = os.path.join(output_path, output_file)
+        make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath)
     logging.info('finished preliminary mods: simples')
-
-    # root level compounds
-    for pointer, _ in sorted(parents_children.items()):
-        output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', pointer)
-        output_file = os.path.join(output_path, 'MODS.xml')
-        path_to_pointer = os.path.join(alias_data_dir, 'Cpd', '{}.json'.format(pointer))
-        ingredients = (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict, expanded_monograph_title_dict)
-        make_a_single_mods(ingredients)
-        copyfile(os.path.join(alias_data_dir, 'Cpd', '{}_cpd.xml'.format(pointer)), os.path.join(output_path, 'structure.cpd'))
-
-    # child level simples
-    for parent, children_pointers in sorted(parents_children.items()):
-        for pointer in children_pointers:
-            output_path = os.path.join('output', '{}_compounds'.format(alias), 'original_format', parent, pointer)
-            output_file = os.path.join(output_path, 'MODS.xml')
-            path_to_pointer = os.path.join(alias_data_dir, 'Cpd', parent, '{}.json'.format(pointer))
-            ingredients = (pointer,
-                           path_to_pointer,
-                           output_path,
-                           output_file,
-                           nicks_to_names_dict,
-                           mappings_dict,
-                           expanded_monograph_title_dict)
-            make_a_single_mods(ingredients)
-    logging.info('finished preliminary mods: compounds')
+    for parent, child_objects in cpd_objects.items():
+        parent_ItemMetadata = [i for i in child_objects if i.Directory == i.Identifier]
+        for ItemMetadata in parent_ItemMetadata:
+            parent_pointer = str(ItemMetadata.Directory)
+            output_path = os.path.join('output', "{}_compounds".format(alias), 'original_format', parent_pointer)
+            os.makedirs(output_path, exist_ok=True)
+            output_file = "{}.xml".format(parent_pointer)
+            output_filepath = os.path.join(output_path, output_file)
+            make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath)
+        for ItemMetadata in child_objects:
+            if str(ItemMetadata.Identifier) == str(ItemMetadata.Directory):
+                continue
+            parent_pointer = str(ItemMetadata.Directory)
+            child_pointer = str(ItemMetadata.Identifier)
+            output_path = os.path.join('output', "{}_compounds".format(alias), 'original_format', parent_pointer, child_pointer)
+            os.makedirs(output_path, exist_ok=True)
+            output_file = "{}.xml".format(os.path.splitext(ItemMetadata.FileName)[0])
+            output_filepath = os.path.join(output_path, output_file)
+            make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath)
+        logging.info('finished preliminary mods: compounds')
 
     saxon_n_cleanup_mods(alias)
-    IsCountsCorrect(alias, cdm_data_dir)
+    fix_permissions()
     logging.info('completed')
     logging.info('Your output files are in:  output/{}_simple/final_format/ and output/{}_compounds/final_format/'.format(alias, alias))
 
 
-def make_nicks_to_names(cdm_data_dir):
-    filepath = os.path.join(cdm_data_dir, 'Collection_Fields.json')
-    json_text = get_cdm_pointer_json(filepath)
-    nicks_names = parse_collection_fields('Collection_Fields', json_text)
-    return nicks_names
-
-
-def get_cdm_pointer_json(filepath):
-    with open(filepath, 'r', encoding='utf-8') as f:
-        return f.read()
-
-
-def parse_collection_fields(filename, json_text):
-    try:
-        parsed_json = json.loads(json_text)
-    except json.decoder.JSONDecodeError:
-        logging.warning('{}.json is improperly formed json.  Conversion halted!'.format(filename))
-        quit()
-    return {field['nick']: field['name'] for field in parsed_json}
-
-
-def parse_mappings_file(alias):
-    with open('mappings_files/{}.csv'.format(alias), 'r', encoding='utf-8') as f:
-        csv_reader = csv.reader(f, delimiter=',')
-        return {i: j for i, j in csv_reader}
-
-
-def parse_parents_children(cdm_data_dir, cpd_parent_pointers):
-    parents_children = dict()
-    for cpd_parent in cpd_parent_pointers:
-        cpd_parent_filepath = os.path.join(cdm_data_dir, 'Cpd', '{}_cpd.xml'.format(cpd_parent))
-        cpd_parent_etree = ET.parse(cpd_parent_filepath)
-        children_pointers = [i.text for i in cpd_parent_etree.findall('.//pageptr')]
-        parents_children[cpd_parent] = children_pointers
-    return parents_children
-
-
-def parse_root_cdm_pointers(cdm_data_filestructure):
-    Elems_ins = [os.path.join(root, file)
-                 for root, dirs, files in cdm_data_filestructure
-                 for file in files
-                 if ("Elems_in_Collection" in file and ".json" in file)]
-    simple_pointers, cpd_parent_pointers = [], []
-    duplicates = []
-    for filename in Elems_ins:
-        json_text = get_cdm_pointer_json(filename)
-        nicks_text = parse_json(filename, json_text)
-        for i in nicks_text['records']:
-            pointer = str(i['pointer'] or i['dmrecord'])
-            if i['filetype'] == 'cpd':
-                cpd_parent_pointers.append(pointer)
-            else:
-                if pointer in simple_pointers:
-                    duplicates.append(pointer)
-                simple_pointers.append(pointer)
-    return simple_pointers, cpd_parent_pointers
-
-
-def remove_previous_mods(alias):
-    xml_files = ['{}/{}'.format(root, file)
-                 for root, dirs, files in os.walk('output')
-                 for file in files
-                 if alias in root and ".xml" in file]
-    for file in xml_files:
-        os.remove(file)
-
-
-def make_a_single_mods(ingredients):
-    (pointer, path_to_pointer, output_path, output_file, nicks_to_names_dict, mappings_dict, expanded_monograph_title_dict) = ingredients
-    os.makedirs(output_path, exist_ok=True)
-    pointer_json = get_cdm_pointer_json(path_to_pointer)
-    nicks_texts = parse_json(pointer, pointer_json)
-    propers_texts = convert_nicks_to_propers(nicks_to_names_dict, nicks_texts)
-    mods = build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict, expanded_monograph_title_dict)
+def make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath):
+    mods = build_xml(ItemMetadata, mappings_dict, nicks_names_dict)
     merge_same_fields(mods)
     careful_tag_split(mods, 'name', 'namePart')
-    for sub_subject in ('topic', 'geographic', 'temporal', 'occupation'):
+    for sub_subject in ('topic', 'geographic', 'temporal'):
         careful_tag_split(mods, 'subject', sub_subject)
     for sub_subject in ("continent", "country", "province", "region", "state", "territory", "county", "city", "citySection", "island", "area"):
         careful_tag_split(mods, 'hierarchicalGeographic', sub_subject)
@@ -164,73 +73,61 @@ def make_a_single_mods(ingredients):
 
     mods_bytes = ET.tostring(mods, xml_declaration=True, encoding="utf-8", pretty_print=True)
     mods_string = mods_bytes.decode('utf-8')
-    with open(output_file, 'w', encoding="utf-8") as f:
+    with open(output_filepath, 'w', encoding="utf-8") as f:
         f.write(mods_string)
 
 
-def parse_json(filename, json_text):
-    try:
-        parsed_alias_json = json.loads(json_text)
-    except json.decoder.JSONDecodeError:
-        logging.warning('{}.json is improperly formed json.  Conversion halted!'.format(filename))
-        quit()
-    return {nick: text for nick, text in parsed_alias_json.items()}
-
-
-def convert_nicks_to_propers(nicks_to_names_dict, nicks_texts):
-    propers_texts = dict()
-    for k, v in nicks_texts.items():
-        if k in nicks_to_names_dict:
-            propers_texts[nicks_to_names_dict[k]] = v
-    return propers_texts
-
-
-def build_xml(path_to_pointer, pointer, pointer_json, propers_texts, alias, mappings_dict, expanded_monograph_title_dict):
+def build_xml(ItemMetadata, mappings_dict, nicks_names_dict):
     NSMAP = {None: "http://www.loc.gov/mods/v3",
              'mods': "http://www.loc.gov/mods/v3",
              'xsi': "http://www.w3.org/2001/XMLSchema-instance",
              'xlink': "http://www.w3.org/1999/xlink", }
     root_element = ET.Element("mods", nsmap=NSMAP)
-
     for k, v in mappings_dict.items():
-        if k in propers_texts and propers_texts[k]:
-            replacement = propers_texts[k]
-            # overwrite with the expanded title if the pointer has one, otherwise keep normal title
-            if k == 'Title':
-                replacement = expanded_monograph_title_dict.get(pointer, replacement)
+        try:
+            replacement = getattr(ItemMetadata, k)
+        except AttributeError:
+            continue
+        if not replacement:
+            continue
+        elif isinstance(replacement, datetime.datetime):
+            replacement = replacement.strftime('%Y-%m-%d')
+        else:
+            replacement = str(replacement)
             for a, b in [('&', '&amp;'),
                          ('"', '&quot;'),
                          ('<', '&lt;'),
                          ('>', '&gt;')]:
                 replacement = replacement.replace(a, b)
-            v = v.replace("%value%", replacement)
-            new_element = ET.fromstring(v)
-            root_element.append(new_element)
-        elif 'null' in k:
-            new_element = ET.fromstring(v)
-            if 'CONTENTdmData' in v:
-                make_contentDM_elem(new_element[0], pointer, pointer_json, alias)
-            root_element.append(new_element)
-
-    id_elem = ET.Element("identifier", attrib={'type': 'uri', 'invalid': 'yes', 'displayLabel': "Migrated From"})
-    id_elem.text = 'http://cdm16313.contentdm.oclc.org/cdm/singleitem/collection/{}/id/{}'.format(alias, pointer)
-    root_element.append(id_elem)
+        v = v.replace("%value%", replacement)
+        new_element = ET.fromstring(v)
+        root_element.append(new_element)
     return root_element
 
 
-def make_contentDM_elem(cdm_elem, pointer, pointer_json, alias):
-    alias_elem = ET.Element('alias')
-    alias_elem.text = alias
-    cdm_elem.append(alias_elem)
-    pointer_elem = ET.Element('pointer')
-    pointer_elem.text = pointer
-    cdm_elem.append(pointer_elem)
-    dmGetItemInfo_elem = ET.Element('dmGetItemInfo', attrib={
-        'mimetype': "application/json",
-        'source': "https://server16313.contentdm.oclc.org/dmwebservices/index.php?q=dmGetItemInfo/{}/{}/json".format(alias, pointer),
-        'timestamp': '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), })
-    dmGetItemInfo_elem.text = pointer_json
-    cdm_elem.append(dmGetItemInfo_elem)
+def group_by_simple_cpd(items_metadata):
+    simple_objects, compound_objects = set(), dict()
+    for identifier, ItemMetadata in items_metadata.items():
+        if ItemMetadata.Child:
+            if ItemMetadata.Directory not in compound_objects:
+                compound_objects[ItemMetadata.Directory] = {ItemMetadata, }
+            else:
+                compound_objects[ItemMetadata.Directory].add(ItemMetadata)
+    for identifier, ItemMetadata in items_metadata.items():
+        if ItemMetadata.Directory in compound_objects:
+            compound_objects[ItemMetadata.Directory].add(ItemMetadata)
+        else:
+            simple_objects.add(ItemMetadata)
+    return simple_objects, compound_objects
+
+
+def remove_previous_mods(alias):
+    xml_files = ['{}/{}'.format(root, file)
+                 for root, dirs, files in os.walk('output')
+                 for file in files
+                 if alias in root and ".xml" in file]
+    for file in xml_files:
+        os.remove(file)
 
 
 def merge_same_fields(orig_etree):
@@ -348,6 +245,7 @@ def flatten_simple_dir(simple_dir):
 
 def run_saxon(output_dir, alias_xslts, cpd_or_simple):
     starting_dir = os.path.join(output_dir, 'presaxon_flattened')
+    alias_xslts = [i for i in alias_xslts if i]
     for xslt in alias_xslts:
         logging.info('doing {} saxon {}'.format(cpd_or_simple.title(), xslt))
         new_dir = os.path.join(output_dir, xslt)
@@ -439,18 +337,6 @@ def reinflate_cpd_dir(cpd_dir):
             copyfile(source_file, dest_file)
 
 
-def setup_logging():
-    logging.basicConfig(filename='convert_to_mods_log.txt',
-                        level=logging.INFO,
-                        format='%(asctime)s: %(levelname)-8s %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p')
-    console = logging.StreamHandler()
-    console.setLevel(logging.WARNING)
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-    console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
-
-
 def write_etree(etree, name):
     os.makedirs('debug_output_xmls', exist_ok=True)
     with open('debug_output_xmls/{}.xml'.format(name), 'w') as f:
@@ -462,13 +348,12 @@ def write_etree(etree, name):
 if __name__ == '__main__':
     setup_logging()
     try:
-        alias = sys.argv[1]
-        cdm_data_dir = sys.argv[2]
+        collection_xlsx = sys.argv[1]
     except IndexError:
         logging.warning('')
-        logging.warning('Change to: "python convert_to_mods.py $aliasname $path/to/Cached_Cdm_files"')
+        logging.warning('Change to: "python convert_xlsx_to_mods.py $path/to/CollectionX.xlsx"')
         logging.warning('')
         quit()
-    logging.info('starting {}'.format(alias))
-    convert_to_mods(alias, cdm_data_dir)
-    logging.info('finished {}'.format(alias))
+    logging.info('starting {}'.format(collection_xlsx))
+    main(collection_xlsx)
+    logging.info('finished {}'.format(collection_xlsx))
