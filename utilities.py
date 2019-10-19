@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# coding=utf-8
 
 import os
 import subprocess
@@ -30,14 +31,14 @@ def make_named_tuple(xlsx_workbook):
     max_columns = count_active_columns(items_sheet)
 
     items_metadata = dict()
-    for num, row in enumerate(items_sheet.iter_rows(max_col=max_columns)):
-        if num == 0:
+    for row_num, row in enumerate(items_sheet.iter_rows(max_col=max_columns)):
+        if row_num == 0:
             headers = (shorten_name(i.value) for i in row)
             ItemMetadata = namedtuple('ItemMetadata', headers)
             continue
         values = (i.value for i in row)
         item = ItemMetadata(*values)
-        items_metadata[item.Identifier] = item
+        items_metadata[row_num + 1] = item  # 1 indexing so that key matches spreadsheet row number
     return items_metadata
 
 
@@ -123,9 +124,6 @@ class MonographTitleCombiner:
             self.loop_one_layer(node_elem)
 
     def loop_one_layer(self, elem):
-        # elem_nodetitle = self.get_this_level_nodetitle(elem)
-        # if elem_nodetitle:
-        #     print('Are we losing this title info for file {}: {}'.format(self.current_stucture_file, elem_nodetitle))
         child_node_elems = [child for child in elem.iterchildren() if child.tag == 'node']
         child_page_elems = [child for child in elem.iterchildren() if child.tag == 'page']
         if child_node_elems and not child_page_elems:
