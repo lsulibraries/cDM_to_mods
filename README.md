@@ -1,10 +1,12 @@
 # How to:
 
-for converting the output of cdm_xporter/scrape_cdm.py into mods format (especially for ingest into Islandora)
+Part of the ingest to Islandora pathway (cdm_xporter -> cDM_to_mods -> [convert_to_islandorabooknews] -> Islandora ingest)
+
+A spreadsheet of source data skips the cdm_xporter step & starts at the cDM_to_mods step.
 
 ### Setup
 
- - Install docker-compose as described in the [gnatty repo](https://github.com/lsulibraries/gnatty#if-you-need-dependecies).  
+ - Install git and docker-compose as described in the [gnatty repo](https://github.com/lsulibraries/gnatty#if-you-need-dependecies).  
 
 - `git clone https://github.com/lsulibraries/cDM_to_mods`
 
@@ -14,32 +16,44 @@ for converting the output of cdm_xporter/scrape_cdm.py into mods format (especia
   
   1) Make a mapping_file for each collection.  A mapping file assigns each Dublin Core element to it's MODS equivalent.  See the examples in ./mappings_files/
 
-  2) Make an alias_xslt file for each collection.  An alias_xslt file is a list of xslts to run against the rough mods files.  After they run, the mods should be valid mods.  You'll find a number of useful xlst's in the ./xsl/ folder.  But you may also write your own & save it at ./xls/
+  2) Make an alias_xslt file for each collection.  An alias_xslt file is a list of xslts to run against the rough mods files.  See the examples in ./alias_xslts/  After the xlts run, the mods should be finished valid mods.
+  Cara and Mike wrote a number of useful xslt's in the ./xsl/ folder.  But you may also write your own & save it at ./xls/
 
   3) Copy the source folder from U:/ContentDmData/Cached_Cdm_files/{$alias} to somewhere in this folder.
 
-  5) From this folder, `docker-compose exec python3 convert_cdm_to_mods.py {alias} {path/to/Cached_Cdm_files}`
+  5) From this folder, `docker-compose exec cdm_to_mods python3 convert_cdm_to_mods.py {alias} {path/to/Cached_Cdm_files}`
         -this /Cached_Cdm_files needs only metadata.
   
-  6) From this folder, `docker-compose exec python3 post_converstion_cleanup.py {alias} {path/to/Cached_Cdm_files}`
+  6) From this folder, `docker-compose exec cdm_to_mods python3 post_converstion_cleanup.py {alias} {path/to/Cached_Cdm_files}`
         -this /Cached_Cdm_files needs metadata+binaries
 
 ### Converting a spreadsheet to mods
 
-  1) See Xslx_Template_Prototype for an example.
+  1) Make a Mappings sheet in your xslx file; no need for a separate file.  See Xlsx_Template_Prototype/CollectionX.xlsx for an example.
+  There are two columns -- Column name from the Metadata sheet + xml element
+  A 'null1', 'null2' in place of a column name will result in every mods file holding a hardcoded xml element.
 
-  2) Make an alias_xslt file for each collection.  An alias_xslt file is a list of xslts to run against the rough mods files.  After they run, the mods should be valid mods.  You'll find a number of useful xlst's in the ./xsl/ folder.  But you may also write your own & save it at ./xls/
+  2) Make an alias_xslt file for each collection.  An alias_xslt file is a list of xslts to run against the rough mods files.  See the examples in ./alias_xslts/  After the xlts run, the mods should be finished valid mods.
+  Cara and Mike wrote a number of useful xslt's in the ./xsl/ folder.  But you may also write your own & save it at ./xls/
 
-  3) The DC to mods mapping is a sheet in your xslx file; no need for a separate file.  See Xlsx_Template_Prototype/CollectionX.xlsx for an example.
+  3) The Metadata sheet contains all your useful metadata plus the folders & filenames of the source binaries.  Your binaries can be grouped in whatever folder(s), as long as they match what you describe in the spreadsheet.  With one restriction: a compound object's binaries should all be in one folder named after the "Identifier" of the parent object as named in the Spreadsheet.
 
-  4) The Mapping file also connects each mods file to the filepath for the matching binary.  Your binaries can be grouped in whatever folder(s), as long as the match what you describe in Spreadsheet.  With one restriction: a compound object's binaries must all be in one folder named after the "Identifier" of the parent object as named in the Spreadsheet.
+  4) `docker-compose exec cdm_to_mods python3 convert_xlsx_to_mods.py {path/to/your_spreadsheet.xlsx}`
 
-  4) `docker-compose exec python3 convert_xlsx_to_mods.py {path/to/your_spreadsheet.xlsx}`
-
-  5) `docker-compose exec python3 post_xlsx_cleanup.py {alias} {root folder with the spreadsheet.xslx & binaries}
+  5) `docker-compose exec cdm_to_mods python3 post_xlsx_cleanup.py {alias} {root folder with the spreadsheet.xslx & binaries}
 
 
-## What they do
+## Why the long command
+
+docker-compose  -- the program that runs the virtual machine
+exec  -- execute for us please
+cdm_to_mods  -- which virtual machine we want to use
+python3  -- the program we run inside the virtual machine
+\*.py  -- the python script to run
+{alias}, {path/to/etc}, etc  -- some info telling the script where our source data is
+
+
+## What each script does
 
 convert_cdm_to_mods.py and convert_xlsx_to_mods.py:
   - applies the mapping to the sourcedata to create rough mods files.
