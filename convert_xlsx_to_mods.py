@@ -29,7 +29,11 @@ def main(xlsx_file):
     for ItemMetadata in simple_objects:
         output_path = os.path.join('output', f"{alias}_simples", 'original_format')
         os.makedirs(output_path, exist_ok=True)
-        output_file = f"{os.path.splitext(ItemMetadata.FileName)[0]}.xml"
+        try:
+            output_file = f"{os.path.splitext(ItemMetadata.FileName)[0]}.xml"
+        except TypeError:
+            logging.fatal(f"{ItemMetadata.Identifier} seems to be a simple object but has no 'File Name' in the spreadsheet.")
+            quit()
         output_filepath = os.path.join(output_path, output_file)
         make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath)
     logging.info('finished preliminary mods: simples')
@@ -92,6 +96,9 @@ def build_xml(ItemMetadata, mappings_dict, nicks_names_dict):
             continue
         if not replacement:
             continue
+        if not v:  # if mapping row has no column B
+            logging.error(f"{k} in mapping file is empty, skipping {k} column")
+            continue
         elif isinstance(replacement, datetime.datetime):
             replacement = replacement.strftime('%Y-%m-%d')
         else:
@@ -101,8 +108,16 @@ def build_xml(ItemMetadata, mappings_dict, nicks_names_dict):
                          ('<', '&lt;'),
                          ('>', '&gt;')]:
                 replacement = replacement.replace(a, b)
-        v = v.replace("%value%", replacement)
-        new_element = ET.fromstring(v)
+        try:
+            v = v.replace("%value%", replacement)
+        except AttributeError:
+            logging.fatal(f"{k}\t{v} in mapping was expected to have a '%value%' variable")
+            quit()
+        try:
+            new_element = ET.fromstring(v)
+        except ET.XMLSyntaxError:
+            logging.fatal(f"{k} {v} in mapping is malformed.  exiting.")
+            quit()
         root_element.append(new_element)
     return root_element
 
