@@ -27,7 +27,7 @@ def make_names_tags(xlsx_workbook):
 
 
 def make_named_tuple(xlsx_workbook):
-    items_sheet = xlsx_workbook.get_sheet_by_name('Descriptive Metadata')
+    items_sheet = xlsx_workbook.get_sheet_by_name('Metadata')
     max_columns = count_active_columns(items_sheet)
 
     items_metadata = dict()
@@ -43,7 +43,7 @@ def make_named_tuple(xlsx_workbook):
 
 
 def make_nicks_names(xlsx_workbook):
-    items_sheet = xlsx_workbook.get_sheet_by_name('Descriptive Metadata')
+    items_sheet = xlsx_workbook.get_sheet_by_name('Metadata')
     max_columns = count_active_columns(items_sheet)
     for num, row in enumerate(items_sheet.iter_rows(max_col=max_columns)):
         if num == 0:

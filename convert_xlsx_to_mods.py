@@ -92,12 +92,12 @@ def build_xml(ItemMetadata, mappings_dict, nicks_names_dict):
         try:
             replacement = getattr(ItemMetadata, k)
         except AttributeError:
-            logging.error(f"{k} in Mappings but not a column in Descriptive metadata.")
+            # logging.info(f"{k} in Mappings but not a column in Metadata.")
             continue
         if not replacement:
             continue
         if not v:  # if mapping row has no column B
-            logging.error(f"{k} in mapping file is empty, skipping {k} column")
+            # logging.info(f"{k} in mapping file is empty, skipping {k} column")
             continue
         elif isinstance(replacement, datetime.datetime):
             replacement = replacement.strftime('%Y-%m-%d')
@@ -108,9 +108,9 @@ def build_xml(ItemMetadata, mappings_dict, nicks_names_dict):
                          ('<', '&lt;'),
                          ('>', '&gt;')]:
                 replacement = replacement.replace(a, b)
-        try:
+        if "%value%" in v:
             v = v.replace("%value%", replacement)
-        except AttributeError:
+        else:
             logging.fatal(f"{k}\t{v} in mapping was expected to have a '%value%' variable")
             quit()
         try:
