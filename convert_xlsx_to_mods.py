@@ -15,7 +15,7 @@ from lxml import etree as ET
 from utilities import parse_xlsx_file
 from utilities import fix_permissions
 from utilities import setup_logging
-
+from utilities import group_by_simple_cpd
 
 MODS_DEF = ET.parse('schema/mods-3-6.xsd')
 MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
@@ -24,35 +24,35 @@ MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 def main(xlsx_file):
     alias = os.path.splitext(os.path.split(xlsx_file)[-1])[0]
     remove_previous_mods(alias)
-    mappings_dict, nicks_names_dict, items_metadata, xsls = parse_xlsx_file(xlsx_file)
-    simple_objects, cpd_objects = group_by_simple_cpd(items_metadata)
-    for ItemMetadata in simple_objects:
+    mappings, metadata, xsls = parse_xlsx_file(xlsx_file)
+    simples, compounds = group_by_simple_cpd(metadata)
+    for item_metadata in simples:
         output_path = os.path.join('output', f"{alias}_simples", 'original_format')
         os.makedirs(output_path, exist_ok=True)
         try:
-            output_file = f"{os.path.splitext(ItemMetadata.FileName)[0]}.xml"
+            output_file = f"{os.path.splitext(item_metadata['FileName'])[0]}.xml"
         except TypeError:
-            logging.fatal(f"{ItemMetadata.Identifier} seems to be a simple object but has no 'File Name' in the spreadsheet.")
+            logging.fatal(f"{item_metadata['Identifier']} seems to be a simple object but has no 'File Name' in the spreadsheet. \n Program cancelled")
             quit()
         output_filepath = os.path.join(output_path, output_file)
-        make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath)
+        make_a_single_mods(item_metadata, mappings, output_filepath)
     logging.info('finished preliminary mods: simples')
-    for parent_pointer, sub_objects in cpd_objects.items():
+    for parent_pointer, sub_objects in compounds.items():
         parent_pointer = str(parent_pointer)
-        for k, ItemMetadata in sub_objects.items():
+        for k, item_metadata in sub_objects.items():
             if k == 'parent':
                 output_path = os.path.join('output', f"{alias}_compounds", 'original_format', parent_pointer)
                 os.makedirs(output_path, exist_ok=True)
                 output_file = f"{parent_pointer}.xml"
                 output_filepath = os.path.join(output_path, output_file)
-                make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath)
+                make_a_single_mods(item_metadata, mappings, output_filepath)
             else:  # these are all children objects
-                child_pointer = str(ItemMetadata.Identifier)
+                child_pointer = str(item_metadata['Child'])
                 output_path = os.path.join('output', f"{alias}_compounds", 'original_format', parent_pointer, child_pointer)
                 os.makedirs(output_path, exist_ok=True)
-                output_file = f"{os.path.splitext(ItemMetadata.FileName)[0]}.xml"
+                output_file = f"{os.path.splitext(item_metadata['FileName'])[0]}.xml"
                 output_filepath = os.path.join(output_path, output_file)
-                make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath)
+                make_a_single_mods(item_metadata, mappings, output_filepath)
     logging.info('finished preliminary mods: compounds')
     saxon_n_cleanup_mods(alias, xsls)
     fix_permissions()
@@ -60,8 +60,17 @@ def main(xlsx_file):
     logging.info(f"Your output files are in:  output/{alias}_simple/final_format/ and output/{alias}_compounds/final_format/")
 
 
-def make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath):
-    mods = build_xml(ItemMetadata, mappings_dict, nicks_names_dict)
+def remove_previous_mods(alias):
+    xml_files = [f"{root}/{file}"
+                 for root, _, files in os.walk('output')
+                 for file in files
+                 if alias in root and ".xml" in file]
+    for file in xml_files:
+        os.remove(file)
+
+
+def make_a_single_mods(item_metadata, mappings, output_filepath):
+    mods = build_xml(item_metadata, mappings)
     merge_same_fields(mods)
     careful_tag_split(mods, 'name', 'namePart')
     for sub_subject in ('topic', 'geographic', 'temporal'):
@@ -78,26 +87,23 @@ def make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, out
         f.write(mods_string)
 
 
-def build_xml(ItemMetadata, mappings_dict, nicks_names_dict):
+def build_xml(item_metadata, mappings):
     NSMAP = {None: "http://www.loc.gov/mods/v3",
              'mods': "http://www.loc.gov/mods/v3",
              'xsi': "http://www.w3.org/2001/XMLSchema-instance",
              'xlink': "http://www.w3.org/1999/xlink", }
     root_element = ET.Element("mods", nsmap=NSMAP)
-    for k, v in mappings_dict.items():
+    for k, v in mappings.items():
+        if not v:
+            # logging.info(f"{k} in Mappings sheet is empty, skipping {k} column")
+            continue
         if 'null' in k:
             new_element = ET.fromstring(v)
             root_element.append(new_element)
             continue
-        try:
-            replacement = getattr(ItemMetadata, k)
-        except AttributeError:
-            # logging.info(f"{k} in Mappings but not a column in Metadata.")
-            continue
+        replacement = item_metadata.get(k)
         if not replacement:
-            continue
-        if not v:  # if mapping row has no column B
-            # logging.info(f"{k} in mapping file is empty, skipping {k} column")
+            # logging.info(f"Extra {k} in Mappings sheet but not a column in Metadata. skipping")
             continue
         elif isinstance(replacement, datetime.datetime):
             replacement = replacement.strftime('%Y-%m-%d')
@@ -111,65 +117,15 @@ def build_xml(ItemMetadata, mappings_dict, nicks_names_dict):
         if "%value%" in v:
             v = v.replace("%value%", replacement)
         else:
-            logging.fatal(f"{k}\t{v} in mapping was expected to have a '%value%' variable")
+            logging.fatal(f"{k}\t{v} in mapping was expected to have a '%value%' variable. \n Program cancelled")
             quit()
         try:
             new_element = ET.fromstring(v)
         except ET.XMLSyntaxError:
-            logging.fatal(f"{k} {v} in mapping is malformed.  exiting.")
+            logging.fatal(f"{k} {v} in mapping is malformed. \n Program cancelled")
             quit()
         root_element.append(new_element)
     return root_element
-
-
-def group_by_simple_cpd(items_metadata):
-    simples, compounds = set(), dict()
-    child_of = False
-    for row_num, ItemMetadata in items_metadata.items():
-
-        # Logic of this function --
-        # if this row has nothing in the Child cell
-        #    & there is a next row
-        #    & that next row has info in the Child cell,
-        #    then
-        #       this row is a parent
-        #       set child_of flag to the parent identifier
-        # else if this row has info in the Child cell
-        #    then
-        #       it is a child object
-        #       its parent's name is in the child_of flag
-        # Otherwise
-        #       this item is a simple object
-        #       set child_of flag to False.
-
-        if (not ItemMetadata.Child and
-                items_metadata.get(row_num + 1) and
-                items_metadata.get(row_num + 1).Child
-            ):
-            child_of = ItemMetadata.Identifier
-            # catch fire if overlapping parent ids
-            if compounds.get(ItemMetadata.Identifier):
-                logging.fatal(f"two parents in spreadsheet with id: {ItemMetadata.Identifier} \n Program cancelled.")
-                quit()
-            compounds[ItemMetadata.Identifier] = {'parent': ItemMetadata, }
-        elif ItemMetadata.Child:
-            # catch fire if two children with same id
-            if compounds[child_of].get(int(ItemMetadata.Child)):
-                logging.fatal(f"two children in spreadsheet with id: {child_of} {ItemMetadata.Child} \n Program cancelled.")
-                quit()
-            compounds[child_of][int(ItemMetadata.Child)] = ItemMetadata
-        else:
-            simples.add(ItemMetadata)
-    return simples, compounds
-
-
-def remove_previous_mods(alias):
-    xml_files = [f"{root}/{file}"
-                 for root, dirs, files in os.walk('output')
-                 for file in files
-                 if alias in root and ".xml" in file]
-    for file in xml_files:
-        os.remove(file)
 
 
 def merge_same_fields(orig_etree):
@@ -234,7 +190,7 @@ def reorder_location(root_element):
 
 
 def reorder_node(root_element, target_tagname, subtag_order_dict):
-    if root_element.find(f"./{target_tagname}") is None:  # lxml wants this syntax
+    if root_element.find(f"./{target_tagname}") is None:  # lxml wants this None syntax
         return
     location_elem = root_element.find(f"./{target_tagname}")
     child_elems = location_elem.getchildren()
@@ -246,7 +202,6 @@ def reorder_node(root_element, target_tagname, subtag_order_dict):
 
 
 def saxon_n_cleanup_mods(alias, xsls):
-
     simples_output_dir = os.path.join('output', f"{alias}_simples")
     if f"{alias}_simples" in os.listdir('output') and 'original_format' in os.listdir(simples_output_dir):
         flatten_simple_dir(simples_output_dir)
@@ -309,7 +264,7 @@ def validate_mods(alias, directory):
         file_etree = ET.parse(os.path.join(directory, file))
         pointer = file.split('.')[0]
         if not MODS_SCHEMA.validate(file_etree):
-            logging.warning(f"{alias} {pointer} post-xsl did not validate!!!!")
+            logging.warning(f"{alias} item '{pointer}' post-xsl did not validate!!!!")
             break
     else:
         logging.info("This group of files post-xsl Validated")
@@ -323,7 +278,7 @@ def check_date_format(alias, flat_final_dir):
         date_elems = [elem for tag in ('dateCaptured', 'recordChangeDate', 'recordCreationDate', 'dateIssued', 'dateCreated',)
                       for elem in file_etree.findall(f".//{{http://www.loc.gov/mods/v3}}{tag}")]
         for i in date_elems:
-            if not good_format_date(i.text):
+            if not is_valid_date(i.text):
                 logging.warning(f"{file} {i.tag.replace('{http://www.loc.gov/mods/v3}', '')} has bad date: '{i.text}'")
 
 
@@ -332,7 +287,7 @@ correct_year_only = re.compile(r'^(\d{4})$')                              # 3456
 correct_year_month = re.compile(r'^(\d{4})[-](\d{2})$')                   # 1234-05
 
 
-def good_format_date(text):
+def is_valid_date(text):
     yearmonthday = correct_year_month_day.search(text)
     yearonly = correct_year_only.search(text)
     yearmonth = correct_year_month.search(text)
@@ -383,12 +338,10 @@ def write_etree(etree, name):
 if __name__ == '__main__':
     setup_logging()
     try:
-        collection_xlsx = sys.argv[1]
+        xlsx = sys.argv[1]
     except IndexError:
-        logging.warning('')
-        logging.warning('Change to: "python convert_xlsx_to_mods.py $path/to/{alias}.xlsx"')
-        logging.warning('')
+        logging.warning('Change to: "python convert_xlsx_to_mods.py $path/to/{filename}.xlsx"')
         quit()
-    logging.info(f"starting {collection_xlsx}")
-    main(collection_xlsx)
-    logging.info(f"finished {collection_xlsx}")
+    logging.info(f"starting {xlsx}")
+    main(xlsx)
+    logging.info(f"finished {xlsx}")

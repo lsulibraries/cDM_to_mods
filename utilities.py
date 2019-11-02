@@ -13,67 +13,58 @@ import openpyxl
 
 
 def parse_xlsx_file(xlsx_file):
-    xlsx_workbook = openpyxl.load_workbook(xlsx_file)
-    nicks_tags_dict = make_names_tags(xlsx_workbook)
-    collection_named_tuple = make_named_tuple(xlsx_workbook)
-    nicks_names_dict = make_nicks_names(xlsx_workbook)
-    xsls = gather_xsls(xlsx_workbook)
-    return nicks_tags_dict, nicks_names_dict, collection_named_tuple, xsls
-
-
-def make_names_tags(xlsx_workbook):
     try:
-        mappings_sheet = xlsx_workbook.get_sheet_by_name('Mappings')
-    except KeyError:
-        logging.fatal(f"""Could not find worksheet "Mappings" in the xlsx file. exiting""")
+        workbook = openpyxl.load_workbook(xlsx_file)
+    except openpyxl.utils.exceptions.InvalidFileException:
+        logging.fatal(f"'{xlsx_file}' does not appear to be a valid xlsx Excel file. \n Program cancelled")
         quit()
-    nicks_to_tags_dict = {shorten_name(row[0].value): row[1].value for row in mappings_sheet.iter_rows()}
-    return nicks_to_tags_dict
+    mappings = parse_mappings(workbook)
+    metadata = parse_metadata(workbook)
+    xsls = parse_xsls(workbook)
+    return mappings, metadata, xsls
 
 
-def make_named_tuple(xlsx_workbook):
+def parse_mappings(workbook):
     try:
-        sheet = xlsx_workbook.get_sheet_by_name('Metadata')
+        mappings_sheet = workbook.get_sheet_by_name('Mappings')
     except KeyError:
-        logging.fatal(f"""Could not find worksheet "Metadata" in the xlsx file. exiting""")
+        logging.fatal(f"""Could not find worksheet "Mappings" in the xlsx file. \n Program cancelled""")
+        quit()
+    mappings = {shorten(row[0].value): row[1].value for row in mappings_sheet.iter_rows()}
+    return mappings
+
+
+def parse_metadata(workbook):
+    try:
+        sheet = workbook.get_sheet_by_name('Metadata')
+    except KeyError:
+        logging.fatal(f"""Could not find worksheet "Metadata" in the xlsx file. \n Program cancelled""")
         quit()
     max_columns = count_active_columns(sheet)
-    items_metadata = dict()
+    metadata = dict()
     for row_num, row in enumerate(sheet.iter_rows(max_col=max_columns)):
         if row_num == 0:
-            headers = (shorten_name(i.value) for i in row)
-            ItemMetadata = namedtuple('ItemMetadata', headers)
+            headers = [shorten(i.value) for i in row]
             continue
         values = (i.value for i in row)
-        item = ItemMetadata(*values)
-        items_metadata[row_num + 1] = item  # 1 indexing so that key matches spreadsheet row number
-    return items_metadata
+        item = dict(zip(headers, values))
+        item["Row"] = row_num + 1
+        metadata[row_num + 1] = item  # 1-indexing so that key matches spreadsheet row number
+    return metadata
 
 
-def make_nicks_names(xlsx_workbook):
+def parse_xsls(workbook):
     try:
-        sheet = xlsx_workbook.get_sheet_by_name('Metadata')
+        sheet = workbook.get_sheet_by_name('Xsls')
     except KeyError:
-        logging.fatal(f"""Could not find worksheet "Metadata" in the xlsx file. exiting""")
-        quit()
-    max_columns = count_active_columns(sheet)
-    for num, row in enumerate(sheet.iter_rows(max_col=max_columns)):
-        if num == 0:
-            return {shorten_name(i.value): i.value for i in row if i}
-
-
-def gather_xsls(xlsx_workbook):
-    try:
-        sheet = xlsx_workbook.get_sheet_by_name('Xsls')
-    except KeyError:
-        logging.fatal(f"""Could not find worksheet "Xsls" in the xlsx file. exiting""")
+        logging.fatal(f"""Could not find worksheet "Xsls" in the xlsx file. \n Program cancelled""")
         quit()
     max_columns = count_active_columns(sheet)
     xsls = [i[0].value for i in sheet.iter_rows(max_col=max_columns) if i[0].value]
     return xsls
 
 
-def shorten_name(fullname):
+def shorten(fullname):
     return ''.join([i for i in fullname if i.isalnum()])
 
 
@@ -85,7 +76,7 @@ def count_active_columns(worksheet):
 def fix_permissions():
     all_files = [
         os.path.join(root, file)
-        for root, dirs, files in os.walk('../cDM_to_mods')
+        for root, dirs, files in os.walk('../cDM_to_mods/')
         for file in files
     ]
     all_dirs = [
@@ -115,6 +106,49 @@ def setup_logging():
     string_handler.setFormatter(formatter)
     logging.getLogger('').addHandler(string_handler)
     return logging_string
+
+
+def group_by_simple_cpd(metadata):
+    simples, compounds = list(), dict()
+    child_of = False
+    for row_num, item_metadata in sorted(metadata.items()):
+
+        # Logic of this function --
+        # if this row has nothing in the Child cell
+        #    & there is a next row
+        #    & that next row has info in the Child cell,
+        #    then
+        #       this row is a parent
+        #       set child_of flag to the parent identifier
+        # else if this row has info in the Child cell
+        #    then
+        #       it is a child object
+        #       its parent's name is in the child_of flag
+        # Otherwise
+        #       this item is a simple object
+        #       set child_of flag to False.
+
+        if (
+            not item_metadata['Child'] and
+            metadata.get(row_num + 1) and
+            metadata.get(row_num + 1)['Child']
+        ):
+            child_of = item_metadata['Identifier']
+            # catch fire if overlapping parent ids
+            if compounds.get(item_metadata['Identifier']):
+                logging.fatal(f"two parents in spreadsheet with id: {item_metadata['Identifier']} \n Program cancelled")
+                quit()
+            compounds[item_metadata['Identifier']] = {'parent': item_metadata, }
+        elif item_metadata['Child']:
+            # catch fire if two children with same id
+            if compounds[child_of].get(int(item_metadata['Child'])):
+                logging.fatal(f"two children in spreadsheet with id: {child_of} {item_metadata['Child']} \n Program cancelled")
+                quit()
+            item_metadata['Parent'] = child_of
+            compounds[child_of][int(item_metadata['Child'])] = item_metadata
+        else:
+            simples.append(item_metadata)
+    return simples, compounds
 
 
 class MonographTitleCombiner:

@@ -10,126 +10,103 @@ from lxml import etree as ET
 from utilities import parse_xlsx_file
 from utilities import fix_permissions
 from utilities import setup_logging
+from utilities import group_by_simple_cpd
 
 
-class IsCountsCorrect():
-    def __init__(self, alias, binaries_dir, simples, parents, cpd_children):
-        all_exp_simples, all_exp_parents, exp_child_dictionary = simples, parents, cpd_children
-        all_exp_children = [i for key in exp_child_dictionary for i in exp_child_dictionary[key]]
-        all_obs_simples = self.lookup_observed_simples(alias)
-        all_obs_parents, all_obs_children = self.lookup_observed_compounds(alias)
+def main(xlsx_path):
+    alias = os.path.splitext(os.path.split(xlsx_path)[-1])[0]
+    _, metadata, _ = parse_xlsx_file(xlsx_path)
+    simples, compounds = group_by_simple_cpd(metadata)
+    pull_in_binaries(xlsx_path, simples, compounds)
+    make_structurefiles(compounds, alias)
+    report_filetype(alias)
+    folder_by_extension(alias)
+    make_zips(alias)
+    cleanup_leftover_files(alias)
+    fix_permissions()
 
-        logging.info('Count Simples: {}'.format(len(all_exp_simples)))
-        logging.info('Count Cpd Parents: {}'.format(len(all_exp_parents)))
-        logging.info('Count Cpd Children: {}'.format(len(all_exp_children)))
-        if len(all_obs_simples) == len(all_exp_simples):
-            logging.info('simples metadata counts match')
-        else:
-            logging.warning("BIG DEAL:  Simples Don't Match.  Expected: {}.  Observed: {}".format(len(all_exp_simples), len(all_obs_simples)))
-            quit()
-        if len(all_exp_parents) == len(all_obs_parents):
-            logging.info('compound parents metadata counts match')
-        else:
-            logging.warning("BIG DEAL:  Compound Parents Don't Match.  Expected: {}.  Observed: {}".format(len(all_exp_parents), len(all_obs_parents)))
-            quit()
-        if len(all_exp_children) == len(all_obs_children):
-            logging.info('compound children metadata counts match')
-        else:
-            logging.warning("BIG DEAL:  Compound Children Don't Match.  Expected: {}.  Observed: {}".format(len(all_exp_children), len(all_obs_children)))
-            quit()
-        logging.info('IsCountsCorrect done')
-
-    def lookup_observed_simples(self, alias):
-        output_dir = os.path.join('output', '{}_simples'.format(alias), 'final_format')
-        if not os.path.isdir(output_dir):
-            return []
-        simple_files = [i for i in os.listdir(output_dir) if os.path.splitext(i)[1] == ".xml"]
-        return simple_files
-
-    def lookup_observed_compounds(self, alias):
-        output_dir = os.path.join('output', '{}_compounds'.format(alias), 'final_format')
-        cpd_parents, cpd_children = [], []
-        for root, dirs, files in os.walk(output_dir):
-            for file in files:
-                parent_dir = os.path.split(root)[0]
-                grandparent_dir = os.path.split(parent_dir)[1]
-                if file == "MODS.xml":
-                    if grandparent_dir.isnumeric():
-                        cpd_children.append(parent_dir)
-                    else:
-                        cpd_parents.append(parent_dir)
-        return cpd_parents, cpd_children
+def pull_in_binaries(xlsx_path, simples, compounds):
+    source_root, xlsx_file = os.path.split(xlsx_path)
+    alias = os.path.splitext(xlsx_file)[0]
+    for metadata in simples:
+        kind = 'simple'
+        sourcepath = os.path.join(
+            f"{metadata['Directory']}",
+            metadata['FileName']
+        )
+        outroot = os.path.join(
+            'output',
+            f"{alias}_simples",
+            'final_format'
+        )
+        copy_binary(kind, sourcepath, outroot)
+    for parent, child_objects in compounds.items():
+        for child, metadata in child_objects.items():
+            if child == 'parent':  # parent root items have no binaries to move
+                continue
+            kind = 'compound'
+            sourcepath = os.path.join(
+                f"{metadata['Directory']}",
+                metadata['FileName']
+            )
+            outroot = os.path.join(
+                'output',
+                f"{alias}_compounds",
+                'final_format',
+                f"{metadata['Parent']}",
+                f"{metadata['Child']}"
+            )
+            copy_binary(kind, sourcepath, outroot)
+    logging.info('PullInBinaries done')
 
 
-class PullInBinaries():
-    def __init__(self, alias, binaries_dir, simples, parents, cpd_children):
-        for parent, child_objects in cpd_children.items():
-            for ItemMetadata in child_objects:
-                sourcefile = ItemMetadata.FileName
-                sourcepath = os.path.join(binaries_dir, alias, str(ItemMetadata.Directory))
-                kind = 'compound'
-                outroot = 'output/{}_compounds/final_format/{}/{}'.format(alias, ItemMetadata.Directory, ItemMetadata.Identifier)
-                if sourcefile:
-                    self.copy_binary(kind, sourcepath, sourcefile, outroot)
-        for ItemMetadata in simples:
-            sourcefile = ItemMetadata.FileName
-            sourcepath = os.path.join(binaries_dir, alias, str(ItemMetadata.Directory))
-            kind = 'simple'
-            outroot = 'output/{}_simples/final_format'.format(alias)
-            self.copy_binary(kind, sourcepath, sourcefile, outroot)
-        logging.info('PullInBinaries done')
-
-    def makedict_sourcefiles(self, alias, binaries_dir):
-        sourcefiles_paths = dict()
-        input_dir = os.path.join(binaries_dir, alias)
-        for root, dirs, files in os.walk(input_dir):
-            for file in files:
-                filename, extension = os.path.splitext(file)
-                if extension.lower() in ('.jp2', '.mp4', '.mp3', '.pdf', '.tif'):
-                    if filename in sourcefiles_paths:
-                        logging.warning("pointer {} has multiple possible source binaries -- please cull unwanted version".format(filename))
-                        quit()
-                    sourcefiles_paths[filename] = (root, file)
-        return sourcefiles_paths
-
-    def copy_binary(self, kind, sourcepath, sourcefile, outroot):
-        if kind == 'simple':
-            shutil.copyfile(os.path.join(sourcepath, sourcefile), os.path.join(outroot, sourcefile))
-        elif kind == 'compound':
-            shutil.copyfile(os.path.join(sourcepath, sourcefile), os.path.join(outroot, "OBJ.{}".format(sourcefile.split('.')[-1])))
+def copy_binary(kind, sourcepath, outroot):
+    sourcefile = os.path.split(sourcepath)[1]
+    if kind == 'simple':
+        outfile = sourcefile
+    elif kind == 'compound':
+        outfile = f"OBJ.{os.path.splitext(sourcefile)[1]}"
+    try:
+        shutil.copyfile(
+            sourcepath,
+            os.path.join(outroot, outfile)
+        )
+    except FileNotFoundError:
+        logging.fatal(f"expecting file at {sourcepath} \n  Program cancelled")
+        quit()
 
 
-class MakeStructureFile():
-    def __init__(self, alias):
-        for root, dirs, files in os.walk('output'):
-            if 'structure.cpd' in files:
-                parent = os.path.split(root)[-1]
-                new_etree = ET.Element("islandora_compound_object", title=parent)
-                old_etree = ET.parse("{}/structure.cpd".format(root))
-                for i in old_etree.findall('.//pageptr'):
-                    new_etree.append(ET.Element('child', content=i.text))
+def make_structurefiles(compounds, alias):
+    for parent, items in compounds.items():
+        root_element = ET.Element("islandora_compound_object", title=f"{parent}")
+        children = [int(i) for i in items if i != 'parent']
+        for name in sorted(children):
+            subelem = ET.Element("child", content=f"{parent}/{name}")
+            root_element.append(subelem)
+        xml_bytes = ET.tostring(root_element, xml_declaration=True, encoding="utf-8", pretty_print=True)
+        xml_string = xml_bytes.decode('utf-8')
+        with open(f"output/{alias}_compounds/final_format/{parent}/structure.xml", 'w', encoding="utf-8") as f:
+            f.write(xml_string)
 
-                with open('{}/structure.xml'.format(root), 'wb') as f:
-                    f.write(ET.tostring(new_etree, encoding="utf-8", xml_declaration=True, pretty_print=True))
-        logging.info('MakeStructureFile done')
+    logging.info('make_structurefiles done')
 
 
 def report_filetype(alias):
     filetypes = set()
     all_binaries = []
     simples_binaries = ["{}/{}".format(root, file)
-                        for root, dirs, files in os.walk('output/{}_simples/final_format'.format(alias))
+                        for root, _, files in os.walk('output/{}_simples/final_format'.format(alias))
                         for file in files
                         if '.xml' not in file]
     all_binaries.extend(simples_binaries)
     compounds_binaries = ["{}/{}".format(root, file)
-                          for root, dirs, files in os.walk('output/{}_compounds/final_format'.format(alias))
+                          for root, _, files in os.walk('output/{}_compounds/final_format'.format(alias))
                           for file in files
                           if '.xml' not in file]
     all_binaries.extend(compounds_binaries)
     for binary_filename in all_binaries:
         filetypes.add(binary_filename.split('.')[-1])
-    logging.info('Collection contains filetypes: {}'.format(filetypes))
+    logging.info(f"Collection contains filetypes: {filetypes}")
 
 
 def folder_by_extension(alias):
@@ -168,69 +145,26 @@ def make_zips(alias):
 
 
 def cleanup_leftover_files(alias):
-    root_simples, root_compounds = '{}_simples'.format(alias), '{}_compounds'.format(alias)
-    leftover_folders = [root for root, dirs, files in os.walk('output') if os.path.split(root)[1] in (root_simples, root_compounds)]
+    root_simples, root_compounds = f"{alias}_simples", f"{alias}_compounds"
+    leftover_folders = [
+        root
+        for root, _, files in os.walk('output')
+        if os.path.split(root)[1] in (root_simples, root_compounds)]
     for folder in leftover_folders:
         shutil.rmtree(folder)
     logging.info('intermediate folders deleted')
 
 
-def main(alias, binaries_dir):
-    nicks_tags_dict, nicks_names_dict, items_metadata = parse_xlsx(binaries_dir, alias)
-    simples, parents, cpd_children = split_source_metadata(items_metadata)
-    PullInBinaries(alias, binaries_dir, simples, parents, cpd_children)
-    # MakeStructureFile(alias)
-    IsCountsCorrect(alias, binaries_dir, simples, parents, cpd_children)
-    report_filetype(alias)
-    folder_by_extension(alias)
-    make_zips(alias)
-    cleanup_leftover_files(alias)
-    fix_permissions()
-
-
-def split_source_metadata(items_metadata):
-    simples, parents, cpd_children = [], [], dict()
-    for identifier, ItemMetadata in items_metadata.items():
-        if ItemMetadata.Child and ItemMetadata.Child != 'None':
-            if ItemMetadata.Directory not in cpd_children:
-                cpd_children[ItemMetadata.Directory] = [ItemMetadata]
-            else:
-                cpd_children[ItemMetadata.Directory].append(ItemMetadata)
-    for identifier, ItemMetadata in items_metadata.items():
-        if identifier in cpd_children:
-            parents.append(ItemMetadata)
-        elif not ItemMetadata.Child or ItemMetadata.Child == 'None':
-            simples.append(ItemMetadata)
-    return simples, parents, cpd_children
-
-
-def parse_xlsx(binaries_dir, alias):
-    xlsx_filepath = locate_xlsx_file(binaries_dir, alias)
-    parsed_xlsx = parse_xlsx_file(xlsx_filepath)
-    return parsed_xlsx
-
-
-def locate_xlsx_file(binaries_dir, alias):
-    xlsx_filepath = os.path.join(binaries_dir, '{}.xlsx'.format(alias))
-    try:
-        os.path.isfile(xlsx_filepath)
-    except NameError:
-        logging.warning('No file {}.xlsx found in source folder "{}"'.format(alias, binaries_dir))
-        quit()
-    return xlsx_filepath
-
-
 if __name__ == '__main__':
     logging_string = setup_logging()
     try:
-        alias = sys.argv[1]
-        binaries_dir = sys.argv[2]
+        xlsx_path = sys.argv[1]
     except IndexError:
         logging.warning('')
-        logging.warning('Change to: "python post_xlsx_cleanup.py $alias {}"'.format(os.path.join('$filepath', 'to', 'directory', 'with', 'the', 'binaries')))
+        logging.warning('Change to: "python post_xlsx_cleanup.py $path/to/{filename}.xlsx"')
         logging.warning('')
         quit()
-    logging.info('starting {}'.format(alias))
-    main(alias, binaries_dir)
-    logging.info('finished {}'.format(alias))
+    logging.info(f"starting {xlsx_path}")
+    main(xlsx_path)
+    logging.info(f"finished {xlsx_path}")
     logging_string.close()
