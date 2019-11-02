@@ -24,7 +24,7 @@ MODS_SCHEMA = ET.XMLSchema(MODS_DEF)
 def main(xlsx_file):
     alias = os.path.splitext(os.path.split(xlsx_file)[-1])[0]
     remove_previous_mods(alias)
-    mappings_dict, nicks_names_dict, items_metadata = parse_xlsx_file(xlsx_file)
+    mappings_dict, nicks_names_dict, items_metadata, xsls = parse_xlsx_file(xlsx_file)
     simple_objects, cpd_objects = group_by_simple_cpd(items_metadata)
     for ItemMetadata in simple_objects:
         output_path = os.path.join('output', f"{alias}_simples", 'original_format')
@@ -54,7 +54,7 @@ def main(xlsx_file):
                 output_filepath = os.path.join(output_path, output_file)
                 make_a_single_mods(ItemMetadata, alias, mappings_dict, nicks_names_dict, output_filepath)
     logging.info('finished preliminary mods: compounds')
-    saxon_n_cleanup_mods(alias)
+    saxon_n_cleanup_mods(alias, xsls)
     fix_permissions()
     logging.info('completed')
     logging.info(f"Your output files are in:  output/{alias}_simple/final_format/ and output/{alias}_compounds/final_format/")
@@ -245,13 +245,12 @@ def reorder_node(root_element, target_tagname, subtag_order_dict):
         location_elem.append(i)
 
 
-def saxon_n_cleanup_mods(alias):
-    alias_xslts = read_alias_xslt_file(alias)
+def saxon_n_cleanup_mods(alias, xsls):
 
     simples_output_dir = os.path.join('output', f"{alias}_simples")
     if f"{alias}_simples" in os.listdir('output') and 'original_format' in os.listdir(simples_output_dir):
         flatten_simple_dir(simples_output_dir)
-        run_saxon(simples_output_dir, alias_xslts, 'simple')
+        run_saxon(simples_output_dir, xsls, 'simple')
         flat_final_dir = os.path.join(simples_output_dir, 'final_format')
         validate_mods(alias, flat_final_dir)
         check_date_format(alias, flat_final_dir)
@@ -262,18 +261,13 @@ def saxon_n_cleanup_mods(alias):
     if f"{alias}_compounds" in os.listdir('output') and 'original_format' in os.listdir(compounds_output_dir):
         cpd_output_dir = os.path.join('output', f"{alias}_compounds")
         flatten_cpd_dir(cpd_output_dir)
-        run_saxon(cpd_output_dir, alias_xslts, 'compound')
+        run_saxon(cpd_output_dir, xsls, 'compound')
         flat_final_dir = os.path.join(cpd_output_dir, 'post-saxon')
         validate_mods(alias, flat_final_dir)
         check_date_format(alias, flat_final_dir)
         reinflate_cpd_dir(cpd_output_dir)
     else:
         logging.info('no compound objects in this collection')
-
-
-def read_alias_xslt_file(alias):
-    with open(os.path.join('alias_xslts', f"{alias}.txt"), 'r') as f:
-        return [i for i in f.read().split('\n')]
 
 
 def flatten_simple_dir(simple_dir):
@@ -285,10 +279,9 @@ def flatten_simple_dir(simple_dir):
             copyfile(os.path.join(orig_format_dir, file), os.path.join(flattened_dir, file))
 
 
-def run_saxon(output_dir, alias_xslts, cpd_or_simple):
+def run_saxon(output_dir, xsls, cpd_or_simple):
     starting_dir = os.path.join(output_dir, 'presaxon_flattened')
-    alias_xslts = [i for i in alias_xslts if i]
-    for xslt in alias_xslts:
+    for xslt in xsls:
         logging.info(f"doing {cpd_or_simple.title()} saxon {xslt}")
         new_dir = os.path.join(output_dir, xslt)
         os.makedirs(new_dir, exist_ok=True)

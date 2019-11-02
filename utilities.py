@@ -17,21 +17,29 @@ def parse_xlsx_file(xlsx_file):
     nicks_tags_dict = make_names_tags(xlsx_workbook)
     collection_named_tuple = make_named_tuple(xlsx_workbook)
     nicks_names_dict = make_nicks_names(xlsx_workbook)
-    return nicks_tags_dict, nicks_names_dict, collection_named_tuple
+    xsls = gather_xsls(xlsx_workbook)
+    return nicks_tags_dict, nicks_names_dict, collection_named_tuple, xsls
 
 
 def make_names_tags(xlsx_workbook):
-    mappings_sheet = xlsx_workbook.get_sheet_by_name('Mappings')
+    try:
+        mappings_sheet = xlsx_workbook.get_sheet_by_name('Mappings')
+    except KeyError:
+        logging.fatal(f"""Could not find worksheet "Mappings" in the xlsx file. exiting""")
+        quit()
     nicks_to_tags_dict = {shorten_name(row[0].value): row[1].value for row in mappings_sheet.iter_rows()}
     return nicks_to_tags_dict
 
 
 def make_named_tuple(xlsx_workbook):
-    items_sheet = xlsx_workbook.get_sheet_by_name('Metadata')
-    max_columns = count_active_columns(items_sheet)
-
+    try:
+        sheet = xlsx_workbook.get_sheet_by_name('Metadata')
+    except KeyError:
+        logging.fatal(f"""Could not find worksheet "Metadata" in the xlsx file. exiting""")
+        quit()
+    max_columns = count_active_columns(sheet)
     items_metadata = dict()
-    for row_num, row in enumerate(items_sheet.iter_rows(max_col=max_columns)):
+    for row_num, row in enumerate(sheet.iter_rows(max_col=max_columns)):
         if row_num == 0:
             headers = (shorten_name(i.value) for i in row)
             ItemMetadata = namedtuple('ItemMetadata', headers)
@@ -43,11 +51,26 @@ def make_named_tuple(xlsx_workbook):
 
 
 def make_nicks_names(xlsx_workbook):
-    items_sheet = xlsx_workbook.get_sheet_by_name('Metadata')
-    max_columns = count_active_columns(items_sheet)
-    for num, row in enumerate(items_sheet.iter_rows(max_col=max_columns)):
+    try:
+        sheet = xlsx_workbook.get_sheet_by_name('Metadata')
+    except KeyError:
+        logging.fatal(f"""Could not find worksheet "Metadata" in the xlsx file. exiting""")
+        quit()
+    max_columns = count_active_columns(sheet)
+    for num, row in enumerate(sheet.iter_rows(max_col=max_columns)):
         if num == 0:
             return {shorten_name(i.value): i.value for i in row if i}
+
+
+def gather_xsls(xlsx_workbook):
+    try:
+        sheet = xlsx_workbook.get_sheet_by_name('Xsls')
+    except KeyError:
+        logging.fatal(f"""Could not find worksheet "Xsls" in the xlsx file. exiting""")
+        quit()
+    max_columns = count_active_columns(sheet)
+    xsls = [i[0].value for i in sheet.iter_rows(max_col=max_columns) if i[0].value]
+    return xsls
 
 
 def shorten_name(fullname):
