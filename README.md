@@ -14,7 +14,7 @@ A spreadsheet of source data skips the cdm_xporter step & starts at the cDM_to_m
 
 ### Converting cdm_xporter output to mods
   
-  1) Make a mapping_file for each collection.  A mapping file assigns each Dublin Core element to it's MODS equivalent.  See the examples in ./mappings_files/
+  1) Make a mapping_file for each collection.  A mapping file assigns each Dublin Core element to it's MODS equivalent.  Some examples are in ./mappings_files/ .  This file is a 2 column csv file.  Its second column is a template for an xml element, with the word %value% as a placeholder.  Its first column is a keyword matching the "name" of the field (as found in the file "Collection_Fields.json").  The corresponding "nick" value matches the key in the contentDM source json file.
 
   2) Make an alias_xslt file for each collection.  An alias_xslt file is a list of xslts to run against the rough mods files.  See the examples in ./alias_xslts/  After the xlts run, the mods should be finished valid mods.
   Cara and Mike wrote a number of useful xslt's in the ./xsl/ folder.  But you may also write your own & save it at ./xls/
@@ -24,7 +24,7 @@ A spreadsheet of source data skips the cdm_xporter step & starts at the cDM_to_m
   5) From this folder, `docker-compose exec cdm_to_mods python3 convert_cdm_to_mods.py {alias} {path/to/Cached_Cdm_files}`
         -this /Cached_Cdm_files needs only metadata.
   
-  6) From this folder, `docker-compose exec cdm_to_mods python3 post_converstion_cleanup.py {alias} {path/to/Cached_Cdm_files}`
+  6) From this folder, `docker-compose exec cdm_to_mods python3 post_cdm_cleanup.py {alias} {path/to/Cached_Cdm_files}`
         -this /Cached_Cdm_files needs metadata+binaries
 
 ### Converting a spreadsheet to mods
